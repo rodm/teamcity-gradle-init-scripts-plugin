@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                                   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+       default-autowire="constructor">
+
+    <bean class="teamcity.gradle.scripts.server.InitScriptsAdminController"/>
+    <bean class="teamcity.gradle.scripts.server.InitScriptsActionsController"/>
+    <bean class="teamcity.gradle.scripts.server.UploadScriptAction"/>
+    <bean class="teamcity.gradle.scripts.server.DeleteScriptAction"/>
+    <bean class="teamcity.gradle.scripts.server.InitScriptsBuildFeature"/>
+    <bean class="teamcity.gradle.scripts.server.InitScriptsProvider"/>
+    <bean class="teamcity.gradle.scripts.server.GradleInitScriptsPage"/>
+    <bean class="teamcity.gradle.scripts.server.GradleScriptsManager"/>
+</beans>
