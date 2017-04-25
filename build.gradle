@@ -12,11 +12,6 @@ ext {
     java8Home = project.findProperty('java8.home') ?: '/opt/jdk1.8.0_92'
 }
 
-subprojects {
-    group = rootProject.group
-    version = rootProject.version
-}
-
 teamcity {
     version = '10.0'
 }

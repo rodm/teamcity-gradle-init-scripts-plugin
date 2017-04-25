@@ -10,12 +10,12 @@ dependencies {
 
 teamcity {
     server {
-        archiveName = 'gradle-init-scripts.zip'
+        archiveName = "gradle-init-scripts-${rootProject.version}.zip"
 
         descriptor {
             name = 'gradleInitScripts'
             displayName = 'Gradle Init Scripts'
-            version = project.version
+            version = rootProject.version
             description = 'Provides support for reusing Gradle init scripts'
             vendorName = 'Rod MacKenzie'
             vendorUrl = 'https://github.com/rodm'
