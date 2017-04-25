@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Map;
 
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.FEATURE_TYPE;
@@ -45,10 +44,7 @@ public class GradleInitScriptsFeature extends AgentLifeCycleAdapter {
 
     @Override
     public void beforeRunnerStart(@NotNull BuildRunnerContext runner) {
-        AgentRunningBuild build = runner.getBuild();
-        Collection<AgentBuildFeature> features = build.getBuildFeaturesOfType(FEATURE_TYPE);
-
-        if (!features.isEmpty()) {
+        if (hasGradleInitScriptFeature(runner)) {
             Map<String, String> runnerParameters = runner.getRunnerParameters();
             String initScriptName = runnerParameters.get(INIT_SCRIPT_NAME);
             String initScriptContent = runnerParameters.get(INIT_SCRIPT_CONTENT);
@@ -58,7 +54,7 @@ public class GradleInitScriptsFeature extends AgentLifeCycleAdapter {
             }
 
             try {
-                initScriptFile = FileUtil.createTempFile(build.getBuildTempDirectory(), "init_", ".gradle", true);
+                initScriptFile = FileUtil.createTempFile(getBuildTempDirectory(runner), "init_", ".gradle", true);
                 FileUtil.writeFile(initScriptFile, initScriptContent, "UTF-8");
 
                 String params = runnerParameters.getOrDefault(GRADLE_CMD_PARAMS, "");
@@ -76,5 +72,15 @@ public class GradleInitScriptsFeature extends AgentLifeCycleAdapter {
             FileUtil.delete(initScriptFile);
             initScriptFile = null;
         }
+    }
+
+    boolean hasGradleInitScriptFeature(BuildRunnerContext context) {
+        AgentRunningBuild build = context.getBuild();
+        return !build.getBuildFeaturesOfType(FEATURE_TYPE).isEmpty();
+    }
+
+    File getBuildTempDirectory(BuildRunnerContext context) {
+        AgentRunningBuild build = context.getBuild();
+        return build.getBuildTempDirectory();
     }
 }
