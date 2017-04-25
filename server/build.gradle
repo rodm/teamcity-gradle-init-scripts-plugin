@@ -16,7 +16,7 @@ teamcity {
             name = 'gradleInitScripts'
             displayName = 'Gradle Init Scripts'
             version = project.version
-            description = 'TeamCity Gradle Init Scripts Plugin'
+            description = 'Provides support for reusing Gradle init scripts'
             vendorName = 'Rod MacKenzie'
             vendorUrl = 'https://github.com/rodm'
             downloadUrl = 'https://github.com/rodm/teamcity-gradle-init-scripts-plugin'
