@@ -1,0 +1,27 @@
+= TeamCity Gradle Init Scripts plugin
+:uri-teamcity: https://www.jetbrains.com/teamcity/[TeamCity]
+:uri-gradle-docs: https://docs.gradle.org/current/userguide
+:uri-gradle-init-scripts: {uri-gradle-docs}/init_scripts.html[Gradle init scripts]
+:uri-download: https://bintray.com/rodm/teamcity-plugins-generic/teamcity-gradle-init-scripts-plugin
+
+A {uri-teamcity} plugin that provides support for reusing {uri-gradle-init-scripts}
+between build configurations.
+
+## Installation
+
+* Download the plugin file from {uri-download} (see _Downloads_ section at the bottom of the page).
+
+* Go to the plugin list of your TeamCity installation at `&lt;TeamCity URL&gt;/admin/admin.html?item=plugins` and
+click on the link _Upload plugin zip_ to install the downloaded plugin file.
+
+* Restart TeamCity.
+
+## Using the plugin
+
+* Edit a project, on the Gradle Init Scripts page upload an init script.
+
+* Edit a build configuration and add the Build Feature, Gradle Init Script, and select the init script to use.
+
+## License
+
+This plugin is available under the http://www.apache.org/licenses/LICENSE-2.0.html[Apache License, Version 2.0].
