@@ -23,7 +23,7 @@ bintray {
 
     filesSpec {
         from "${project(':server').buildDir}/distributions"
-        into project.version
+        into '.'
         include '*.zip'
     }
 
