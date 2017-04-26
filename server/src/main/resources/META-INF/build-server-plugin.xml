@@ -12,5 +12,5 @@
     <bean class="teamcity.gradle.scripts.server.InitScriptsBuildFeature"/>
     <bean class="teamcity.gradle.scripts.server.InitScriptsProvider"/>
     <bean class="teamcity.gradle.scripts.server.GradleInitScriptsPage"/>
-    <bean class="teamcity.gradle.scripts.server.GradleScriptsManager"/>
+    <bean class="teamcity.gradle.scripts.server.DefaultGradleScriptsManager"/>
 </beans>

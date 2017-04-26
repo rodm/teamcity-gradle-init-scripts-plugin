@@ -17,72 +17,18 @@
 package teamcity.gradle.scripts.server;
 
 import jetbrains.buildServer.serverSide.SProject;
-import jetbrains.buildServer.util.ExceptionUtil;
-import jetbrains.buildServer.util.FileUtil;
-import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.PLUGIN_NAME;
-
-public class GradleScriptsManager {
+public interface GradleScriptsManager {
 
     @NotNull
-    private static final Logger LOG = Logger.getLogger("jetbrains.buildServer.SERVER");
-
-    @NotNull
-    List<String> getScriptNames(@NotNull SProject project) {
-        final List<String> result = new ArrayList<>();
-        FileFilter filter = File::isFile;
-
-        try {
-            File pluginDataDirectory = getPluginDataDirectory(project);
-            File[] files = pluginDataDirectory.listFiles(filter);
-            if (files != null && files.length > 0) {
-                for (File file : files) {
-                    result.add(file.getName());
-                }
-            }
-        } catch (IOException e) {
-            LOG.error(e.getMessage());
-            result.clear();
-        }
-        return result;
-    }
+    List<String> getScriptNames(@NotNull SProject project);
 
     @Nullable
-    String findScript(@NotNull SProject project, @NotNull String name) {
-        try {
-            File file = new File(getPluginDataDirectory(project), name);
-            if (file.exists()) {
-                return FileUtil.readText(file, "UTF-8");
-            }
-        }
-        catch (Exception e) {
-            ExceptionUtil.rethrowAsRuntimeException(e);
-        }
-        return null;
-    }
+    String findScript(@NotNull SProject project, @NotNull String name);
 
-    boolean deleteScript(@NotNull SProject project, @NotNull String name) {
-        boolean result = false;
-        try {
-            File file = new File(getPluginDataDirectory(project), name);
-            result = FileUtil.delete(file);
-        }
-        catch (IOException e) {
-            LOG.error(e.getMessage());
-        }
-        return result;
-    }
-
-    private File getPluginDataDirectory(@NotNull SProject project) throws IOException {
-        return FileUtil.createDir(project.getPluginDataDirectory(PLUGIN_NAME));
-    }
+    boolean deleteScript(@NotNull SProject project, @NotNull String name);
 }
