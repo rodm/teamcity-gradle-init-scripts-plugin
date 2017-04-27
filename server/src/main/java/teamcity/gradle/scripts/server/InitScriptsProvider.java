@@ -32,13 +32,9 @@ public class InitScriptsProvider implements BuildStartContextProcessor {
     private static final Logger LOG = Logger.getLogger("jetbrains.buildServer.SERVER");
 
     @NotNull
-    private final ProjectManager projectManager;
-
-    @NotNull
     private final GradleScriptsManager scriptsManager;
 
-    public InitScriptsProvider(@NotNull ProjectManager projectManager, @NotNull GradleScriptsManager scriptsManager) {
-        this.projectManager = projectManager;
+    public InitScriptsProvider(@NotNull GradleScriptsManager scriptsManager) {
         this.scriptsManager = scriptsManager;
     }
 
@@ -51,16 +47,14 @@ public class InitScriptsProvider implements BuildStartContextProcessor {
                     Collection<SBuildFeatureDescriptor> features = buildType.getBuildFeaturesOfType(FEATURE_TYPE);
                     for (SBuildFeatureDescriptor feature : features) {
 
-                        SProject project = projectManager.findProjectById(context.getBuild().getProjectId());
-                        if (project != null) {
-                            String scriptName = feature.getParameters().get(INIT_SCRIPT_NAME);
-                            String scriptContent = scriptsManager.findScript(project, scriptName);
-                            if (scriptContent != null) {
-                                runnerContext.addRunnerParameter(INIT_SCRIPT_NAME, scriptName);
-                                runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT, scriptContent);
-                            } else {
-                                LOG.error("Init script content for '" + scriptName + "' is empty");
-                            }
+                        SProject project = buildType.getProject();
+                        String scriptName = feature.getParameters().get(INIT_SCRIPT_NAME);
+                        String scriptContent = scriptsManager.findScript(project, scriptName);
+                        if (scriptContent != null) {
+                            runnerContext.addRunnerParameter(INIT_SCRIPT_NAME, scriptName);
+                            runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT, scriptContent);
+                        } else {
+                            LOG.error("Init script content for '" + scriptName + "' is empty");
                         }
                     }
                 }

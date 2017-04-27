@@ -43,17 +43,14 @@ class InitScriptsProviderTest {
 
     private InitScriptsProvider provider
 
-    private ProjectManager projectManager = mock(ProjectManager)
-
-    private GradleScriptsManager scriptsManager = mock(GradleScriptsManager)
+    private GradleScriptsManager scriptsManager
 
     private boolean isGradleRunner = true
 
     @Before
     void setup() {
-        projectManager = mock(ProjectManager)
         scriptsManager = mock(GradleScriptsManager)
-        provider = new InitScriptsProvider(projectManager, scriptsManager) {
+        provider = new InitScriptsProvider(scriptsManager) {
             @Override
             boolean isGradleRunner(SRunnerContext runnerContext) {
                 return isGradleRunner
@@ -70,8 +67,10 @@ class InitScriptsProviderTest {
         SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
         when(feature.getParameters()).thenReturn(parameters)
         Collection<SBuildFeatureDescriptor> features = [feature]
+        SProject project = mock(SProject)
         SBuildType buildType = mock(SBuildType)
         when(buildType.getBuildFeaturesOfType(eq(FEATURE_TYPE))).thenReturn(features)
+        when(buildType.getProject()).thenReturn(project)
 
         SRunningBuild runningBuild = mock(SRunningBuild)
         when(runningBuild.getBuildType()).thenReturn(buildType)
@@ -81,8 +80,6 @@ class InitScriptsProviderTest {
         when(context.getRunnerContexts()).thenReturn(runnerContexts)
         when(context.getBuild()).thenReturn(runningBuild)
 
-        SProject project = mock(SProject)
-        when(projectManager.findProjectById(eq('project1'))).thenReturn(project)
         when(scriptsManager.findScript(eq(project), eq('init.gradle'))).thenReturn('script content')
 
         provider.updateParameters(context)
@@ -109,7 +106,7 @@ class InitScriptsProviderTest {
     void 'isGradleRunner should return true for Gradle build runner type'() {
         SRunnerContext runnerContext = mock(SRunnerContext)
         when(runnerContext.getRunType()).thenReturn(new UnknownRunType('gradle-runner'))
-        provider = new InitScriptsProvider(projectManager, scriptsManager)
+        provider = new InitScriptsProvider(scriptsManager)
 
         assertThat(provider.isGradleRunner(runnerContext), is(true))
     }
@@ -118,7 +115,7 @@ class InitScriptsProviderTest {
     void 'isGradleRunner should return false for other build runner types'() {
         SRunnerContext runnerContext = mock(SRunnerContext)
         when(runnerContext.getRunType()).thenReturn(new UnknownRunType('Maven2'))
-        provider = new InitScriptsProvider(projectManager, scriptsManager)
+        provider = new InitScriptsProvider(scriptsManager)
 
         assertThat(provider.isGradleRunner(runnerContext), is(false))
     }
