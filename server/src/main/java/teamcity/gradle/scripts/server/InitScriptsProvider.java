@@ -45,7 +45,7 @@ public class InitScriptsProvider implements BuildStartContextProcessor {
     @Override
     public void updateParameters(@NotNull BuildStartContext context) {
         for (SRunnerContext runnerContext : context.getRunnerContexts()) {
-            if ("gradle-runner".equals(runnerContext.getRunType().getType())) {
+            if (isGradleRunner(runnerContext)) {
                 SBuildType buildType = context.getBuild().getBuildType();
                 if (buildType != null) {
                     Collection<SBuildFeatureDescriptor> features = buildType.getBuildFeaturesOfType(FEATURE_TYPE);
@@ -66,5 +66,9 @@ public class InitScriptsProvider implements BuildStartContextProcessor {
                 }
             }
         }
+    }
+
+    boolean isGradleRunner(SRunnerContext runnerContext) {
+        return "gradle-runner".equals(runnerContext.getRunType().getType());
     }
 }
