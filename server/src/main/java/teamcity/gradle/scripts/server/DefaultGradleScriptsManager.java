@@ -29,12 +29,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jetbrains.buildServer.log.Loggers.SERVER_CATEGORY;
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.PLUGIN_NAME;
 
 public class DefaultGradleScriptsManager implements GradleScriptsManager {
 
     @NotNull
-    private static final Logger LOG = Logger.getLogger("jetbrains.buildServer.SERVER");
+    private static final Logger LOG = Logger.getLogger(SERVER_CATEGORY + ".GradleInitScripts");
 
     @Override
     @NotNull

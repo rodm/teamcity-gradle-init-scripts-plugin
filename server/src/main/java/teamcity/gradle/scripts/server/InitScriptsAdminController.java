@@ -32,12 +32,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
 
+import static jetbrains.buildServer.log.Loggers.SERVER_CATEGORY;
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.INIT_SCRIPT_NAME;
 
 public class InitScriptsAdminController extends BaseController {
 
     @NotNull
-    private static final Logger LOG = Logger.getLogger("jetbrains.buildServer.SERVER");
+    private static final Logger LOG = Logger.getLogger(SERVER_CATEGORY + ".GradleInitScripts");
 
     private final ProjectManager projectManager;
 

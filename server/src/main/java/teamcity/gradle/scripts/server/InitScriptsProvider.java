@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
+import static jetbrains.buildServer.log.Loggers.SERVER_CATEGORY;
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.FEATURE_TYPE;
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.INIT_SCRIPT_CONTENT;
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.INIT_SCRIPT_NAME;
@@ -29,7 +30,7 @@ import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.INIT_SCRIPT
 public class InitScriptsProvider implements BuildStartContextProcessor {
 
     @NotNull
-    private static final Logger LOG = Logger.getLogger("jetbrains.buildServer.SERVER");
+    private static final Logger LOG = Logger.getLogger(SERVER_CATEGORY + ".GradleInitScripts");
 
     @NotNull
     private final GradleScriptsManager scriptsManager;
