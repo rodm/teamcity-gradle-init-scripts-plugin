@@ -26,13 +26,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import static jetbrains.buildServer.log.Loggers.AGENT_CATEGORY;
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.FEATURE_TYPE;
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.INIT_SCRIPT_CONTENT;
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.INIT_SCRIPT_NAME;
 
 public class GradleInitScriptsFeature extends AgentLifeCycleAdapter {
 
-    private static Logger LOG = Logger.getLogger("jetbrains.buildServer.AGENT");
+    private static Logger LOG = Logger.getLogger(AGENT_CATEGORY + ".GradleInitScriptsFeature");
 
     private static String GRADLE_CMD_PARAMS = "ui.gradleRunner.additional.gradle.cmd.params";
 
