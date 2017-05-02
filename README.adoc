@@ -1,4 +1,4 @@
-= TeamCity Gradle Init Scripts plugin
+= Gradle Init Scripts plugin
 :uri-teamcity: https://www.jetbrains.com/teamcity/[TeamCity]
 :uri-gradle-docs: https://docs.gradle.org/current/userguide
 :uri-gradle-init-scripts: {uri-gradle-docs}/init_scripts.html[Gradle init scripts]
@@ -6,6 +6,8 @@
 
 A {uri-teamcity} plugin that provides support for reusing {uri-gradle-init-scripts}
 between build configurations.
+
+image:https://travis-ci.org/rodm/teamcity-gradle-init-scripts-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/rodm/teamcity-gradle-init-scripts-plugin"]
 
 ## Installation
 
