@@ -34,12 +34,17 @@ import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.PLUGIN_NAME
 
 class GradleScriptManagerTest {
 
+    private GradleScriptsManager scriptsManager
+
     @Rule
     public TemporaryFolder projectDir = new TemporaryFolder()
 
-    private GradleScriptsManager scriptsManager
-
     private File pluginDir
+
+    @Rule
+    public TemporaryFolder parentProjectDir = new TemporaryFolder()
+
+    private File parentPluginDir
 
     @Before
     void setup() {
@@ -47,6 +52,8 @@ class GradleScriptManagerTest {
         pluginDir = projectDir.newFolder(PLUGIN_NAME)
         new File(pluginDir, 'init1.gradle') << 'contents of script1'
         new File(pluginDir, 'init2.gradle') << 'contents of script2'
+        parentPluginDir = parentProjectDir.newFolder(PLUGIN_NAME)
+        new File(parentPluginDir, 'parent.gradle') << 'contents of parent script'
     }
 
     @Test
@@ -63,6 +70,7 @@ class GradleScriptManagerTest {
     void 'project with scripts returns list of names'() {
         SProject project = mock(SProject)
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        when(project.getProjectPath()).thenReturn([project])
 
         List<String> scripts = scriptsManager.getScriptNames(project)
         assertThat(scripts, hasSize(2))
@@ -71,8 +79,40 @@ class GradleScriptManagerTest {
     }
 
     @Test
+    void 'project with parent returns list of scripts from both projects'() {
+        SProject parentProject = mock(SProject)
+        when(parentProject.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(parentPluginDir)
+        SProject project = mock(SProject)
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        when(project.getProjectPath()).thenReturn([parentProject, project])
+
+        List<String> scripts = scriptsManager.getScriptNames(project)
+        assertThat(scripts, hasSize(3))
+        assertThat(scripts, hasItem('init1.gradle'))
+        assertThat(scripts, hasItem('init2.gradle'))
+        assertThat(scripts, hasItem('parent.gradle'))
+    }
+
+    @Test
+    void 'project with parent returns list of scripts with no duplicates'() {
+        SProject parentProject = mock(SProject)
+        when(parentProject.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(parentPluginDir)
+        SProject project = mock(SProject)
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        when(project.getProjectPath()).thenReturn([parentProject, project])
+        new File(parentPluginDir, 'init1.gradle') << 'contents of parent script1'
+
+        List<String> scripts = scriptsManager.getScriptNames(project)
+        assertThat(scripts, hasSize(3))
+        assertThat(scripts, hasItem('init1.gradle'))
+        assertThat(scripts, hasItem('init2.gradle'))
+        assertThat(scripts, hasItem('parent.gradle'))
+    }
+
+    @Test
     void 'find returns content for a script that exists'() {
         SProject project = mock(SProject)
+        when(project.getProjectPath()).thenReturn([project])
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
 
         String contents = scriptsManager.findScript(project, 'init1.gradle')
@@ -86,6 +126,18 @@ class GradleScriptManagerTest {
 
         String contents = scriptsManager.findScript(project, 'dummy.gradle')
         assertThat(contents, is(nullValue()))
+    }
+
+    @Test
+    void 'find returns content for a script in a parent project'() {
+        SProject parentProject = mock(SProject)
+        when(parentProject.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(parentPluginDir)
+        SProject project = mock(SProject)
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        when(project.getProjectPath()).thenReturn([parentProject, project])
+
+        String contents = scriptsManager.findScript(project, 'parent.gradle')
+        assertThat(contents, equalTo('contents of parent script'))
     }
 
     @Test

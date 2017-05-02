@@ -26,8 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static jetbrains.buildServer.log.Loggers.SERVER_CATEGORY;
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.PLUGIN_NAME;
@@ -40,20 +39,31 @@ public class DefaultGradleScriptsManager implements GradleScriptsManager {
     @Override
     @NotNull
     public List<String> getScriptNames(@NotNull SProject project) {
+        final Set<String> foundNames = new HashSet<>();
         final List<String> result = new ArrayList<>();
         FileFilter filter = File::isFile;
 
-        try {
-            File pluginDataDirectory = getPluginDataDirectory(project);
-            File[] files = pluginDataDirectory.listFiles(filter);
-            if (files != null && files.length > 0) {
-                for (File file : files) {
-                    result.add(file.getName());
+        List<SProject> projectPath = project.getProjectPath();
+        ListIterator<SProject> iter = projectPath.listIterator(projectPath.size());
+
+        while (iter.hasPrevious()) {
+            SProject currentProject = iter.previous();
+
+            try {
+                File pluginDataDirectory = getPluginDataDirectory(currentProject);
+                File[] files = pluginDataDirectory.listFiles(filter);
+                if (files != null && files.length > 0) {
+                    for (File file : files) {
+                        if (!foundNames.contains(file.getName())) {
+                            result.add(file.getName());
+                            foundNames.add(file.getName());
+                        }
+                    }
                 }
+            } catch (IOException e) {
+                LOG.error(e.getMessage());
+                result.clear();
             }
-        } catch (IOException e) {
-            LOG.error(e.getMessage());
-            result.clear();
         }
         return result;
     }
@@ -61,14 +71,20 @@ public class DefaultGradleScriptsManager implements GradleScriptsManager {
     @Override
     @Nullable
     public String findScript(@NotNull SProject project, @NotNull String name) {
-        try {
-            File file = new File(getPluginDataDirectory(project), name);
-            if (file.exists()) {
-                return FileUtil.readText(file, "UTF-8");
+        List<SProject> projectPath = project.getProjectPath();
+        ListIterator<SProject> iter = projectPath.listIterator(projectPath.size());
+
+        while (iter.hasPrevious()) {
+            SProject currentProject = iter.previous();
+
+            try {
+                File file = new File(getPluginDataDirectory(currentProject), name);
+                if (file.exists()) {
+                    return FileUtil.readText(file, "UTF-8");
+                }
+            } catch (Exception e) {
+                ExceptionUtil.rethrowAsRuntimeException(e);
             }
-        }
-        catch (Exception e) {
-            ExceptionUtil.rethrowAsRuntimeException(e);
         }
         return null;
     }
