@@ -8,6 +8,7 @@ A {uri-teamcity} plugin that provides support for reusing {uri-gradle-init-scrip
 between build configurations.
 
 image:https://travis-ci.org/rodm/teamcity-gradle-init-scripts-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/rodm/teamcity-gradle-init-scripts-plugin"]
+image:https://api.bintray.com/packages/rodm/teamcity-plugins-generic/gradle-init-scripts/images/download.svg[link="https://bintray.com/rodm/teamcity-plugins-generic/gradle-init-scripts/_latestVersion"]
 
 ## Installation
 
