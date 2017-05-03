@@ -66,7 +66,11 @@
         BS.GradleAddInitScripts.prepareFileUpload();
     </script>
 
+    <c:if test="${empty scripts[currentProject]}">
+        <p>There are no Gradle initialization scripts defined in the current project.</p>
+    </c:if>
     <c:if test="${not empty scripts[currentProject]}">
+        <p style="margin-top: 2em">Gradle initialization scripts defined in the current project</p>
         <table class="parametersTable" style="width: 100%">
             <tr>
                 <th style="width: 45%">Script Name</th>
@@ -88,7 +92,7 @@
     <c:forEach items="${scripts}" var="projects">
         <c:set var="project" value="${projects.key}"/>
         <c:if test="${project ne currentProject}">
-            <p style="margin-top: 2em">Initialization scripts inherited from <admin:editProjectLink projectId="${project.externalId}"><c:out value="${project.fullName}"/></admin:editProjectLink></p>
+            <p style="margin-top: 2em">Scripts inherited from <admin:editProjectLink projectId="${project.externalId}"><c:out value="${project.fullName}"/></admin:editProjectLink></p>
             <table class="parametersTable" style="width: 100%">
                 <tr>
                     <th style="width: 45%">Script Name</th>
