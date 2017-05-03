@@ -40,7 +40,7 @@ public class DefaultGradleScriptsManager implements GradleScriptsManager {
     @NotNull
     public Map<SProject, List<String>> getScriptNames(@NotNull SProject project) {
         final Set<String> foundNames = new HashSet<>();
-        final Map<SProject, List<String>> result = new HashMap<>();
+        final Map<SProject, List<String>> result = new LinkedHashMap<>();
         FileFilter filter = File::isFile;
 
         List<SProject> projectPath = project.getProjectPath();
