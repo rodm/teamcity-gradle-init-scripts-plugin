@@ -25,8 +25,10 @@ import org.junit.rules.TemporaryFolder
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.hasItem
+import static org.hamcrest.Matchers.hasKey
 import static org.hamcrest.Matchers.hasSize
 import static org.hamcrest.Matchers.is
+import static org.hamcrest.Matchers.not
 import static org.hamcrest.Matchers.nullValue
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
@@ -57,13 +59,13 @@ class GradleScriptManagerTest {
     }
 
     @Test
-    void 'project with no scripts returns empty list'() {
+    void 'project with no scripts returns an empty map'() {
         File emptyPluginDir = projectDir.newFolder('emptyPluginDir')
         SProject project = mock(SProject)
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(emptyPluginDir)
 
-        List<String> scripts = scriptsManager.getScriptNames(project)
-        assertThat(scripts, hasSize(0))
+        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+        assertThat(scripts.keySet(), hasSize(0))
     }
 
     @Test
@@ -72,25 +74,29 @@ class GradleScriptManagerTest {
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
         when(project.getProjectPath()).thenReturn([project])
 
-        List<String> scripts = scriptsManager.getScriptNames(project)
-        assertThat(scripts, hasSize(2))
-        assertThat(scripts, hasItem('init1.gradle'))
-        assertThat(scripts, hasItem('init2.gradle'))
+        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+        assertThat(scripts.get(project), hasSize(2))
+        assertThat(scripts.get(project), hasItem('init1.gradle'))
+        assertThat(scripts.get(project), hasItem('init2.gradle'))
     }
 
     @Test
-    void 'project with parent returns list of scripts from both projects'() {
+    void 'project with parent returns a map of projects and scripts'() {
         SProject parentProject = mock(SProject)
         when(parentProject.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(parentPluginDir)
         SProject project = mock(SProject)
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
         when(project.getProjectPath()).thenReturn([parentProject, project])
 
-        List<String> scripts = scriptsManager.getScriptNames(project)
-        assertThat(scripts, hasSize(3))
-        assertThat(scripts, hasItem('init1.gradle'))
-        assertThat(scripts, hasItem('init2.gradle'))
-        assertThat(scripts, hasItem('parent.gradle'))
+        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+        assertThat(scripts.keySet(), hasSize(2))
+        assertThat(scripts, hasKey(project))
+        assertThat(scripts, hasKey(parentProject))
+        assertThat(scripts.get(project), hasSize(2))
+        assertThat(scripts.get(project), hasItem('init1.gradle'))
+        assertThat(scripts.get(project), hasItem('init2.gradle'))
+        assertThat(scripts.get(parentProject), hasSize(1))
+        assertThat(scripts.get(parentProject), hasItem('parent.gradle'))
     }
 
     @Test
@@ -102,11 +108,10 @@ class GradleScriptManagerTest {
         when(project.getProjectPath()).thenReturn([parentProject, project])
         new File(parentPluginDir, 'init1.gradle') << 'contents of parent script1'
 
-        List<String> scripts = scriptsManager.getScriptNames(project)
-        assertThat(scripts, hasSize(3))
-        assertThat(scripts, hasItem('init1.gradle'))
-        assertThat(scripts, hasItem('init2.gradle'))
-        assertThat(scripts, hasItem('parent.gradle'))
+        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+        assertThat(scripts.get(parentProject), hasSize(1))
+        assertThat(scripts.get(parentProject), hasItem('parent.gradle'))
+        assertThat(scripts.get(parentProject), not(hasItem('init1.gradle')))
     }
 
     @Test

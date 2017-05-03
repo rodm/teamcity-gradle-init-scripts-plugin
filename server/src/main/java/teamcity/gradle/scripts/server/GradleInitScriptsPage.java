@@ -23,7 +23,6 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.Map;
 
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.PLUGIN_NAME;
@@ -59,9 +58,9 @@ public class GradleInitScriptsPage extends EditProjectTab {
         final SProject project = getProject(request);
         String result = TITLE;
         if (project != null) {
-            List<String> scriptNames =  scriptsManager.getScriptNames(project);
-            if (scriptNames.size() > 0) {
-                result = TITLE + " (" + scriptNames.size() + ")";
+            int count =  scriptsManager.getScriptsCount(project);
+            if (count > 0) {
+                result = TITLE + " (" + count + ")";
             }
         }
         return result;

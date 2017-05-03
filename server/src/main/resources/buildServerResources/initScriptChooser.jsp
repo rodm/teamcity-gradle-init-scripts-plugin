@@ -19,7 +19,12 @@
 
 <props:selectProperty id="${chooserId}" name="${chooserName}" enableFilter="true" className="longField">
     <props:option value="">-- Choose an initialization script --</props:option>
-    <c:forEach var="script" items="${scripts}">
-        <props:option value="${script}">${script}</props:option>
+    <c:forEach var="projects" items="${scripts}">
+        <c:set var="project" value="${projects.key}"/>
+        <optgroup label="&ndash;&ndash; ${project.name} scripts &ndash;&ndash;">
+            <c:forEach var="script" items="${scripts[project]}">
+                <props:option value="${script}" className="user-depth-2">${script}</props:option>
+            </c:forEach>
+        </optgroup>
     </c:forEach>
 </props:selectProperty>

@@ -62,17 +62,17 @@
         </forms:multipartForm>
     </bs:dialog>
     <script type="text/javascript">
-        BS.GradleAddInitScripts.setFiles([<c:forEach var="script" items="${scripts}">'${script}',</c:forEach>]);
+        BS.GradleAddInitScripts.setFiles([<c:forEach var="script" items="${scripts[currentProject]}">'${script}',</c:forEach>]);
         BS.GradleAddInitScripts.prepareFileUpload();
     </script>
 
-    <c:if test="${not empty scripts}">
+    <c:if test="${not empty scripts[currentProject]}">
         <table class="parametersTable" style="width: 100%">
             <tr>
                 <th style="width: 45%">Script Name</th>
                 <th colspan="1"></th>
             </tr>
-            <c:forEach var="script" items="${scripts}">
+            <c:forEach var="script" items="${scripts[currentProject]}">
                 <tr>
                     <td>
                         <c:out value="${script}"/>
@@ -84,4 +84,23 @@
             </c:forEach>
         </table>
     </c:if>
+
+    <c:forEach items="${scripts}" var="projects">
+        <c:set var="project" value="${projects.key}"/>
+        <c:if test="${project ne currentProject}">
+            <p style="margin-top: 2em">Initialization scripts inherited from <admin:editProjectLink projectId="${project.externalId}"><c:out value="${project.fullName}"/></admin:editProjectLink></p>
+            <table class="parametersTable" style="width: 100%">
+                <tr>
+                    <th style="width: 45%">Script Name</th>
+                </tr>
+                <c:forEach var="script" items="${scripts[project]}">
+                    <tr>
+                        <td>
+                            <c:out value="${script}"/>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </c:if>
+    </c:forEach>
 </div>

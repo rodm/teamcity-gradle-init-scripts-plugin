@@ -21,11 +21,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 public interface GradleScriptsManager {
 
     @NotNull
-    List<String> getScriptNames(@NotNull SProject project);
+    Map<SProject, List<String>> getScriptNames(@NotNull SProject project);
+
+    int getScriptsCount(@NotNull SProject project);
 
     @Nullable
     String findScript(@NotNull SProject project, @NotNull String name);

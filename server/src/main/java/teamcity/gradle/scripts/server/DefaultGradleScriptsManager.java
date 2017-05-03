@@ -38,9 +38,9 @@ public class DefaultGradleScriptsManager implements GradleScriptsManager {
 
     @Override
     @NotNull
-    public List<String> getScriptNames(@NotNull SProject project) {
+    public Map<SProject, List<String>> getScriptNames(@NotNull SProject project) {
         final Set<String> foundNames = new HashSet<>();
-        final List<String> result = new ArrayList<>();
+        final Map<SProject, List<String>> result = new HashMap<>();
         FileFilter filter = File::isFile;
 
         List<SProject> projectPath = project.getProjectPath();
@@ -53,12 +53,14 @@ public class DefaultGradleScriptsManager implements GradleScriptsManager {
                 File pluginDataDirectory = getPluginDataDirectory(currentProject);
                 File[] files = pluginDataDirectory.listFiles(filter);
                 if (files != null && files.length > 0) {
+                    List<String> scripts = new ArrayList<>();
                     for (File file : files) {
                         if (!foundNames.contains(file.getName())) {
-                            result.add(file.getName());
+                            scripts.add(file.getName());
                             foundNames.add(file.getName());
                         }
                     }
+                    result.put(currentProject, scripts);
                 }
             } catch (IOException e) {
                 LOG.error(e.getMessage());
@@ -66,6 +68,11 @@ public class DefaultGradleScriptsManager implements GradleScriptsManager {
             }
         }
         return result;
+    }
+
+    @Override
+    public int getScriptsCount(@NotNull SProject project) {
+        return getScriptNames(project).values().stream().mapToInt(List::size).sum();
     }
 
     @Override
@@ -102,6 +109,7 @@ public class DefaultGradleScriptsManager implements GradleScriptsManager {
         return result;
     }
 
+    @NotNull
     private File getPluginDataDirectory(@NotNull SProject project) throws IOException {
         return FileUtil.createDir(project.getPluginDataDirectory(PLUGIN_NAME));
     }

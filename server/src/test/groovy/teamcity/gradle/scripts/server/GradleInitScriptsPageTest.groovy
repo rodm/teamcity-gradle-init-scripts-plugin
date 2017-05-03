@@ -74,7 +74,7 @@ class GradleInitScriptsPageTest {
         HttpServletRequest request = mock(HttpServletRequest)
         SProject project = mock(SProject)
         when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
-        when(scriptsManager.getScriptNames(eq(project))).thenReturn(['init1.gradle', 'init2.gradle'])
+        when(scriptsManager.getScriptsCount(eq(project))).thenReturn(2)
 
         assertThat(page.getTabTitle(request), equalTo('Gradle Init Scripts (2)'))
     }
@@ -86,14 +86,14 @@ class GradleInitScriptsPageTest {
         HttpServletRequest request = mock(HttpServletRequest)
         SProject project = mock(SProject)
         when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
-        when(scriptsManager.getScriptNames(eq(project))).thenReturn(['init1.gradle', 'init2.gradle'])
+        when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
         Map<String, Object> model = [:]
 
         page.fillModel(model, request)
 
         assertThat(model, hasKey('scripts'))
-        List<String> scripts = model.get('scripts') as List
-        assertThat(scripts, hasItem('init1.gradle'))
-        assertThat(scripts, hasItem('init2.gradle'))
+        Map<SProject, List<String>> scripts = model.get('scripts') as Map
+        assertThat(scripts.get(project), hasItem('init1.gradle'))
+        assertThat(scripts.get(project), hasItem('init2.gradle'))
     }
 }

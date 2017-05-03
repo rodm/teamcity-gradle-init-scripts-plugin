@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static jetbrains.buildServer.log.Loggers.SERVER_CATEGORY;
 import static teamcity.gradle.scripts.common.GradleInitScriptsPlugin.INIT_SCRIPT_NAME;
@@ -70,16 +71,16 @@ public class InitScriptsAdminController extends BaseController {
     }
 
     @NotNull
-    private List<String> getScriptNames(@NotNull HttpServletRequest request) {
+    private Map<SProject, List<String>> getScriptNames(@NotNull HttpServletRequest request) {
         String projectId = request.getParameter("projectId");
         if (projectId == null) {
             LOG.error("Missing request parameter 'projectId'");
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
         SProject project = projectManager.findProjectById(projectId);
         if (project == null) {
             LOG.error("Project not found: projectId: " + projectId);
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
         return scriptsManager.getScriptNames(project);
     }
