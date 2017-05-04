@@ -1,3 +1,4 @@
 
 apply plugin: 'java'
+apply plugin: 'org.gradle.jacoco'
 apply plugin: 'com.github.rodm.teamcity-common'
