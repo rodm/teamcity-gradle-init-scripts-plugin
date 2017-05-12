@@ -80,7 +80,7 @@ class GradleInitScriptsPageTest {
     }
 
     @Test
-    void 'page fills model will list of scripts'() {
+    void 'page fills model with list of scripts'() {
         GradleInitScriptsPage page = new GradleInitScriptsPage(places, descriptor, scriptsManager)
 
         HttpServletRequest request = mock(HttpServletRequest)
