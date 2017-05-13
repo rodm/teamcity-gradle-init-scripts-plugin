@@ -48,6 +48,14 @@ public class GradleInitScriptsPage extends EditProjectTab {
         super.fillModel(model, request);
         final SProject project = getProject(request);
         if (project != null) {
+            String fileName = request.getParameter("file");
+            if (fileName != null) {
+                String fileContent = scriptsManager.findScript(project, fileName);
+                if (fileContent != null) {
+                    model.put("fileName", fileName);
+                    model.put("fileContent", fileContent);
+                }
+            }
             model.put("scripts", scriptsManager.getScriptNames(project));
         }
     }

@@ -32,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.hasItem
 import static org.hamcrest.Matchers.hasKey
 import static org.hamcrest.Matchers.hasSize
+import static org.hamcrest.Matchers.not
 import static org.mockito.Mockito.eq
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
@@ -44,21 +45,26 @@ class GradleInitScriptsPageTest {
 
     private GradleScriptsManager scriptsManager
 
+    private SProject project
+
+    private GradleInitScriptsPage page
+
     @Before
     void setup() {
         places = mock(PagePlaces)
         descriptor = mock(PluginDescriptor)
         scriptsManager = mock(GradleScriptsManager)
+        project = mock(SProject)
 
         when(places.getPlaceById(eq(PlaceId.EDIT_PROJECT_PAGE_TAB))).thenReturn(mock(PagePlace))
         when(descriptor.getPluginResourcesPath(eq('projectPage.jsp'))).thenReturn('pluginResourcesPath/projectPage.jsp')
         when(descriptor.getPluginResourcesPath(eq('initScripts.js'))).thenReturn('pluginResourcesPath/initScripts.js')
+
+        page = new GradleInitScriptsPage(places, descriptor, scriptsManager)
     }
 
     @Test
     void 'page is configured with required resources'() {
-        GradleInitScriptsPage page = new GradleInitScriptsPage(places, descriptor, scriptsManager)
-
         assertThat(page.getTabTitle(), equalTo('Gradle Init Scripts'))
         assertThat(page.getIncludeUrl(), equalTo('pluginResourcesPath/projectPage.jsp'))
         assertThat(page.getJsPaths(), hasSize(1))
@@ -69,10 +75,7 @@ class GradleInitScriptsPageTest {
 
     @Test
     void 'page title shows scripts count'() {
-        GradleInitScriptsPage page = new GradleInitScriptsPage(places, descriptor, scriptsManager)
-
         HttpServletRequest request = mock(HttpServletRequest)
-        SProject project = mock(SProject)
         when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
         when(scriptsManager.getScriptsCount(eq(project))).thenReturn(2)
 
@@ -81,13 +84,10 @@ class GradleInitScriptsPageTest {
 
     @Test
     void 'page fills model with list of scripts'() {
-        GradleInitScriptsPage page = new GradleInitScriptsPage(places, descriptor, scriptsManager)
-
+        Map<String, Object> model = [:]
         HttpServletRequest request = mock(HttpServletRequest)
-        SProject project = mock(SProject)
         when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
         when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
-        Map<String, Object> model = [:]
 
         page.fillModel(model, request)
 
@@ -95,5 +95,47 @@ class GradleInitScriptsPageTest {
         Map<SProject, List<String>> scripts = model.get('scripts') as Map
         assertThat(scripts.get(project), hasItem('init1.gradle'))
         assertThat(scripts.get(project), hasItem('init2.gradle'))
+    }
+
+    @Test
+    void 'model filled with file name and content when file requested'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(request.getParameter("file")).thenReturn("init.gradle")
+        when(scriptsManager.findScript(eq(project), eq('init.gradle'))).thenReturn('file contents')
+
+        page.fillModel(model, request)
+
+        assertThat(model, hasKey('fileName'))
+        assertThat(model, hasKey('fileContent'))
+        assertThat(model.get('fileName') as String, equalTo('init.gradle'))
+        assertThat(model.get('fileContent') as String, equalTo('file contents'))
+    }
+
+    @Test
+    void 'model not filled with file name and content when requested file does not exist'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(request.getParameter("file")).thenReturn("init.gradle")
+        when(scriptsManager.findScript(eq(project), eq('init.gradle'))).thenReturn(null)
+
+        page.fillModel(model, request)
+
+        assertThat(model, not(hasKey('fileName')))
+        assertThat(model, not(hasKey('fileContent')))
+    }
+
+    @Test
+    void 'model not filled with file name and content when file not requested'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+
+        page.fillModel(model, request)
+
+        assertThat(model, not(hasKey('fileName')))
+        assertThat(model, not(hasKey('fileContent')))
     }
 }
