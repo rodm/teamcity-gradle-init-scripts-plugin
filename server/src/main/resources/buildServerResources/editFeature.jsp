@@ -15,7 +15,7 @@
   --%>
 
 <%@ include file="/include-internal.jsp"%>
-<%@ page import="teamcity.gradle.scripts.common.GradleInitScriptsPlugin" %>
+<%@ page import="com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
 

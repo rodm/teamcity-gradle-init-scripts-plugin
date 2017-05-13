@@ -5,5 +5,5 @@
                                    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
        default-autowire="constructor">
 
-    <bean class="teamcity.gradle.scripts.agent.GradleInitScriptsFeature"/>
+    <bean class="com.github.rodm.teamcity.gradle.scripts.agent.GradleInitScriptsFeature"/>
 </beans>
