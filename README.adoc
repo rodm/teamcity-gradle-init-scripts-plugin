@@ -10,6 +10,14 @@ between build configurations.
 image:https://travis-ci.org/rodm/teamcity-gradle-init-scripts-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/rodm/teamcity-gradle-init-scripts-plugin"]
 image:https://api.bintray.com/packages/rodm/teamcity-plugins-generic/gradle-init-scripts/images/download.svg[link="https://bintray.com/rodm/teamcity-plugins-generic/gradle-init-scripts/_latestVersion"]
 
+## Features
+
+* Upload Gradle initialization scripts to a project
+
+* Apply a script to a build configuration as a Build Feature
+
+* Shows the build configurations and templates using the script
+
 ## Installation
 
 * Download the plugin file from {uri-download} (see _Downloads_ section at the bottom of the page).
@@ -24,6 +32,10 @@ click on the link _Upload plugin zip_ to install the downloaded plugin file.
 * Edit a project, on the Gradle Init Scripts page upload an init script.
 
 * Edit a build configuration and add the Build Feature, Gradle Init Script, and select the init script to use.
+
+## Compatibility
+
+The plugin is compatibile with TeamCity 10.0 and later.
 
 ## License
 
