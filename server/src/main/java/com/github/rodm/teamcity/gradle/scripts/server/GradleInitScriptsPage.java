@@ -25,7 +25,6 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -65,7 +64,7 @@ public class GradleInitScriptsPage extends EditProjectTab {
             }
             Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project);
             model.put("scripts", scripts);
-            Map<String, List<SBuildType>> usage = getScriptsUsage(scripts);
+            Map<String, ScriptUsage> usage = getScriptsUsage(scripts);
             model.put("usage", usage);
         }
     }
@@ -84,11 +83,11 @@ public class GradleInitScriptsPage extends EditProjectTab {
         return result;
     }
 
-    private Map<String, List<SBuildType>> getScriptsUsage(Map<SProject, List<String>> scripts) {
-        Map<String, List<SBuildType>> usage = new LinkedHashMap<>();
+    private Map<String, ScriptUsage> getScriptsUsage(Map<SProject, List<String>> scripts) {
+        Map<String, ScriptUsage> usage = new LinkedHashMap<>();
         for (Map.Entry<SProject, List<String>> entry : scripts.entrySet()) {
             for (String script : entry.getValue()) {
-                usage.put(script, new ArrayList<>());
+                usage.put(script, new ScriptUsage());
             }
         }
 
@@ -98,7 +97,7 @@ public class GradleInitScriptsPage extends EditProjectTab {
                 for (SBuildFeatureDescriptor feature : buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
                     Map<String, String> parameters = feature.getParameters();
                     String scriptName = parameters.get(INIT_SCRIPT_NAME);
-                    usage.get(scriptName).add(buildType);
+                    usage.get(scriptName).addBuildType(buildType);
                 }
             }
         }

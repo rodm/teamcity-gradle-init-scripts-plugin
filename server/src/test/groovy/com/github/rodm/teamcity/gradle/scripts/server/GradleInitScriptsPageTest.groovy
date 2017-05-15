@@ -164,11 +164,11 @@ class GradleInitScriptsPageTest {
 
         page.fillModel(model, request)
 
-        Map<String, List<SBuildType>> usage = model.get('usage') as Map
+        Map<String, ScriptUsage> usage = model.get('usage') as Map
         assertThat(usage, hasKey('init1.gradle'))
-        assertThat(usage.get('init1.gradle'), hasSize(0))
+        assertThat(usage.get('init1.gradle').buildTypes, hasSize(0))
         assertThat(usage, hasKey('init2.gradle'))
-        assertThat(usage.get('init2.gradle'), hasSize(0))
+        assertThat(usage.get('init2.gradle').buildTypes, hasSize(0))
     }
 
     @Test
@@ -187,9 +187,9 @@ class GradleInitScriptsPageTest {
 
         page.fillModel(model, request)
 
-        Map<String, List<SBuildType>> usage = model.get('usage') as Map
-        List<SBuildType> buildTypes = usage.get('init1.gradle')
-        assertThat(buildTypes, hasSize(1))
-        assertThat(buildTypes.get(0), equalTo(buildType))
+        Map<String, ScriptUsage> usage = model.get('usage') as Map
+        ScriptUsage scriptUsage = usage.get('init1.gradle')
+        assertThat(scriptUsage.buildTypes, hasSize(1))
+        assertThat(scriptUsage.buildTypes.get(0), equalTo(buildType))
     }
 }
