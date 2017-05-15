@@ -42,6 +42,23 @@
                     </jsp:body>
                 </bs:simplePopup>
             </c:if>
+            <c:if test="${not empty usage[script].buildTemplates}">
+                <c:if test="${not empty usage[script].buildTypes}"> and </c:if>
+                <bs:simplePopup controlId="msbttu_${util:forJSIdentifier(currentProject.externalId)}_${util:forJSIdentifier(script)}"
+                                linkOpensPopup="false"
+                                popup_options="shift: {x: -100, y: 20}">
+                  <jsp:attribute name="content">
+                    <div>
+                        <ul class="menuList">
+                        <c:forEach items="${usage[script].buildTemplates}" var="template">
+                            <l:li><admin:editTemplateLink templateId="${template.externalId}"><c:out value="${template.fullName}"/></admin:editTemplateLink></l:li>
+                        </c:forEach>
+                        </ul>
+                    </div>
+                  </jsp:attribute>
+                    <jsp:body>${fn:length(usage[script].buildTemplates)} template<bs:s val="${fn:length(usage[script].buildTemplates)}"/></jsp:body>
+                </bs:simplePopup>
+            </c:if>
         </div>
     </c:otherwise>
 </c:choose>

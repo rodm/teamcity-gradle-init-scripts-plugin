@@ -17,6 +17,7 @@
 package com.github.rodm.teamcity.gradle.scripts.server;
 
 import jetbrains.buildServer.controllers.admin.projects.EditProjectTab;
+import jetbrains.buildServer.serverSide.BuildTypeTemplate;
 import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
@@ -98,6 +99,13 @@ public class GradleInitScriptsPage extends EditProjectTab {
                     Map<String, String> parameters = feature.getParameters();
                     String scriptName = parameters.get(INIT_SCRIPT_NAME);
                     usage.get(scriptName).addBuildType(buildType);
+                }
+            }
+            for (BuildTypeTemplate buildTemplate : project.getOwnBuildTypeTemplates()) {
+                for (SBuildFeatureDescriptor feature : buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
+                    Map<String, String> parameters = feature.getParameters();
+                    String scriptName = parameters.get(INIT_SCRIPT_NAME);
+                    usage.get(scriptName).addBuildTemplate(buildTemplate);
                 }
             }
         }

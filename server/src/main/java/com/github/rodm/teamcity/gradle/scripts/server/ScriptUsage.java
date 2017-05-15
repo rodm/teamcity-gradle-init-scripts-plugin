@@ -16,6 +16,7 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server;
 
+import jetbrains.buildServer.serverSide.BuildTypeTemplate;
 import jetbrains.buildServer.serverSide.SBuildType;
 
 import java.util.ArrayList;
@@ -25,11 +26,21 @@ public class ScriptUsage {
 
     private List<SBuildType> buildTypes = new ArrayList<>();
 
+    private List<BuildTypeTemplate> buildTemplates = new ArrayList<>();
+
     public List<SBuildType> getBuildTypes() {
         return buildTypes;
     }
 
     void addBuildType(SBuildType buildType) {
         buildTypes.add(buildType);
+    }
+
+    public List<BuildTypeTemplate> getBuildTemplates() {
+        return buildTemplates;
+    }
+
+    void addBuildTemplate(BuildTypeTemplate buildTemplate) {
+        buildTemplates.add(buildTemplate);
     }
 }

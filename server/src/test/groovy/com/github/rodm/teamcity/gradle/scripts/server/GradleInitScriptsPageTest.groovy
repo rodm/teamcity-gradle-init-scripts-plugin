@@ -17,6 +17,7 @@
 package com.github.rodm.teamcity.gradle.scripts.server
 
 import jetbrains.buildServer.controllers.admin.projects.EditProjectTab
+import jetbrains.buildServer.serverSide.BuildTypeTemplate
 import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor
 import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.SProject
@@ -35,6 +36,7 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.hasItem
 import static org.hamcrest.Matchers.hasKey
 import static org.hamcrest.Matchers.hasSize
+import static org.hamcrest.Matchers.isA
 import static org.hamcrest.Matchers.not
 import static org.mockito.Mockito.eq
 import static org.mockito.Mockito.mock
@@ -166,9 +168,9 @@ class GradleInitScriptsPageTest {
 
         Map<String, ScriptUsage> usage = model.get('usage') as Map
         assertThat(usage, hasKey('init1.gradle'))
-        assertThat(usage.get('init1.gradle').buildTypes, hasSize(0))
+        assertThat(usage.get('init1.gradle'), isA(ScriptUsage))
         assertThat(usage, hasKey('init2.gradle'))
-        assertThat(usage.get('init2.gradle').buildTypes, hasSize(0))
+        assertThat(usage.get('init2.gradle'), isA(ScriptUsage))
     }
 
     @Test
@@ -191,5 +193,27 @@ class GradleInitScriptsPageTest {
         ScriptUsage scriptUsage = usage.get('init1.gradle')
         assertThat(scriptUsage.buildTypes, hasSize(1))
         assertThat(scriptUsage.buildTypes.get(0), equalTo(buildType))
+    }
+
+    @Test
+    void 'usage map has a list of build templates using a script'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
+        Map<String, String> parameters = ['initScriptName': 'init1.gradle']
+        SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
+        when(feature.getParameters()).thenReturn(parameters)
+        Collection<SBuildFeatureDescriptor> features = [feature]
+        BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
+        when(buildTemplate.getBuildFeaturesOfType(eq(FEATURE_TYPE))).thenReturn(features)
+        when(project.getOwnBuildTypeTemplates()).thenReturn([buildTemplate])
+
+        page.fillModel(model, request)
+
+        Map<String, ScriptUsage> usage = model.get('usage') as Map
+        ScriptUsage scriptUsage = usage.get('init1.gradle')
+        assertThat(scriptUsage.buildTemplates, hasSize(1))
+        assertThat(scriptUsage.buildTemplates.get(0), equalTo(buildTemplate))
     }
 }
