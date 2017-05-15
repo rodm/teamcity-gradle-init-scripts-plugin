@@ -17,14 +17,21 @@
 package com.github.rodm.teamcity.gradle.scripts.server;
 
 import jetbrains.buildServer.controllers.admin.projects.EditProjectTab;
+import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
+import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.web.openapi.PagePlaces;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE;
+import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME;
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.PLUGIN_NAME;
 
 public class GradleInitScriptsPage extends EditProjectTab {
@@ -56,7 +63,10 @@ public class GradleInitScriptsPage extends EditProjectTab {
                     model.put("fileContent", fileContent);
                 }
             }
-            model.put("scripts", scriptsManager.getScriptNames(project));
+            Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project);
+            model.put("scripts", scripts);
+            Map<String, List<SBuildType>> usage = getScriptsUsage(scripts);
+            model.put("usage", usage);
         }
     }
 
@@ -72,5 +82,26 @@ public class GradleInitScriptsPage extends EditProjectTab {
             }
         }
         return result;
+    }
+
+    private Map<String, List<SBuildType>> getScriptsUsage(Map<SProject, List<String>> scripts) {
+        Map<String, List<SBuildType>> usage = new LinkedHashMap<>();
+        for (Map.Entry<SProject, List<String>> entry : scripts.entrySet()) {
+            for (String script : entry.getValue()) {
+                usage.put(script, new ArrayList<>());
+            }
+        }
+
+        for (Map.Entry<SProject, List<String>> entry : scripts.entrySet()) {
+            SProject project = entry.getKey();
+            for (SBuildType buildType : project.getOwnBuildTypes()) {
+                for (SBuildFeatureDescriptor feature : buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
+                    Map<String, String> parameters = feature.getParameters();
+                    String scriptName = parameters.get(INIT_SCRIPT_NAME);
+                    usage.get(scriptName).add(buildType);
+                }
+            }
+        }
+        return usage;
     }
 }

@@ -1,0 +1,47 @@
+<%--
+  * Copyright 2017 Rod MacKenzie.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  *     http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  --%>
+
+<c:choose>
+    <%--@elvariable id="usage" type="java.util.Map"--%>
+    <c:when test="${empty usage[script]}">
+        <div>Script is not used</div>
+    </c:when>
+    <c:otherwise>
+        <div>
+            Script is used in
+            <c:if test="${not empty usage[script]}">
+                <bs:simplePopup controlId="msbtu_${util:forJSIdentifier(currentProject.externalId)}_${util:forJSIdentifier(script)}"
+                                linkOpensPopup="false"
+                                popup_options="shift: {x: -100, y: 20}">
+                    <jsp:attribute name="content">
+                    <ul class="menuList">
+                        <%--@elvariable id="bt" type="jetbrains.buildServer.serverSide.SBuildType"--%>
+                        <c:forEach items="${usage[script]}" var="bt">
+                            <l:li>
+                                <span style="white-space: nowrap">
+                                    <bs:buildTypeLink buildType="${bt}"><bs:out value="${bt.extendedFullName}"/></bs:buildTypeLink>
+                                </span>
+                            </l:li>
+                        </c:forEach>
+                    </ul>
+                    </jsp:attribute>
+                    <jsp:body>${fn:length(usage[script])} build configuration<bs:s val="${fn:length(usage[script])}"/>
+                    </jsp:body>
+                </bs:simplePopup>
+            </c:if>
+        </div>
+    </c:otherwise>
+</c:choose>

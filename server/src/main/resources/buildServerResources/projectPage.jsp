@@ -98,13 +98,17 @@
                 <table class="highlightable parametersTable" style="width: 100%">
                     <tr>
                         <th style="width: 45%">Script Name</th>
-                        <th colspan="2"></th>
+                        <th colspan="3">Usage</th>
                     </tr>
+                    <%--@elvariable id="usage" type="java.util.Map<String, List<SBuildType>>"--%>
                     <c:forEach var="script" items="${scripts[currentProject]}">
                         <c:url var="fileUrl" value="/admin/editProject.html?projectId=${currentProject.externalId}&tab=gradleInitScripts&file=${script}"/>
                         <c:set var="onclick" value="document.location.href = '${fileUrl}';"/>
                         <tr>
                             <td class="highlight" onclick="${onclick}"><c:out value="${script}"/></td>
+                            <td class="highlight" onclick="${onclick}" style="white-space: nowrap">
+                                <%@ include file="scriptUsage.jspf" %>
+                            </td>
                             <td class="edit highlight"><a href="#" onclick="${onclick}">View</a></td>
                             <td class="edit">
                                 <a href="#" onclick="BS.GradleInitScripts.deleteScript('${currentProject.projectId}', '${script}')">Delete</a>
@@ -126,11 +130,15 @@
                     <table class="parametersTable" style="width: 100%">
                         <tr>
                             <th style="width: 45%">Script Name</th>
+                            <th colspan="1">Usage</th>
                         </tr>
                         <c:forEach var="script" items="${scripts[project]}">
                             <tr>
                                 <td>
                                     <c:out value="${script}"/>
+                                </td>
+                                <td>
+                                    <%@ include file="scriptUsage.jspf" %>
                                 </td>
                             </tr>
                         </c:forEach>

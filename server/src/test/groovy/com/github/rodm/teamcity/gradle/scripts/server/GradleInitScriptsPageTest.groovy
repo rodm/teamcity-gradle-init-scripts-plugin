@@ -17,6 +17,8 @@
 package com.github.rodm.teamcity.gradle.scripts.server
 
 import jetbrains.buildServer.controllers.admin.projects.EditProjectTab
+import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor
+import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.web.openapi.PagePlace
 import jetbrains.buildServer.web.openapi.PagePlaces
@@ -27,6 +29,7 @@ import org.junit.Test
 
 import javax.servlet.http.HttpServletRequest
 
+import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.hasItem
@@ -137,5 +140,56 @@ class GradleInitScriptsPageTest {
 
         assertThat(model, not(hasKey('fileName')))
         assertThat(model, not(hasKey('fileContent')))
+    }
+
+    @Test
+    void 'model filled with empty usage map'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+
+        page.fillModel(model, request)
+
+        assertThat(model, hasKey('usage'))
+        Map<String, List<SBuildType>> usage = model.get('usage') as Map
+        assertThat(usage.entrySet(), hasSize(0))
+    }
+
+    @Test
+    void 'usage map has an entry for each script'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
+
+        page.fillModel(model, request)
+
+        Map<String, List<SBuildType>> usage = model.get('usage') as Map
+        assertThat(usage, hasKey('init1.gradle'))
+        assertThat(usage.get('init1.gradle'), hasSize(0))
+        assertThat(usage, hasKey('init2.gradle'))
+        assertThat(usage.get('init2.gradle'), hasSize(0))
+    }
+
+    @Test
+    void 'usage map has a list of build types using a script'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
+        Map<String, String> parameters = ['initScriptName': 'init1.gradle']
+        SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
+        when(feature.getParameters()).thenReturn(parameters)
+        Collection<SBuildFeatureDescriptor> features = [feature]
+        SBuildType buildType = mock(SBuildType)
+        when(buildType.getBuildFeaturesOfType(eq(FEATURE_TYPE))).thenReturn(features)
+        when(project.getOwnBuildTypes()).thenReturn([buildType])
+
+        page.fillModel(model, request)
+
+        Map<String, List<SBuildType>> usage = model.get('usage') as Map
+        List<SBuildType> buildTypes = usage.get('init1.gradle')
+        assertThat(buildTypes, hasSize(1))
+        assertThat(buildTypes.get(0), equalTo(buildType))
     }
 }
