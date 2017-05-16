@@ -60,7 +60,9 @@ public class DefaultGradleScriptsManager implements GradleScriptsManager {
                             foundNames.add(file.getName());
                         }
                     }
-                    result.put(currentProject, scripts);
+                    if (scripts.size() > 0) {
+                        result.put(currentProject, scripts);
+                    }
                 }
             } catch (IOException e) {
                 LOG.error(e.getMessage());

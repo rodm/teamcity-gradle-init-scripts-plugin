@@ -100,6 +100,21 @@ class GradleScriptManagerTest {
     }
 
     @Test
+    void 'parent project should not be returned if subproject overrides all the parent scripts'() {
+        SProject parentProject = mock(SProject)
+        when(parentProject.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(parentPluginDir)
+        SProject project = mock(SProject)
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        when(project.getProjectPath()).thenReturn([parentProject, project])
+        new File(pluginDir, 'parent.gradle') << 'contents of override script'
+
+        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+        assertThat(scripts.keySet(), hasSize(1))
+        assertThat(scripts, hasKey(project))
+        assertThat(scripts.get(project), hasItem('parent.gradle'))
+    }
+
+    @Test
     void 'project with parent returns list of scripts with no duplicates'() {
         SProject parentProject = mock(SProject)
         when(parentProject.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(parentPluginDir)
