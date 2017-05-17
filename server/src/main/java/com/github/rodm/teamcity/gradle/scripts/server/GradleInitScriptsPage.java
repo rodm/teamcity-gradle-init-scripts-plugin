@@ -116,7 +116,7 @@ public class GradleInitScriptsPage extends EditProjectTab {
             for (SBuildFeatureDescriptor feature : buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
                 Map<String, String> parameters = feature.getParameters();
                 String scriptName = parameters.get(INIT_SCRIPT_NAME);
-                if (!subProjectScripts.contains(scriptName)) {
+                if (!subProjectScripts.contains(scriptName) && usage.get(scriptName) != null) {
                     usage.get(scriptName).addBuildType(buildType);
                 }
             }
@@ -125,7 +125,7 @@ public class GradleInitScriptsPage extends EditProjectTab {
             for (SBuildFeatureDescriptor feature : buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
                 Map<String, String> parameters = feature.getParameters();
                 String scriptName = parameters.get(INIT_SCRIPT_NAME);
-                if (!subProjectScripts.contains(scriptName)) {
+                if (!subProjectScripts.contains(scriptName) && usage.get(scriptName) != null) {
                     usage.get(scriptName).addBuildTemplate(buildTemplate);
                 }
             }
