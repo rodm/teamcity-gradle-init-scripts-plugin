@@ -26,8 +26,10 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE;
@@ -94,21 +96,43 @@ public class GradleInitScriptsPage extends EditProjectTab {
 
         for (Map.Entry<SProject, List<String>> entry : scripts.entrySet()) {
             SProject project = entry.getKey();
-            for (SBuildType buildType : project.getOwnBuildTypes()) {
-                for (SBuildFeatureDescriptor feature : buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
-                    Map<String, String> parameters = feature.getParameters();
-                    String scriptName = parameters.get(INIT_SCRIPT_NAME);
+            addScriptUsageForSubProjects(project, usage, Collections.emptyList());
+            addScriptUsageForProject(project, usage, Collections.emptyList());
+        }
+        return usage;
+    }
+
+    private void addScriptUsageForSubProjects(SProject parent, Map<String, ScriptUsage> usage, List<String> subProjectScripts) {
+        for (SProject project : parent.getOwnProjects()) {
+            List<String> scripts = getProjectScripts(project);
+            scripts.addAll(subProjectScripts);
+            addScriptUsageForSubProjects(project, usage, scripts);
+            addScriptUsageForProject(project, usage, scripts);
+        }
+    }
+
+    private void addScriptUsageForProject(SProject project, Map<String, ScriptUsage> usage, List<String> subProjectScripts) {
+        for (SBuildType buildType : project.getOwnBuildTypes()) {
+            for (SBuildFeatureDescriptor feature : buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
+                Map<String, String> parameters = feature.getParameters();
+                String scriptName = parameters.get(INIT_SCRIPT_NAME);
+                if (!subProjectScripts.contains(scriptName)) {
                     usage.get(scriptName).addBuildType(buildType);
                 }
             }
-            for (BuildTypeTemplate buildTemplate : project.getOwnBuildTypeTemplates()) {
-                for (SBuildFeatureDescriptor feature : buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
-                    Map<String, String> parameters = feature.getParameters();
-                    String scriptName = parameters.get(INIT_SCRIPT_NAME);
+        }
+        for (BuildTypeTemplate buildTemplate : project.getOwnBuildTypeTemplates()) {
+            for (SBuildFeatureDescriptor feature : buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
+                Map<String, String> parameters = feature.getParameters();
+                String scriptName = parameters.get(INIT_SCRIPT_NAME);
+                if (!subProjectScripts.contains(scriptName)) {
                     usage.get(scriptName).addBuildTemplate(buildTemplate);
                 }
             }
         }
-        return usage;
+    }
+
+    private List<String> getProjectScripts(SProject project) {
+        return scriptsManager.getScriptNames(project).getOrDefault(project, new ArrayList<>());
     }
 }
