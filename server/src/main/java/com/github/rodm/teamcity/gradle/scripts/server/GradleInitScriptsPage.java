@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,34 +88,31 @@ public class GradleInitScriptsPage extends EditProjectTab {
     private Map<String, ScriptUsage> getScriptsUsage(Map<SProject, List<String>> scripts) {
         Map<String, ScriptUsage> usage = new LinkedHashMap<>();
         for (Map.Entry<SProject, List<String>> entry : scripts.entrySet()) {
+            SProject project = entry.getKey();
             for (String script : entry.getValue()) {
                 usage.put(script, new ScriptUsage());
+                addScriptUsageForSubProjects(script, project, usage);
             }
-        }
-
-        for (Map.Entry<SProject, List<String>> entry : scripts.entrySet()) {
-            SProject project = entry.getKey();
-            addScriptUsageForSubProjects(project, usage, Collections.emptyList());
-            addScriptUsageForProject(project, usage, Collections.emptyList());
         }
         return usage;
     }
 
-    private void addScriptUsageForSubProjects(SProject parent, Map<String, ScriptUsage> usage, List<String> subProjectScripts) {
+    private void addScriptUsageForSubProjects(String name, SProject parent, Map<String, ScriptUsage> usage) {
         for (SProject project : parent.getOwnProjects()) {
             List<String> scripts = getProjectScripts(project);
-            scripts.addAll(subProjectScripts);
-            addScriptUsageForSubProjects(project, usage, scripts);
-            addScriptUsageForProject(project, usage, scripts);
+            if (!scripts.contains(name)) {
+                addScriptUsageForSubProjects(name, project, usage);
+            }
         }
+        addScriptUsageForProject(name, parent, usage);
     }
 
-    private void addScriptUsageForProject(SProject project, Map<String, ScriptUsage> usage, List<String> subProjectScripts) {
+    private void addScriptUsageForProject(String name, SProject project, Map<String, ScriptUsage> usage) {
         for (SBuildType buildType : project.getOwnBuildTypes()) {
             for (SBuildFeatureDescriptor feature : buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
                 Map<String, String> parameters = feature.getParameters();
                 String scriptName = parameters.get(INIT_SCRIPT_NAME);
-                if (!subProjectScripts.contains(scriptName) && usage.get(scriptName) != null) {
+                if (scriptName.equals(name)) {
                     usage.get(scriptName).addBuildType(buildType);
                 }
             }
@@ -125,7 +121,7 @@ public class GradleInitScriptsPage extends EditProjectTab {
             for (SBuildFeatureDescriptor feature : buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
                 Map<String, String> parameters = feature.getParameters();
                 String scriptName = parameters.get(INIT_SCRIPT_NAME);
-                if (!subProjectScripts.contains(scriptName) && usage.get(scriptName) != null) {
+                if (scriptName.equals(name)) {
                     usage.get(scriptName).addBuildTemplate(buildTemplate);
                 }
             }
