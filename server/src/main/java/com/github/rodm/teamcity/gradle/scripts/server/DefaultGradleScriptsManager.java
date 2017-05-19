@@ -16,6 +16,8 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server;
 
+import jetbrains.buildServer.serverSide.CopiedObjects;
+import jetbrains.buildServer.serverSide.CustomSettingsMapper;
 import jetbrains.buildServer.serverSide.SProject;
 import jetbrains.buildServer.util.ExceptionUtil;
 import jetbrains.buildServer.util.FileUtil;
@@ -31,10 +33,37 @@ import java.util.*;
 import static jetbrains.buildServer.log.Loggers.SERVER_CATEGORY;
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.PLUGIN_NAME;
 
-public class DefaultGradleScriptsManager implements GradleScriptsManager {
+public class DefaultGradleScriptsManager implements GradleScriptsManager, CustomSettingsMapper {
 
     @NotNull
     private static final Logger LOG = Logger.getLogger(SERVER_CATEGORY + ".GradleInitScripts");
+
+    @Override
+    public void mapData(@NotNull final CopiedObjects copiedObjects) {
+        for (Map.Entry<SProject, SProject> entry: copiedObjects.getCopiedProjectsMap().entrySet()) {
+            SProject source = entry.getKey();
+            SProject target = entry.getValue();
+            File sourceDir = source.getPluginDataDirectory(PLUGIN_NAME);
+            File[] files = sourceDir.listFiles();
+            if (files != null && files.length > 0) {
+                File targetDir;
+                try {
+                    targetDir = FileUtil.createDir(target.getPluginDataDirectory(PLUGIN_NAME));
+                } catch (IOException e) {
+                    LOG.warn("Could not create directory for project Gradle init scripts", e);
+                    continue;
+                }
+                for (File sourceFile : files) {
+                    final File targetFile = new File(targetDir, sourceFile.getName());
+                    try {
+                        FileUtil.copy(sourceFile, targetFile);
+                    } catch (IOException e) {
+                        LOG.warn("Could not copy script file: " + sourceFile.getAbsolutePath() + " to: " + targetFile.getAbsolutePath(), e);
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     @NotNull
