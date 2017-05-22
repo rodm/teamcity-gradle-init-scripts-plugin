@@ -47,12 +47,11 @@ public class InitScriptsProvider implements BuildStartContextProcessor {
                 if (buildType != null) {
                     Collection<SBuildFeatureDescriptor> features = buildType.getBuildFeaturesOfType(FEATURE_TYPE);
                     for (SBuildFeatureDescriptor feature : features) {
-
                         SProject project = buildType.getProject();
                         String scriptName = feature.getParameters().get(INIT_SCRIPT_NAME);
                         String scriptContent = scriptsManager.findScript(project, scriptName);
+                        runnerContext.addRunnerParameter(INIT_SCRIPT_NAME, scriptName);
                         if (scriptContent != null) {
-                            runnerContext.addRunnerParameter(INIT_SCRIPT_NAME, scriptName);
                             runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT, scriptContent);
                         } else {
                             LOG.error("Init script content for '" + scriptName + "' is empty");

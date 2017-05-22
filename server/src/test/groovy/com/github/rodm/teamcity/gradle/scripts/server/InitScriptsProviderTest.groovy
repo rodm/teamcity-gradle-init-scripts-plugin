@@ -98,7 +98,36 @@ class InitScriptsProviderTest {
         provider.updateParameters(context)
 
         verify(runnerContext, never()).addRunnerParameter(anyString(), anyString())
-        verify(runnerContext, never()).addRunnerParameter(anyString(), anyString())
+    }
+
+    @Test
+    void 'when script is missing pass the script name to the agent for logging'() {
+        SRunnerContext runnerContext = mock(SRunnerContext)
+        Collection<SRunnerContext> runnerContexts = [runnerContext]
+
+        Map<String, String> parameters = ['initScriptName': 'init.gradle']
+        SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
+        when(feature.getParameters()).thenReturn(parameters)
+        Collection<SBuildFeatureDescriptor> features = [feature]
+        SProject project = mock(SProject)
+        SBuildType buildType = mock(SBuildType)
+        when(buildType.getBuildFeaturesOfType(eq(FEATURE_TYPE))).thenReturn(features)
+        when(buildType.getProject()).thenReturn(project)
+
+        SRunningBuild runningBuild = mock(SRunningBuild)
+        when(runningBuild.getBuildType()).thenReturn(buildType)
+        when(runningBuild.getProjectId()).thenReturn('project1')
+
+        BuildStartContext context = mock(BuildStartContext)
+        when(context.getRunnerContexts()).thenReturn(runnerContexts)
+        when(context.getBuild()).thenReturn(runningBuild)
+
+        when(scriptsManager.findScript(eq(project), eq('init.gradle'))).thenReturn(null)
+
+        provider.updateParameters(context)
+
+        verify(runnerContext).addRunnerParameter(eq(INIT_SCRIPT_NAME), eq('init.gradle'))
+        verify(runnerContext, never()).addRunnerParameter(eq(INIT_SCRIPT_CONTENT), anyString())
     }
 
     @Test
