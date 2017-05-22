@@ -54,7 +54,7 @@ public class InitScriptsProvider implements BuildStartContextProcessor {
                         if (scriptContent != null) {
                             runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT, scriptContent);
                         } else {
-                            LOG.error("Init script content for '" + scriptName + "' is empty");
+                            LOG.error("Init script '" + scriptName + "' not found");
                         }
                     }
                 }
