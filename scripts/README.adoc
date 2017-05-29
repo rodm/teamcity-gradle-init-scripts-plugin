@@ -1,6 +1,8 @@
 = Example Gradle Initialization Scripts
 :uri-gradle-docs: https://docs.gradle.org/current/userguide
 :uri-gradle-init-script-plugins: {uri-gradle-docs}/init_scripts.html#sec:init_script_plugins[Init script plugins]
+:uri-gradle-build-scan-plugin: https://docs.gradle.com/build-scan-plugin/
+:uri-gradle-build-scan-guide: https://guides.gradle.org/creating-build-scans/#enable_build_scans_for_all_builds_optional
 
 To use the scripts select a project to edit then select the 'Gradle Init Scripts' settings page. Upload the
 script using the 'Upload init script' button, then select a build configuration and add the Build Feature
@@ -13,3 +15,6 @@ requires the environment variable `REPO_URL` to be set with the URL of the enter
 * `task-outcomes.gradle` - collects the execution outcomes of all the Gradle tasks in a build configuration and
 outputs the counts as TeamCity statistics values. The statistics values can be used to add a new graph to the
 build configurations statistics page.
+
+* `build-scan.gradle` - apply the {uri-gradle-build-scan-plugin}[Gradle Build Scan] plugin to builds. See the
+{uri-gradle-build-scan-guide}[Creating Build Scans] guide for more information.
