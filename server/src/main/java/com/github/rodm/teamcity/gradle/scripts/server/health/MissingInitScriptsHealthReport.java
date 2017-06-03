@@ -32,7 +32,7 @@ import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FE
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME;
 import static jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.WARN;
 
-public class InitScriptsHealthStatusReport extends HealthStatusReport {
+public class MissingInitScriptsHealthReport extends HealthStatusReport {
 
     private static final String TYPE = "MissingInitScriptsReport";
 
@@ -40,9 +40,9 @@ public class InitScriptsHealthStatusReport extends HealthStatusReport {
 
     private final ItemCategory CATEGORY = new ItemCategory("missing_init_scripts", "Missing Gradle init scripts", WARN);
 
-    public InitScriptsHealthStatusReport(@NotNull GradleScriptsManager scriptsManager,
-                                         @NotNull PagePlaces pagePlaces,
-                                         @NotNull PluginDescriptor descriptor)
+    public MissingInitScriptsHealthReport(@NotNull GradleScriptsManager scriptsManager,
+                                          @NotNull PagePlaces pagePlaces,
+                                          @NotNull PluginDescriptor descriptor)
     {
         this.scriptsManager = scriptsManager;
         final HealthStatusItemPageExtension pageExtension = new HealthStatusItemPageExtension(TYPE, pagePlaces);

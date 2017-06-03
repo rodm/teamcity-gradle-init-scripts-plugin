@@ -51,11 +51,11 @@ import static org.mockito.Mockito.never
 import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
 
-class HealthStatusTest {
+class MissingInitScriptsHealthReportTest {
 
     private GradleScriptsManager scriptsManager
     private PagePlace pagePlace
-    private InitScriptsHealthStatusReport report
+    private MissingInitScriptsHealthReport report
 
     @Before
     void setup() {
@@ -66,7 +66,7 @@ class HealthStatusTest {
         PluginDescriptor descriptor = mock(PluginDescriptor)
         when(places.getPlaceById(eq(PlaceId.HEALTH_STATUS_ITEM))).thenReturn(pagePlace)
         when(descriptor.getPluginResourcesPath(eq('/health/missingInitScripts.jsp'))).thenReturn('pluginResourcesPath/health/missingInitScripts.jsp')
-        report = new InitScriptsHealthStatusReport(scriptsManager, places, descriptor)
+        report = new MissingInitScriptsHealthReport(scriptsManager, places, descriptor)
     }
 
     @Test
