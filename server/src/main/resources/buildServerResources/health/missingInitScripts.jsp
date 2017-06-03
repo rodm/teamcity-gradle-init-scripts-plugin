@@ -15,8 +15,8 @@
 <c:set var="buildType" value="${healthStatusItem.additionalData['buildType']}"/>
 <%--@elvariable id="buildTypeTemplate" type="jetbrains.buildServer.serverSide.BuildTypeTemplate"--%>
 <c:set var="buildTemplate" value="${healthStatusItem.additionalData['buildTemplate']}"/>
-<%--@elvariable id="errors" type="java.util.Set<java.lang.String>"--%>
-<c:set var="errors" value="${healthStatusItem.additionalData['errors']}"/>
+<%--@elvariable id="scriptName" type="java.lang.String>"--%>
+<c:set var="scriptName" value="${healthStatusItem.additionalData['scriptName']}"/>
 
 <c:choose>
     <c:when test="${not empty buildType}">
@@ -31,17 +31,7 @@
                                      cameFromUrl="${pageUrl}">
                 <bs:out value="${target.fullName}"/>
             </admin:editBuildTypeLink>
-            &nbsp;contains <strong><bs:out value="${fn:length(errors)}"/></strong> unresolved Gradle init script
-            name<bs:s val="${fn:length(errors)}"/>:
-            <%
-                @SuppressWarnings("unchecked")
-                final Set<String> set = (Set<String>)pageContext.getAttribute("errors");
-                if (set != null) {
-            %>
-            <%=StringUtil.join(set, ", ")%>
-            <%
-                }
-            %>
+            &nbsp;references Gradle init script <strong><bs:out value="${scriptName}"/></strong> that is missing
         </div>
     </c:when>
     <c:when test="${not empty buildTemplate}">
@@ -56,17 +46,7 @@
                                     cameFromUrl="${pageUrl}">
                 <bs:out value="${target.fullName}"/>
             </admin:editTemplateLink>
-            &nbsp;contains <strong><bs:out value="${fn:length(errors)}"/></strong> unresolved Gradle init script
-            name<bs:s val="${fn:length(errors)}"/>:
-            <%
-                @SuppressWarnings("unchecked")
-                final Set<String> set = (Set<String>)pageContext.getAttribute("errors");
-                if (set != null) {
-            %>
-            <%=StringUtil.join(set, ", ")%>
-            <%
-                }
-            %>
+            &nbsp;references Gradle init script <strong><bs:out value="${scriptName}"/></strong> that is missing
         </div>
     </c:when>
 </c:choose>

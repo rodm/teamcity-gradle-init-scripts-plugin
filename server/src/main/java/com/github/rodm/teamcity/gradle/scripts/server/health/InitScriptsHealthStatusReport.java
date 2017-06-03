@@ -46,7 +46,7 @@ public class InitScriptsHealthStatusReport extends HealthStatusReport {
     {
         this.scriptsManager = scriptsManager;
         final HealthStatusItemPageExtension pageExtension = new HealthStatusItemPageExtension(TYPE, pagePlaces);
-        pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("/report.jsp"));
+        pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("/health/missingInitScripts.jsp"));
         pageExtension.addCssFile("/css/admin/buildTypeForm.css");
         pageExtension.setVisibleOutsideAdminArea(true);
         pageExtension.register();
@@ -83,11 +83,9 @@ public class InitScriptsHealthStatusReport extends HealthStatusReport {
                 String scriptName = parameters.get(INIT_SCRIPT_NAME);
                 String scriptContents = scriptsManager.findScript(buildType.getProject(), scriptName);
                 if (scriptContents == null) {
-                    Set<String> errors = new HashSet<>();
-                    errors.add(scriptName);
                     Map<String, Object> data = new HashMap<>();
                     data.put("buildType", buildType);
-                    data.put("errors", errors);
+                    data.put("scriptName", scriptName);
                     String identity = CATEGORY.getId() + "_" + buildType.getBuildTypeId();
                     HealthStatusItem statusItem = new HealthStatusItem(identity, CATEGORY, data);
                     resultConsumer.consumeForBuildType(buildType, statusItem);
@@ -100,11 +98,9 @@ public class InitScriptsHealthStatusReport extends HealthStatusReport {
                 String scriptName = parameters.get(INIT_SCRIPT_NAME);
                 String scriptContents = scriptsManager.findScript(buildTemplate.getProject(), scriptName);
                 if (scriptContents == null) {
-                    Set<String> errors = new HashSet<>();
-                    errors.add(scriptName);
                     Map<String, Object> data = new HashMap<>();
                     data.put("buildTemplate", buildTemplate);
-                    data.put("errors", errors);
+                    data.put("scriptName", scriptName);
                     String identity = CATEGORY.getId() + "_" + buildTemplate.getTemplateId();
                     HealthStatusItem statusItem = new HealthStatusItem(identity, CATEGORY, data);
                     resultConsumer.consumeForTemplate(buildTemplate, statusItem);

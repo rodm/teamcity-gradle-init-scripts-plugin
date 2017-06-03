@@ -65,7 +65,7 @@ class HealthStatusTest {
         PagePlaces places = mock(PagePlaces)
         PluginDescriptor descriptor = mock(PluginDescriptor)
         when(places.getPlaceById(eq(PlaceId.HEALTH_STATUS_ITEM))).thenReturn(pagePlace)
-        when(descriptor.getPluginResourcesPath(eq('/report.jsp'))).thenReturn('pluginResourcesPath/report.jsp')
+        when(descriptor.getPluginResourcesPath(eq('/health/missingInitScripts.jsp'))).thenReturn('pluginResourcesPath/health/missingInitScripts.jsp')
         report = new InitScriptsHealthStatusReport(scriptsManager, places, descriptor)
     }
 
@@ -82,7 +82,7 @@ class HealthStatusTest {
         verify(pagePlace).addExtension(extensionCaptor.capture(), ArgumentMatchers.<PositionConstraint>any())
 
         HealthStatusItemPageExtension extension = extensionCaptor.value
-        assertThat(extension.getIncludeUrl(), equalTo('pluginResourcesPath/report.jsp'))
+        assertThat(extension.getIncludeUrl(), equalTo('pluginResourcesPath/health/missingInitScripts.jsp'))
         assertThat(extension.getCssPaths(), hasItem('/css/admin/buildTypeForm.css'))
         assertThat(extension.isVisibleOutsideAdminArea(), is(true))
     }
@@ -108,8 +108,8 @@ class HealthStatusTest {
         assertThat(item.getSeverity(), equalTo(WARN))
         assertThat(item.getAdditionalData(), hasKey('buildType'))
         assertThat(item.getAdditionalData().get('buildType'), is(buildType))
-        assertThat(item.getAdditionalData(), hasKey('errors'))
-        assertThat(item.getAdditionalData().get('errors'), hasItem('init.gradle'))
+        assertThat(item.getAdditionalData(), hasKey('scriptName'))
+        assertThat(item.getAdditionalData().get('scriptName'), equalTo('init.gradle'))
     }
 
     @Test
@@ -152,8 +152,8 @@ class HealthStatusTest {
         assertThat(item.getSeverity(), equalTo(WARN))
         assertThat(item.getAdditionalData(), hasKey('buildTemplate'))
         assertThat(item.getAdditionalData().get('buildTemplate'), is(buildTemplate))
-        assertThat(item.getAdditionalData(), hasKey('errors'))
-        assertThat(item.getAdditionalData().get('errors'), hasItem('init.gradle'))
+        assertThat(item.getAdditionalData(), hasKey('scriptName'))
+        assertThat(item.getAdditionalData().get('scriptName'), equalTo('init.gradle'))
     }
 
     @Test
