@@ -25,17 +25,20 @@ import jetbrains.buildServer.serverSide.healthStatus.HealthStatusItem
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusItemConsumer
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusScope
 import jetbrains.buildServer.serverSide.healthStatus.ItemCategory
-import jetbrains.buildServer.serverSide.healthStatus.ItemSeverity
 import jetbrains.buildServer.web.openapi.PagePlace
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PlaceId
 import jetbrains.buildServer.web.openapi.PluginDescriptor
+import jetbrains.buildServer.web.openapi.PositionConstraint
+import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension
+import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers
 
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
-
+import static jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.WARN
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.hasItem
@@ -50,39 +53,46 @@ import static org.mockito.Mockito.when
 
 class HealthStatusTest {
 
-    @Test
-    void 'health status page is configured'() {
+    private GradleScriptsManager scriptsManager
+    private PagePlace pagePlace
+    private InitScriptsHealthStatusReport report
+
+    @Before
+    void setup() {
+        scriptsManager = mock(GradleScriptsManager)
+        pagePlace = mock(PagePlace)
+
         PagePlaces places = mock(PagePlaces)
         PluginDescriptor descriptor = mock(PluginDescriptor)
-        when(places.getPlaceById(eq(PlaceId.HEALTH_STATUS_ITEM))).thenReturn(mock(PagePlace))
-        when(descriptor.getPluginResourcesPath(eq('report.jsp'))).thenReturn('pluginResourcesPath/report.jsp')
+        when(places.getPlaceById(eq(PlaceId.HEALTH_STATUS_ITEM))).thenReturn(pagePlace)
+        when(descriptor.getPluginResourcesPath(eq('/report.jsp'))).thenReturn('pluginResourcesPath/report.jsp')
+        report = new InitScriptsHealthStatusReport(scriptsManager, places, descriptor)
+    }
 
-        InitScriptsHealthStatusItemExtension extension = new InitScriptsHealthStatusItemExtension(places, descriptor)
+    @Test
+    void 'health status report configuration'() {
+        assertThat(report.getType(), equalTo('MissingInitScriptsReport'))
+        assertThat(report.getDisplayName(), equalTo('Missing Gradle Init Scripts'))
+        assertThat(report.getCategories(), hasItem(new ItemCategory('missing_init_scripts', 'Missing Gradle init scripts', WARN)))
+    }
 
+    @Test
+    void 'health status report registers extension page'() {
+        ArgumentCaptor<HealthStatusItemPageExtension> extensionCaptor = ArgumentCaptor.forClass(HealthStatusItemPageExtension)
+        verify(pagePlace).addExtension(extensionCaptor.capture(), ArgumentMatchers.<PositionConstraint>any())
+
+        HealthStatusItemPageExtension extension = extensionCaptor.value
         assertThat(extension.getIncludeUrl(), equalTo('pluginResourcesPath/report.jsp'))
         assertThat(extension.getCssPaths(), hasItem('/css/admin/buildTypeForm.css'))
         assertThat(extension.isVisibleOutsideAdminArea(), is(true))
     }
 
     @Test
-    void 'health status report configuration'() {
-        GradleScriptsManager scriptsManager = mock(GradleScriptsManager)
-        InitScriptsHealthStatusReport report = new InitScriptsHealthStatusReport(scriptsManager)
-
-        assertThat(report.getType(), equalTo('gradleInitScripts'))
-        assertThat(report.getDisplayName(), equalTo('Gradle Init Scripts'))
-        assertThat(report.getCategories(), hasItem(new ItemCategory('gradleInitScripts', 'Gradle init scripts', ItemSeverity.WARN)))
-    }
-
-    @Test
     void 'build type with an invalid script is reported'() {
-        GradleScriptsManager scriptsManager = mock(GradleScriptsManager)
-        InitScriptsHealthStatusReport report = new InitScriptsHealthStatusReport(scriptsManager)
-
         SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
         when(feature.getParameters()).thenReturn([(INIT_SCRIPT_NAME): 'init.gradle'])
         SBuildType buildType = mock(SBuildType)
-        when(buildType.getFullName()).thenReturn('BuildType')
+        when(buildType.getBuildTypeId()).thenReturn('BuildTypeId')
         when(buildType.getBuildFeaturesOfType(FEATURE_TYPE)).thenReturn([feature])
         HealthStatusScope scope = mock(HealthStatusScope)
         when(scope.getBuildTypes()).thenReturn([buildType])
@@ -94,8 +104,8 @@ class HealthStatusTest {
         verify(resultConsumer).consumeForBuildType(eq(buildType), itemCaptor.capture())
 
         HealthStatusItem item = itemCaptor.value
-        assertThat(item.getIdentity(), equalTo('build_type_missing_init_script_BuildType'))
-        assertThat(item.getSeverity(), equalTo(ItemSeverity.WARN))
+        assertThat(item.getIdentity(), equalTo('missing_init_scripts_BuildTypeId'))
+        assertThat(item.getSeverity(), equalTo(WARN))
         assertThat(item.getAdditionalData(), hasKey('buildType'))
         assertThat(item.getAdditionalData().get('buildType'), is(buildType))
         assertThat(item.getAdditionalData(), hasKey('errors'))
@@ -104,9 +114,6 @@ class HealthStatusTest {
 
     @Test
     void 'build type with a valid script is not reported'() {
-        GradleScriptsManager scriptsManager = mock(GradleScriptsManager)
-        InitScriptsHealthStatusReport report = new InitScriptsHealthStatusReport(scriptsManager)
-
         SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
         when(feature.getParameters()).thenReturn([(INIT_SCRIPT_NAME): 'init.gradle'])
         SBuildType buildType = mock(SBuildType)
@@ -126,13 +133,10 @@ class HealthStatusTest {
 
     @Test
     void 'build template with an invalid script is reported'() {
-        GradleScriptsManager scriptsManager = mock(GradleScriptsManager)
-        InitScriptsHealthStatusReport report = new InitScriptsHealthStatusReport(scriptsManager)
-
         SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
         when(feature.getParameters()).thenReturn([(INIT_SCRIPT_NAME): 'init.gradle'])
         BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
-        when(buildTemplate.getFullName()).thenReturn('BuildTemplate')
+        when(buildTemplate.getTemplateId()).thenReturn('BuildTemplateId')
         when(buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)).thenReturn([feature])
         HealthStatusScope scope = mock(HealthStatusScope)
         when(scope.getBuildTypeTemplates()).thenReturn([buildTemplate])
@@ -144,8 +148,8 @@ class HealthStatusTest {
         verify(resultConsumer).consumeForTemplate(eq(buildTemplate), itemCaptor.capture())
 
         HealthStatusItem item = itemCaptor.value
-        assertThat(item.getIdentity(), equalTo('build_template_missing_init_script_BuildTemplate'))
-        assertThat(item.getSeverity(), equalTo(ItemSeverity.WARN))
+        assertThat(item.getIdentity(), equalTo('missing_init_scripts_BuildTemplateId'))
+        assertThat(item.getSeverity(), equalTo(WARN))
         assertThat(item.getAdditionalData(), hasKey('buildTemplate'))
         assertThat(item.getAdditionalData().get('buildTemplate'), is(buildTemplate))
         assertThat(item.getAdditionalData(), hasKey('errors'))
@@ -154,9 +158,6 @@ class HealthStatusTest {
 
     @Test
     void 'build template with a valid script is not reported'() {
-        GradleScriptsManager scriptsManager = mock(GradleScriptsManager)
-        InitScriptsHealthStatusReport report = new InitScriptsHealthStatusReport(scriptsManager)
-
         SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
         when(feature.getParameters()).thenReturn([(INIT_SCRIPT_NAME): 'init.gradle'])
         BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)

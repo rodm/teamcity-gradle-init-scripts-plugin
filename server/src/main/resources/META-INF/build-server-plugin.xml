@@ -14,5 +14,4 @@
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.GradleInitScriptsPage"/>
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.DefaultGradleScriptsManager"/>
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.health.InitScriptsHealthStatusReport"/>
-    <bean class="com.github.rodm.teamcity.gradle.scripts.server.health.InitScriptsHealthStatusItemExtension"/>
 </beans>

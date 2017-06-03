@@ -21,48 +21,58 @@ import jetbrains.buildServer.serverSide.BuildTypeTemplate;
 import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.healthStatus.*;
+import jetbrains.buildServer.web.openapi.PagePlaces;
+import jetbrains.buildServer.web.openapi.PluginDescriptor;
+import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE;
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME;
-import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.PLUGIN_NAME;
+import static jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.WARN;
 
 public class InitScriptsHealthStatusReport extends HealthStatusReport {
 
+    private static final String TYPE = "MissingInitScriptsReport";
+
     private final GradleScriptsManager scriptsManager;
 
-    private final ItemCategory itemCategory;
+    private final ItemCategory CATEGORY = new ItemCategory("missing_init_scripts", "Missing Gradle init scripts", WARN);
 
-    public InitScriptsHealthStatusReport(@NotNull GradleScriptsManager scriptsManager) {
+    public InitScriptsHealthStatusReport(@NotNull GradleScriptsManager scriptsManager,
+                                         @NotNull PagePlaces pagePlaces,
+                                         @NotNull PluginDescriptor descriptor)
+    {
         this.scriptsManager = scriptsManager;
-        this.itemCategory = new ItemCategory(PLUGIN_NAME, "Gradle init scripts", ItemSeverity.WARN);
+        final HealthStatusItemPageExtension pageExtension = new HealthStatusItemPageExtension(TYPE, pagePlaces);
+        pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("/report.jsp"));
+        pageExtension.addCssFile("/css/admin/buildTypeForm.css");
+        pageExtension.setVisibleOutsideAdminArea(true);
+        pageExtension.register();
     }
 
     @NotNull
     @Override
     public String getType() {
-        return PLUGIN_NAME;
+        return TYPE;
     }
 
     @NotNull
     @Override
     public String getDisplayName() {
-        return "Gradle Init Scripts";
+        return "Missing Gradle Init Scripts";
     }
 
     @NotNull
     @Override
     public Collection<ItemCategory> getCategories() {
-        List<ItemCategory> result = new ArrayList<>();
-        result.add(itemCategory);
-        return result;
+        return Collections.singletonList(CATEGORY);
     }
 
     @Override
     public boolean canReportItemsFor(@NotNull HealthStatusScope scope) {
-        return scope.isItemWithSeverityAccepted(itemCategory.getSeverity());
+        return scope.isItemWithSeverityAccepted(CATEGORY.getSeverity());
     }
 
     @Override
@@ -78,8 +88,8 @@ public class InitScriptsHealthStatusReport extends HealthStatusReport {
                     Map<String, Object> data = new HashMap<>();
                     data.put("buildType", buildType);
                     data.put("errors", errors);
-                    String identity = "build_type_missing_init_script_" + buildType.getFullName();
-                    HealthStatusItem statusItem = new HealthStatusItem(identity, itemCategory, data);
+                    String identity = CATEGORY.getId() + "_" + buildType.getBuildTypeId();
+                    HealthStatusItem statusItem = new HealthStatusItem(identity, CATEGORY, data);
                     resultConsumer.consumeForBuildType(buildType, statusItem);
                 }
             }
@@ -95,8 +105,8 @@ public class InitScriptsHealthStatusReport extends HealthStatusReport {
                     Map<String, Object> data = new HashMap<>();
                     data.put("buildTemplate", buildTemplate);
                     data.put("errors", errors);
-                    String identity = "build_template_missing_init_script_" + buildTemplate.getFullName();
-                    HealthStatusItem statusItem = new HealthStatusItem(identity, itemCategory, data);
+                    String identity = CATEGORY.getId() + "_" + buildTemplate.getTemplateId();
+                    HealthStatusItem statusItem = new HealthStatusItem(identity, CATEGORY, data);
                     resultConsumer.consumeForTemplate(buildTemplate, statusItem);
                 }
             }
