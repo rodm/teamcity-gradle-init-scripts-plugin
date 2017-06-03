@@ -65,7 +65,8 @@ class GradleInitScriptsPageTest {
         when(descriptor.getPluginResourcesPath(eq('projectPage.jsp'))).thenReturn('pluginResourcesPath/projectPage.jsp')
         when(descriptor.getPluginResourcesPath(eq('initScripts.js'))).thenReturn('pluginResourcesPath/initScripts.js')
 
-        page = new GradleInitScriptsPage(places, descriptor, scriptsManager)
+        InitScriptsUsageAnalyzer analyzer = new InitScriptsUsageAnalyzer(scriptsManager)
+        page = new GradleInitScriptsPage(places, descriptor, scriptsManager, analyzer)
     }
 
     @Test

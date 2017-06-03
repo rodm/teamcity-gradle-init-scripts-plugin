@@ -41,12 +41,15 @@ public class GradleInitScriptsPage extends EditProjectTab {
 
     private GradleScriptsManager scriptsManager;
 
+    private final InitScriptsUsageAnalyzer analyzer;
+
     GradleInitScriptsPage(@NotNull final PagePlaces pagePlaces,
                           @NotNull final PluginDescriptor descriptor,
-                          @NotNull final GradleScriptsManager scriptsManager)
-    {
+                          @NotNull final GradleScriptsManager scriptsManager,
+                          @NotNull final InitScriptsUsageAnalyzer analyzer) {
         super(pagePlaces, PLUGIN_NAME, descriptor.getPluginResourcesPath("projectPage.jsp"), TITLE);
         this.scriptsManager = scriptsManager;
+        this.analyzer = analyzer;
         addCssFile("/css/admin/buildTypeForm.css");
         addJsFile(descriptor.getPluginResourcesPath("initScripts.js"));
     }
@@ -66,7 +69,7 @@ public class GradleInitScriptsPage extends EditProjectTab {
             }
             Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project);
             model.put("scripts", scripts);
-            Map<String, ScriptUsage> usage = getScriptsUsage(scripts);
+            Map<String, ScriptUsage> usage = analyzer.getScriptsUsage(scripts);
             model.put("usage", usage);
         }
     }
@@ -83,52 +86,5 @@ public class GradleInitScriptsPage extends EditProjectTab {
             }
         }
         return result;
-    }
-
-    private Map<String, ScriptUsage> getScriptsUsage(Map<SProject, List<String>> scripts) {
-        Map<String, ScriptUsage> usage = new LinkedHashMap<>();
-        for (Map.Entry<SProject, List<String>> entry : scripts.entrySet()) {
-            SProject project = entry.getKey();
-            for (String script : entry.getValue()) {
-                usage.put(script, new ScriptUsage());
-                addScriptUsageForSubProjects(script, project, usage);
-            }
-        }
-        return usage;
-    }
-
-    private void addScriptUsageForSubProjects(String name, SProject parent, Map<String, ScriptUsage> usage) {
-        for (SProject project : parent.getOwnProjects()) {
-            List<String> scripts = getProjectScripts(project);
-            if (!scripts.contains(name)) {
-                addScriptUsageForSubProjects(name, project, usage);
-            }
-        }
-        addScriptUsageForProject(name, parent, usage);
-    }
-
-    private void addScriptUsageForProject(String name, SProject project, Map<String, ScriptUsage> usage) {
-        for (SBuildType buildType : project.getOwnBuildTypes()) {
-            for (SBuildFeatureDescriptor feature : buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
-                Map<String, String> parameters = feature.getParameters();
-                String scriptName = parameters.get(INIT_SCRIPT_NAME);
-                if (scriptName.equals(name)) {
-                    usage.get(scriptName).addBuildType(buildType);
-                }
-            }
-        }
-        for (BuildTypeTemplate buildTemplate : project.getOwnBuildTypeTemplates()) {
-            for (SBuildFeatureDescriptor feature : buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
-                Map<String, String> parameters = feature.getParameters();
-                String scriptName = parameters.get(INIT_SCRIPT_NAME);
-                if (scriptName.equals(name)) {
-                    usage.get(scriptName).addBuildTemplate(buildTemplate);
-                }
-            }
-        }
-    }
-
-    private List<String> getProjectScripts(SProject project) {
-        return scriptsManager.getScriptNames(project).getOrDefault(project, new ArrayList<>());
     }
 }
