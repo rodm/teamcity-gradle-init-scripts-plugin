@@ -18,7 +18,7 @@ image:https://api.bintray.com/packages/rodm/teamcity-plugins-generic/gradle-init
 
 * Shows the build configurations and templates using the script
 
-* Reports missing scripts on the Server Health page
+* Reports missing scripts, unused scripts and invalid configurations on the Server Health page
 
 ### Example Scripts
 
