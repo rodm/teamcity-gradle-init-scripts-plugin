@@ -37,6 +37,13 @@ public class InitScriptsUsageAnalyzer {
         this.scriptsManager = scriptsManager;
     }
 
+    public Map<String, ScriptUsage> getProjectScriptsUsage(SProject project) {
+        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project);
+        Map<SProject, List<String>> scriptsForCurrentProject = new LinkedHashMap<>();
+        scriptsForCurrentProject.put(project, scripts.get(project));
+        return getScriptsUsage(scriptsForCurrentProject);
+    }
+
     Map<String, ScriptUsage> getScriptsUsage(Map<SProject, List<String>> scripts) {
         Map<String, ScriptUsage> usage = new LinkedHashMap<>();
         for (Map.Entry<SProject, List<String>> entry : scripts.entrySet()) {
