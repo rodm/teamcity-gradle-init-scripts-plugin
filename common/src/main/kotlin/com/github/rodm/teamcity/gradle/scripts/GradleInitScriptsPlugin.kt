@@ -16,13 +16,13 @@
 
 package com.github.rodm.teamcity.gradle.scripts;
 
-public class GradleInitScriptsPlugin {
+object GradleInitScriptsPlugin {
 
-    public static String PLUGIN_NAME = "gradleInitScripts";
+    const val PLUGIN_NAME = "gradleInitScripts"
 
-    public static String FEATURE_TYPE = "gradle-init-scripts";
+    const val FEATURE_TYPE = "gradle-init-scripts"
 
-    public static String INIT_SCRIPT_NAME = "initScriptName";
+    const val INIT_SCRIPT_NAME = "initScriptName"
 
-    public static String INIT_SCRIPT_CONTENT = "initScriptContent";
+    const val INIT_SCRIPT_CONTENT = "initScriptContent"
 }
