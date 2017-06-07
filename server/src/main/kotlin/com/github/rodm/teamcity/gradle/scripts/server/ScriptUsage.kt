@@ -14,16 +14,27 @@
  * limitations under the License.
  */
 
-package com.github.rodm.teamcity.gradle.scripts.server;
+package com.github.rodm.teamcity.gradle.scripts.server
 
-import jetbrains.buildServer.controllers.BaseAjaxActionController;
-import jetbrains.buildServer.web.openapi.WebControllerManager;
-import org.jetbrains.annotations.NotNull;
+import jetbrains.buildServer.serverSide.BuildTypeTemplate
+import jetbrains.buildServer.serverSide.SBuildType
+import java.util.ArrayList
 
-public class InitScriptsActionsController extends BaseAjaxActionController {
+class ScriptUsage {
 
-    public InitScriptsActionsController(@NotNull WebControllerManager controllerManager) {
-        super(controllerManager);
-        controllerManager.registerController("/admin/initScriptsActions.html", this);
+    private val buildTypes = ArrayList<SBuildType>()
+
+    private val buildTemplates = ArrayList<BuildTypeTemplate>()
+
+    fun getBuildTypes() = buildTypes
+
+    fun addBuildType(buildType: SBuildType) {
+        buildTypes.add(buildType)
+    }
+
+    fun getBuildTemplates() = buildTemplates
+
+    fun addBuildTemplate(buildTemplate: BuildTypeTemplate) {
+        buildTemplates.add(buildTemplate)
     }
 }

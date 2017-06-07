@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.rodm.teamcity.gradle.scripts.server;
+package com.github.rodm.teamcity.gradle.scripts.server
 
-import jetbrains.buildServer.serverSide.SProject;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import jetbrains.buildServer.controllers.BaseAjaxActionController
+import jetbrains.buildServer.web.openapi.WebControllerManager
 
-import java.util.List;
-import java.util.Map;
-
-public interface GradleScriptsManager {
-
-    @NotNull
-    Map<SProject, List<String>> getScriptNames(@NotNull SProject project);
-
-    int getScriptsCount(@NotNull SProject project);
-
-    @Nullable
-    String findScript(@NotNull SProject project, @NotNull String name);
-
-    boolean deleteScript(@NotNull SProject project, @NotNull String name);
+class InitScriptsActionsController(controllerManager: WebControllerManager) : BaseAjaxActionController(controllerManager) {
+    init {
+        controllerManager.registerController("/admin/initScriptsActions.html", this)
+    }
 }
