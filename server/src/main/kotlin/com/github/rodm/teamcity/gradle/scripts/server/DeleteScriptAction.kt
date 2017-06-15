@@ -16,6 +16,7 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server
 
+import jetbrains.buildServer.controllers.ActionMessages
 import jetbrains.buildServer.serverSide.ProjectManager
 import jetbrains.buildServer.web.openapi.ControllerAction
 import org.jdom.Element
@@ -42,7 +43,9 @@ class DeleteScriptAction(controller: InitScriptsActionsController,
             val projectId = request.getParameter("projectId")
             val project = projectManager.findProjectById(projectId)
             if (project != null) {
-                scriptsManager.deleteScript(project, name)
+                val deleted = scriptsManager.deleteScript(project, name)
+                val message = "Gradle init script ${name} ${if (deleted) "was deleted" else "cannot be deleted"}"
+                ActionMessages.getOrCreateMessages(request).addMessage("initScriptsMessage", message)
             }
         }
     }

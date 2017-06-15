@@ -24,6 +24,7 @@ import org.junit.Test
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import javax.servlet.http.HttpSession
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.CoreMatchers.is
@@ -76,7 +77,9 @@ class DeleteScriptActionTest {
 
         HttpServletRequest request = mock(HttpServletRequest)
         HttpServletResponse response = mock(HttpServletResponse)
+        HttpSession session = mock(HttpSession)
 
+        when(request.getSession()).thenReturn(session)
         when(request.getParameter(eq('name'))).thenReturn('init.gradle')
         when(request.getParameter(eq('projectId'))).thenReturn('project1')
         SProject project = mock(SProject)

@@ -26,6 +26,8 @@
     <h2 class="noBorder">Gradle Init Scripts</h2>
     <bs:smallNote>In this section you can manage the Gradle initialization scripts to reuse them within the project</bs:smallNote>
 
+    <bs:messages key="initScriptsMessage"/>
+
     <c:choose>
         <%--@elvariable id="fileName" type="java.lang.String"--%>
         <%--@elvariable id="fileContent" type="java.lang.String"--%>

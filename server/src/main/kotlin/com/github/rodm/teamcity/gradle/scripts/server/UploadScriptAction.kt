@@ -17,6 +17,7 @@
 package com.github.rodm.teamcity.gradle.scripts.server
 
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.PLUGIN_NAME
+import jetbrains.buildServer.controllers.ActionMessages
 import jetbrains.buildServer.controllers.MultipartFormController
 import jetbrains.buildServer.serverSide.ProjectManager
 import jetbrains.buildServer.util.FileUtil
@@ -61,7 +62,10 @@ class UploadScriptAction(val projectManager: ProjectManager,
 
             val pluginDataDirectory = FileUtil.createDir(project.getPluginDataDirectory(PLUGIN_NAME))
             val destinationFile = File(pluginDataDirectory, fileName)
+            val exists = destinationFile.exists()
+            val message = "Gradle init script ${fileName} was ${if (exists) "updated" else "uploaded"}"
             file.transferTo(destinationFile)
+            ActionMessages.getOrCreateMessages(request).addMessage("initScriptsMessage", message)
         }
         catch (e: IOException) {
              model.put("error", e.message)
