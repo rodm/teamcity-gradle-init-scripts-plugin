@@ -125,7 +125,7 @@
                 <c:set var="project" value="${projects.key}"/>
                 <c:if test="${project ne currentProject}">
                     <p style="margin-top: 2em">Scripts inherited from
-                        <admin:editProjectLink projectId="${project.externalId}">
+                        <admin:editProjectLink projectId="${project.externalId}" addToUrl="&tab=gradleInitScripts">
                             <c:out value="${project.fullName}"/>
                         </admin:editProjectLink>
                     </p>
