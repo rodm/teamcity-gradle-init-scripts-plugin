@@ -64,6 +64,11 @@ teamcity {
             serverOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
             agentOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006")
         }
+
+        "teamcity2017" {
+            version = "2017.1.2"
+            javaHome = file(extra["java8Home"])
+        }
     }
 }
 
