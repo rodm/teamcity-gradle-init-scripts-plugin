@@ -18,8 +18,8 @@ teamcity {
 }
 
 bintray {
-    user = findProperty("bintray.user") as String
-    key = findProperty("bintray.key") as String
+    user = findProperty("bintray.user") as String?
+    key = findProperty("bintray.key") as String?
 
     filesSpec(closureOf<RecordingCopyTask> {
         from ("${project(":server").buildDir}/distributions")
