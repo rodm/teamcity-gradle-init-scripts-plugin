@@ -11,6 +11,7 @@ servers/
 
 # IDEA
 .idea/
+out/
 *.ipr
 *.iml
 *.iws
