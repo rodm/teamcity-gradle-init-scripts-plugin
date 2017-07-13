@@ -41,7 +41,7 @@ click on the link _Upload plugin zip_ to install the downloaded plugin file.
 
 ## Compatibility
 
-The plugin is compatibile with TeamCity 10.0 and later.
+The plugin is compatible with TeamCity 10.0 and later.
 
 ## License
 
