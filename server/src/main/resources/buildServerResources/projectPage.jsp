@@ -50,6 +50,9 @@
         </c:when>
 
         <c:otherwise>
+            <c:if test="${not empty inspections}">
+                <%@include file="health/report.jspf"%>
+            </c:if>
             <div class="upload">
                 <forms:addButton
                         onclick="return BS.GradleAddInitScripts.show();">Upload init script file</forms:addButton>

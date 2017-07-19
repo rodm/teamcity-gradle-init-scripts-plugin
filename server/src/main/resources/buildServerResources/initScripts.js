@@ -41,5 +41,17 @@ BS.GradleInitScripts = {
                 }
             });
         }
+    },
+
+    errorDetailsVisible: false,
+
+    toggleErrorDisplay: function() {
+        if (this.errorDetailsVisible) {
+            $j("#errorDetailsToggle").html("Show details...");
+        } else {
+            $j("#errorDetailsToggle").html("Hide");
+        }
+        this.errorDetailsVisible = !this.errorDetailsVisible;
+        BS.Util.toggleVisible("errorDetails")
     }
 };

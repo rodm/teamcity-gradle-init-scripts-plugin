@@ -1,0 +1,75 @@
+<%--
+  * Copyright 2017 Rod MacKenzie.
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  *     http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  --%>
+
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="admin" tagdir="/WEB-INF/tags/admin" %>
+<%@ taglib prefix="bs" tagdir="/WEB-INF/tags" %>
+<%@ include file="/include-internal.jsp" %>
+
+<%--@elvariable id="inspections" type="java.util.List<com.github.rodm.teamcity.gradle.scripts.server.health.ProjectReport>"--%>
+<div class="icon_before icon16 attentionRed" style="width: 100%">
+    Found <strong>${fn:length(inspections)}</strong> project<bs:s val="${fn:length(inspections)}"/> containing  errors. <a id="errorDetailsToggle" href="#" onclick="BS.GradleInitScripts.toggleErrorDisplay()">Show details...</a>
+    <div id="errorDetails" style="display: none">
+        <ul>
+            <c:forEach var="res" items="${inspections}">
+                <c:set var="p" value="${res.project}"/>
+                <li><bs:out value="${p.fullName}"/>
+                    <ul>
+                        <c:forEach var="bts" items="${res.buildTypes}">
+                            <li>
+                                <c:set var="target" value="${bts.key}"/>
+                                <c:set var="scriptName" value="${bts.value}"/>
+                                <div>
+                                    <%--@elvariable id="buildConfigSteps" type="java.util.ArrayList<jetbrains.buildServer.controllers.admin.projects.ConfigurationStep>"--%>
+                                    <%--@elvariable id="pageUrl" type="java.lang.String"--%>
+                                    <%--@elvariable id="target" type="jetbrains.buildServer.serverSide.SBuildType"--%>
+                                    <admin:editBuildTypeNavSteps settings="${target}"/>
+                                    <admin:editBuildTypeLink buildTypeId="${target.externalId}"
+                                                             step="${buildConfigSteps[5].stepId}"
+                                                             cameFromUrl="${pageUrl}">
+                                        <bs:out value="${target.fullName}"/>
+                                    </admin:editBuildTypeLink>
+                                    &nbsp;references Gradle init script <strong><bs:out value="${scriptName}"/></strong> that is missing
+                                </div>
+                            </li>
+                        </c:forEach>
+                        <c:forEach var="bts" items="${res.buildTemplates}">
+                            <c:set var="target" value="${bts.key}"/>
+                            <c:set var="scriptName" value="${bts.value}"/>
+                            <li>
+                                <div>
+                                    <%--@elvariable id="buildConfigSteps" type="java.util.ArrayList<jetbrains.buildServer.controllers.admin.projects.ConfigurationStep>"--%>
+                                    <%--@elvariable id="pageUrl" type="java.lang.String"--%>
+                                    <%--@elvariable id="target" type="jetbrains.buildServer.serverSide.BuildTypeTemplate"--%>
+                                    <admin:editBuildTypeNavSteps settings="${target}"/>
+                                    <admin:editTemplateLink templateId="${target.externalId}"
+                                                            step="${buildConfigSteps[5].stepId}"
+                                                            cameFromUrl="${pageUrl}">
+                                        <bs:out value="${target.fullName}"/>
+                                    </admin:editTemplateLink>
+                                    &nbsp;references Gradle init script <strong><bs:out value="${scriptName}"/></strong> that is missing
+                                </div>
+                            </li>
+                        </c:forEach>
+                    </ul>
+                </li>
+            </c:forEach>
+        </ul>
+    </div>
+</div>
+

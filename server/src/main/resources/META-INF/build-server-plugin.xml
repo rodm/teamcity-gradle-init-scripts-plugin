@@ -14,6 +14,7 @@
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.GradleInitScriptsPage"/>
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.DefaultGradleScriptsManager"/>
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.InitScriptsUsageAnalyzer"/>
+    <bean class="com.github.rodm.teamcity.gradle.scripts.server.health.ProjectInspector"/>
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.health.MissingInitScriptsHealthReport"/>
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.health.UnusedInitScriptsHealthReport"/>
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.health.InvalidInitScriptsHealthReport"/>

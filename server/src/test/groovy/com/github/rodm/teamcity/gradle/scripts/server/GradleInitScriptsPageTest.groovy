@@ -16,6 +16,7 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server
 
+import com.github.rodm.teamcity.gradle.scripts.server.health.ProjectInspector
 import jetbrains.buildServer.controllers.admin.projects.EditProjectTab
 import jetbrains.buildServer.serverSide.BuildTypeTemplate
 import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor
@@ -66,7 +67,8 @@ class GradleInitScriptsPageTest {
         when(descriptor.getPluginResourcesPath(eq('initScripts.js'))).thenReturn('pluginResourcesPath/initScripts.js')
 
         InitScriptsUsageAnalyzer analyzer = new InitScriptsUsageAnalyzer(scriptsManager)
-        page = new GradleInitScriptsPage(places, descriptor, scriptsManager, analyzer)
+        ProjectInspector inspector = new ProjectInspector(scriptsManager)
+        page = new GradleInitScriptsPage(places, descriptor, scriptsManager, analyzer, inspector)
     }
 
     @Test
