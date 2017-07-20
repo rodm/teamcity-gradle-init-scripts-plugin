@@ -25,4 +25,8 @@ object GradleInitScriptsPlugin {
     const val INIT_SCRIPT_NAME = "initScriptName"
 
     const val INIT_SCRIPT_CONTENT = "initScriptContent"
+
+    const val INIT_SCRIPT_NAME_PARAMETER = "gradle.init.script.name"
+
+    const val INIT_SCRIPT_CONTENT_PARAMETER = "gradle.init.script.content"
 }
