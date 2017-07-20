@@ -44,7 +44,6 @@ class InitScriptsAdminController(server: SBuildServer,
     override fun doHandle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView? {
         val model = ModelAndView(pluginDescriptor.getPluginResourcesPath("initScriptChooser.jsp"))
         model.addObject("scripts", getScriptNames(request))
-        model.addObject("selectedScript", request.getParameter("selectedScript"))
         model.addObject("chooserName", INIT_SCRIPT_NAME)
         model.addObject("chooserId", "gradleInitScript")
         return model
