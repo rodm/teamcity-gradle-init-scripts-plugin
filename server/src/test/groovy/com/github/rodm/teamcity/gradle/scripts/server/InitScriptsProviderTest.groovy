@@ -37,6 +37,8 @@ import static org.mockito.Mockito.when
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_CONTENT
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
+import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_CONTENT_PARAMETER
+import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
 
 class InitScriptsProviderTest {
 
@@ -55,6 +57,27 @@ class InitScriptsProviderTest {
                 return isGradleRunner
             }
         }
+    }
+
+    @Test
+    void 'settings extension parameters are added to the runner context'() {
+        SRunnerContext runnerContext = mock(SRunnerContext)
+        when(runnerContext.getParameters()).thenReturn(['gradle.init.script.name': 'init.gradle'])
+        Collection<SRunnerContext> runnerContexts = [runnerContext]
+        SProject project = mock(SProject)
+        SBuildType buildType = mock(SBuildType)
+        when(buildType.getProject()).thenReturn(project)
+        SRunningBuild runningBuild = mock(SRunningBuild)
+        when(runningBuild.getBuildType()).thenReturn(buildType)
+        BuildStartContext context = mock(BuildStartContext)
+        when(context.getRunnerContexts()).thenReturn(runnerContexts)
+        when(context.getBuild()).thenReturn(runningBuild)
+        when(scriptsManager.findScript(eq(project), eq('init.gradle'))).thenReturn('script content')
+
+        provider.updateParameters(context)
+
+        verify(runnerContext).addRunnerParameter(eq(INIT_SCRIPT_NAME_PARAMETER), eq('init.gradle'))
+        verify(runnerContext).addRunnerParameter(eq(INIT_SCRIPT_CONTENT_PARAMETER), eq('script content'))
     }
 
     @Test

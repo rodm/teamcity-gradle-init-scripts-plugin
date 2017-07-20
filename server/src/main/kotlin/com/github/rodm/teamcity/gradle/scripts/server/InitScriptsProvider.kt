@@ -18,7 +18,9 @@ package com.github.rodm.teamcity.gradle.scripts.server
 
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_CONTENT
+import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_CONTENT_PARAMETER
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
+import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
 import jetbrains.buildServer.log.Loggers.SERVER_CATEGORY
 import jetbrains.buildServer.serverSide.BuildStartContext
 import jetbrains.buildServer.serverSide.BuildStartContextProcessor
@@ -34,10 +36,22 @@ open class InitScriptsProvider(private val scriptsManager: GradleScriptsManager)
             if (isGradleRunner(runnerContext)) {
                 val buildType = context.build.buildType
                 if (buildType != null) {
+                    val project = buildType.project
+
+                    var scriptName = runnerContext.parameters[INIT_SCRIPT_NAME_PARAMETER]
+                    if (scriptName != null) {
+                        val scriptContent = scriptsManager.findScript(project, scriptName)
+                        if (scriptContent != null) {
+                            runnerContext.addRunnerParameter(INIT_SCRIPT_NAME_PARAMETER, scriptName)
+                            runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT_PARAMETER, scriptContent)
+                        } else {
+                            LOG.error("Init script '$scriptName' not found")
+                        }
+                    }
+
                     val features = buildType.getBuildFeaturesOfType(FEATURE_TYPE)
                     for (feature in features) {
-                        val project = buildType.project
-                        val scriptName = feature.parameters[INIT_SCRIPT_NAME]
+                        scriptName = feature.parameters[INIT_SCRIPT_NAME]
                         val scriptContent = scriptsManager.findScript(project, scriptName!!)
                         runnerContext.addRunnerParameter(INIT_SCRIPT_NAME, scriptName)
                         if (scriptContent != null) {
