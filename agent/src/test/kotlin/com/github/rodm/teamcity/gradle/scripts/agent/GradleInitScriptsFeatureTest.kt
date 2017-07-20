@@ -18,6 +18,8 @@ package com.github.rodm.teamcity.gradle.scripts.agent
 
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_CONTENT
+import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_CONTENT_PARAMETER
+import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
 import jetbrains.buildServer.agent.AgentLifeCycleListener
 import jetbrains.buildServer.agent.BuildFinishedStatus
 import jetbrains.buildServer.agent.BuildRunnerContext
@@ -39,7 +41,9 @@ import java.io.File
 
 class GradleInitScriptsFeatureTest : Spek({
 
-    val RUNNER_PARAMETERS = hashMapOf(INIT_SCRIPT_NAME to "init.gradle", INIT_SCRIPT_CONTENT to "content")
+    val FEATURE_PARAMETERS = hashMapOf(INIT_SCRIPT_NAME to "init.gradle", INIT_SCRIPT_CONTENT to "content")
+
+    val SETTINGS_PARAMETERS = hashMapOf(INIT_SCRIPT_NAME_PARAMETER to "init.gradle", INIT_SCRIPT_CONTENT_PARAMETER to "content")
 
     describe("a Gradle Init Script feature") {
         var hasGradleInitScriptFeature = true
@@ -62,7 +66,7 @@ class GradleInitScriptsFeatureTest : Spek({
 
         on("being enabled for a build") {
             val runner = mock(BuildRunnerContext::class.java)
-            `when`(runner.runnerParameters).thenReturn(RUNNER_PARAMETERS)
+            `when`(runner.runnerParameters).thenReturn(FEATURE_PARAMETERS)
 
             feature.beforeRunnerStart(runner)
 
@@ -96,12 +100,44 @@ class GradleInitScriptsFeatureTest : Spek({
         on("being disabled for a build") {
             hasGradleInitScriptFeature = false
             val runner = mock(BuildRunnerContext::class.java)
-            `when`(runner.runnerParameters).thenReturn(RUNNER_PARAMETERS)
+            `when`(runner.runnerParameters).thenReturn(FEATURE_PARAMETERS)
 
             feature.beforeRunnerStart(runner)
 
             it("does not add an additional --init-script arg") {
                 verify(runner, never()).addRunnerParameter(anyString(), anyString())
+            }
+        }
+
+        on("being enabled by build runner settings") {
+            val runner = mock(BuildRunnerContext::class.java)
+            `when`(runner.runnerParameters).thenReturn(SETTINGS_PARAMETERS)
+
+            feature.beforeRunnerStart(runner)
+
+            it("adds an additional --init-script to the args passed to Gradle") {
+                verify(runner).addRunnerParameter(eq("ui.gradleRunner.additional.gradle.cmd.params"), matches("--init-script .* "))
+            }
+
+            it("writes an init script to the temporary build directory") {
+                val files = tempDir.root.list().toList()
+                assertThat(files, hasItem(startsWith("init_")))
+                assertThat(files, hasItem(endsWith(".gradle")))
+            }
+
+            it("writes the init script content to a file") {
+                val files = tempDir.root.listFiles()
+                assertThat(files[0].readText(), equalTo("content"))
+            }
+
+            it("removes the init script file after the build finishes") {
+                val filesBeforeBuild = tempDir.root.list().toList()
+
+                feature.runnerFinished(runner, BuildFinishedStatus.FINISHED_SUCCESS)
+
+                val filesAfterBuild = tempDir.root.list().toList()
+                assertThat(filesBeforeBuild, hasSize(1))
+                assertThat(filesAfterBuild, hasSize(0))
             }
         }
     }

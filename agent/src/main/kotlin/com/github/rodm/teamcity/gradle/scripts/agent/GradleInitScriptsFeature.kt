@@ -18,7 +18,9 @@ package com.github.rodm.teamcity.gradle.scripts.agent
 
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_CONTENT
+import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_CONTENT_PARAMETER
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
+import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
 import jetbrains.buildServer.agent.*
 import jetbrains.buildServer.log.Loggers.AGENT_CATEGORY
 import jetbrains.buildServer.util.EventDispatcher
@@ -26,6 +28,7 @@ import jetbrains.buildServer.util.FileUtil
 import org.apache.log4j.Logger
 import java.io.File
 import java.io.IOException
+import java.lang.RuntimeException
 
 open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCycleListener>) : AgentLifeCycleAdapter() {
 
@@ -33,13 +36,35 @@ open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCy
 
     private val GRADLE_CMD_PARAMS = "ui.gradleRunner.additional.gradle.cmd.params"
 
-    private var initScriptFile: File? = null
+    private var settingsInitScriptFile: File? = null
+
+    private var featureInitScriptFile: File? = null
 
     init {
         eventDispatcher.addListener(this)
     }
 
     override fun beforeRunnerStart(runner: BuildRunnerContext) {
+        val runnerParameters = runner.runnerParameters
+        val initScriptName = runnerParameters.get(INIT_SCRIPT_NAME_PARAMETER)
+        val initScriptContent = runnerParameters.get(INIT_SCRIPT_CONTENT_PARAMETER)
+        if (initScriptName != null) {
+            if (initScriptContent == null) {
+                throw RuntimeException("Runner is configured to use init script '$initScriptName', but no content was found. Please check runner settings.")
+            }
+
+            try {
+                settingsInitScriptFile = FileUtil.createTempFile(getBuildTempDirectory(runner), "init_", ".gradle", true)
+                FileUtil.writeFile(settingsInitScriptFile!!, initScriptContent, "UTF-8")
+
+                val params = runnerParameters.getOrDefault(GRADLE_CMD_PARAMS, "")
+                val initScriptParams = "--init-script " + settingsInitScriptFile!!.absolutePath
+                runner.addRunnerParameter(GRADLE_CMD_PARAMS, initScriptParams + " " + params)
+            } catch (e: IOException) {
+                LOG.info("Failed to write init script: " + e.message)
+            }
+        }
+
         if (hasGradleInitScriptFeature(runner)) {
             val runnerParameters = runner.runnerParameters
             val initScriptName = runnerParameters.get(INIT_SCRIPT_NAME)
@@ -50,11 +75,11 @@ open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCy
             }
 
             try {
-                initScriptFile = FileUtil.createTempFile(getBuildTempDirectory(runner), "init_", ".gradle", true)
-                FileUtil.writeFile(initScriptFile!!, initScriptContent, "UTF-8")
+                featureInitScriptFile = FileUtil.createTempFile(getBuildTempDirectory(runner), "init_", ".gradle", true)
+                FileUtil.writeFile(featureInitScriptFile!!, initScriptContent, "UTF-8")
 
                 val params = runnerParameters.getOrDefault(GRADLE_CMD_PARAMS, "")
-                val initScriptParams = "--init-script " + initScriptFile!!.absolutePath
+                val initScriptParams = "--init-script " + featureInitScriptFile!!.absolutePath
                 runner.addRunnerParameter(GRADLE_CMD_PARAMS, initScriptParams + " " + params)
             } catch (e: IOException) {
                 LOG.info("Failed to write init script: " + e.message)
@@ -63,9 +88,13 @@ open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCy
     }
 
     override fun runnerFinished(runner: BuildRunnerContext, status: BuildFinishedStatus) {
-        if (initScriptFile != null) {
-            FileUtil.delete(initScriptFile!!)
-            initScriptFile = null
+        if (settingsInitScriptFile != null) {
+            FileUtil.delete(settingsInitScriptFile!!)
+            settingsInitScriptFile = null
+        }
+        if (featureInitScriptFile != null) {
+            FileUtil.delete(featureInitScriptFile!!)
+            featureInitScriptFile = null
         }
     }
 
