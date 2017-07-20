@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.github.rodm"
-version = "0.6"
+version = "0.7-SNAPSHOT"
 
 teamcity {
     version = "10.0"
