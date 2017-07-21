@@ -20,8 +20,8 @@ import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.buildType.EditBuildRunnerSettingsExtension
 
-class InitScriptSettingsExtension(pagePlaces: PagePlaces,
-                                  descriptor: PluginDescriptor)
+class InitScriptsSettingsExtension(pagePlaces: PagePlaces,
+                                   descriptor: PluginDescriptor)
 {
     private val supportedRunTypes = listOf("gradle-runner")
 
