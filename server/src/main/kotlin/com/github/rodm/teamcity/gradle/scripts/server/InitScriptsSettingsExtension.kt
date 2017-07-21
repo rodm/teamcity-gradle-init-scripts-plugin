@@ -16,11 +16,14 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server
 
+import jetbrains.buildServer.serverSide.ProjectManager
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.buildType.EditBuildRunnerSettingsExtension
+import jetbrains.buildServer.web.openapi.buildType.ViewBuildRunnerSettingsExtension
 
-class InitScriptsSettingsExtension(pagePlaces: PagePlaces,
+class InitScriptsSettingsExtension(projectManager: ProjectManager,
+                                   pagePlaces: PagePlaces,
                                    descriptor: PluginDescriptor)
 {
     private val supportedRunTypes = listOf("gradle-runner")
@@ -31,5 +34,10 @@ class InitScriptsSettingsExtension(pagePlaces: PagePlaces,
         editRunnerExtension.includeUrl = descriptor.getPluginResourcesPath("/editRunner.jsp")
         editRunnerExtension.addCssFile("/css/admin/buildTypeForm.css")
         editRunnerExtension.register()
+
+        val viewRunnerExtension = ViewBuildRunnerSettingsExtension(projectManager, pagePlaces, supportedRunTypes)
+        viewRunnerExtension.pluginName = descriptor.pluginName
+        viewRunnerExtension.includeUrl = descriptor.getPluginResourcesPath("/viewRunner.jsp")
+        viewRunnerExtension.register()
     }
 }
