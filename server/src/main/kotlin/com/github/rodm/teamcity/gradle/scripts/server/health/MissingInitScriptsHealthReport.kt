@@ -32,6 +32,10 @@ import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtens
 import java.util.Collections
 import java.util.HashMap
 
+enum class StatusType {
+    BUILD_RUNNER, BUILD_FEATURE
+}
+
 class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsManager,
                                      pagePlaces: PagePlaces,
                                      descriptor: PluginDescriptor) : HealthStatusReport()
@@ -69,6 +73,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
                         val data = HashMap<String, Any?>()
                         data.put("buildType", buildType)
                         data.put("scriptName", scriptName)
+                        data.put("statusType", StatusType.BUILD_RUNNER)
                         val identity = CATEGORY.id + "_runner_" + buildType.buildTypeId
                         val statusItem = HealthStatusItem(identity, CATEGORY, data)
                         resultConsumer.consumeForBuildType(buildType, statusItem)
@@ -83,6 +88,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
                     val data = HashMap<String, Any?>()
                     data.put("buildType", buildType)
                     data.put("scriptName", scriptName)
+                    data.put("statusType", StatusType.BUILD_FEATURE)
                     val identity = CATEGORY.id + "_feature_" + buildType.buildTypeId
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForBuildType(buildType, statusItem)
@@ -99,6 +105,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
                         val data = HashMap<String, Any?>()
                         data.put("buildTemplate", buildTemplate)
                         data.put("scriptName", scriptName)
+                        data.put("statusType", StatusType.BUILD_RUNNER)
                         val identity = CATEGORY.id + "_runner_" + buildTemplate.templateId
                         val statusItem = HealthStatusItem(identity, CATEGORY, data)
                         resultConsumer.consumeForTemplate(buildTemplate, statusItem)
@@ -113,6 +120,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
                     val data = HashMap<String, Any?>()
                     data.put("buildTemplate", buildTemplate)
                     data.put("scriptName", scriptName)
+                    data.put("statusType", StatusType.BUILD_FEATURE)
                     val identity = CATEGORY.id + "_feature_" + buildTemplate.templateId
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForTemplate(buildTemplate, statusItem)

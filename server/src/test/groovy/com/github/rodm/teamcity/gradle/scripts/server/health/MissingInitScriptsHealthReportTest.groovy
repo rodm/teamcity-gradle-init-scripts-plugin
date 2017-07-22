@@ -113,6 +113,8 @@ class MissingInitScriptsHealthReportTest {
         assertThat(item.getAdditionalData().get('buildType'), is(buildType))
         assertThat(item.getAdditionalData(), hasKey('scriptName'))
         assertThat(item.getAdditionalData().get('scriptName'), equalTo('init.gradle'))
+        assertThat(item.getAdditionalData(), hasKey('statusType'))
+        assertThat(item.getAdditionalData().get('statusType'), equalTo(StatusType.BUILD_FEATURE))
     }
 
     @Test
@@ -158,6 +160,8 @@ class MissingInitScriptsHealthReportTest {
         assertThat(item.getAdditionalData().get('buildTemplate'), is(buildTemplate))
         assertThat(item.getAdditionalData(), hasKey('scriptName'))
         assertThat(item.getAdditionalData().get('scriptName'), equalTo('init.gradle'))
+        assertThat(item.getAdditionalData(), hasKey('statusType'))
+        assertThat(item.getAdditionalData().get('statusType'), equalTo(StatusType.BUILD_FEATURE))
     }
 
     @Test
@@ -203,6 +207,8 @@ class MissingInitScriptsHealthReportTest {
         assertThat(item.getAdditionalData().get('buildType'), is(buildType))
         assertThat(item.getAdditionalData(), hasKey('scriptName'))
         assertThat(item.getAdditionalData().get('scriptName'), equalTo('init.gradle'))
+        assertThat(item.getAdditionalData(), hasKey('statusType'))
+        assertThat(item.getAdditionalData().get('statusType'), equalTo(StatusType.BUILD_RUNNER))
     }
 
     @Test
@@ -248,6 +254,8 @@ class MissingInitScriptsHealthReportTest {
         assertThat(item.getAdditionalData().get('buildTemplate'), is(buildTemplate))
         assertThat(item.getAdditionalData(), hasKey('scriptName'))
         assertThat(item.getAdditionalData().get('scriptName'), equalTo('init.gradle'))
+        assertThat(item.getAdditionalData(), hasKey('statusType'))
+        assertThat(item.getAdditionalData().get('statusType'), equalTo(StatusType.BUILD_RUNNER))
     }
 
     @Test

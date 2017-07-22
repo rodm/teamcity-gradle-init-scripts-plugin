@@ -32,7 +32,17 @@
 <c:set var="buildTemplate" value="${healthStatusItem.additionalData['buildTemplate']}"/>
 <%--@elvariable id="scriptName" type="java.lang.String>"--%>
 <c:set var="scriptName" value="${healthStatusItem.additionalData['scriptName']}"/>
+<%--@elvariable id="scriptName" type="java.lang.String>"--%>
+<c:set var="statusType" value="${healthStatusItem.additionalData['statusType']}"/>
 
+<c:choose>
+    <c:when test="${statusType eq 'BUILD_RUNNER'}">
+        <c:set var="stepIndex" value="2"/>
+    </c:when>
+    <c:otherwise>
+        <c:set var="stepIndex" value="5"/>
+    </c:otherwise>
+</c:choose>
 <c:choose>
     <c:when test="${not empty buildType}">
         <c:set var="target" value="${buildType}"/>
@@ -42,7 +52,7 @@
             <%--@elvariable id="target" type="jetbrains.buildServer.serverSide.SBuildType"--%>
             <admin:editBuildTypeNavSteps settings="${target}"/>
             <admin:editBuildTypeLink buildTypeId="${target.externalId}"
-                                     step="${buildConfigSteps[5].stepId}"
+                                     step="${buildConfigSteps[stepIndex].stepId}"
                                      cameFromUrl="${pageUrl}">
                 <bs:out value="${target.fullName}"/>
             </admin:editBuildTypeLink>
@@ -57,7 +67,7 @@
             <%--@elvariable id="target" type="jetbrains.buildServer.serverSide.BuildTypeTemplate"--%>
             <admin:editBuildTypeNavSteps settings="${target}"/>
             <admin:editTemplateLink templateId="${target.externalId}"
-                                    step="${buildConfigSteps[5].stepId}"
+                                    step="${buildConfigSteps[stepIndex].stepId}"
                                     cameFromUrl="${pageUrl}">
                 <bs:out value="${target.fullName}"/>
             </admin:editTemplateLink>
