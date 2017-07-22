@@ -18,6 +18,7 @@ package com.github.rodm.teamcity.gradle.scripts.server.health
 
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
+import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
 import com.github.rodm.teamcity.gradle.scripts.server.GradleScriptsManager
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusItem
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusItemConsumer
@@ -59,6 +60,21 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
 
     override fun report(scope: HealthStatusScope, resultConsumer: HealthStatusItemConsumer) {
         for (buildType in scope.buildTypes) {
+            for (runner in buildType.buildRunners) {
+                val parameters = runner.parameters
+                val scriptName = parameters[INIT_SCRIPT_NAME_PARAMETER]
+                if (scriptName != null) {
+                    val scriptContents = scriptsManager.findScript(buildType.project, scriptName)
+                    if (scriptContents == null) {
+                        val data = HashMap<String, Any?>()
+                        data.put("buildType", buildType)
+                        data.put("scriptName", scriptName)
+                        val identity = CATEGORY.id + "_" + buildType.buildTypeId
+                        val statusItem = HealthStatusItem(identity, CATEGORY, data)
+                        resultConsumer.consumeForBuildType(buildType, statusItem)
+                    }
+                }
+            }
             for (feature in buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
                 val parameters = feature.parameters
                 val scriptName = parameters[INIT_SCRIPT_NAME]
@@ -74,6 +90,21 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
             }
         }
         for (buildTemplate in scope.buildTypeTemplates) {
+            for (runner in buildTemplate.buildRunners) {
+                val parameters = runner.parameters
+                val scriptName = parameters[INIT_SCRIPT_NAME_PARAMETER]
+                if (scriptName != null) {
+                    val scriptContents = scriptsManager.findScript(buildTemplate.project, scriptName)
+                    if (scriptContents == null) {
+                        val data = HashMap<String, Any?>()
+                        data.put("buildTemplate", buildTemplate)
+                        data.put("scriptName", scriptName)
+                        val identity = CATEGORY.id + "_" + buildTemplate.templateId
+                        val statusItem = HealthStatusItem(identity, CATEGORY, data)
+                        resultConsumer.consumeForTemplate(buildTemplate, statusItem)
+                    }
+                }
+            }
             for (feature in buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
                 val parameters = feature.parameters
                 val scriptName = parameters[INIT_SCRIPT_NAME]

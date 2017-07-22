@@ -19,6 +19,7 @@ package com.github.rodm.teamcity.gradle.scripts.server.health
 import com.github.rodm.teamcity.gradle.scripts.server.GradleScriptsManager
 import jetbrains.buildServer.serverSide.BuildTypeTemplate
 import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor
+import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor
 import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusItem
@@ -38,6 +39,7 @@ import org.mockito.ArgumentMatchers
 
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
+import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
 import static jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.WARN
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
@@ -165,6 +167,96 @@ class MissingInitScriptsHealthReportTest {
         BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
         when(buildTemplate.getFullName()).thenReturn('BuildType')
         when(buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)).thenReturn([feature])
+        HealthStatusScope scope = mock(HealthStatusScope)
+        when(scope.getBuildTypeTemplates()).thenReturn([buildTemplate])
+        SProject project = mock(SProject)
+        when(buildTemplate.getProject()).thenReturn(project)
+        when(scriptsManager.findScript(eq(project), eq('init.gradle'))).thenReturn('script content')
+
+        HealthStatusItemConsumer resultConsumer = mock(HealthStatusItemConsumer)
+        report.report(scope, resultConsumer)
+
+        verify(resultConsumer, never()).consumeForTemplate(any(BuildTypeTemplate), any(HealthStatusItem))
+    }
+
+    @Test
+    void 'build type runner with an invalid script is reported'() {
+        SBuildRunnerDescriptor runner = mock(SBuildRunnerDescriptor)
+        when(runner.getParameters()).thenReturn([(INIT_SCRIPT_NAME_PARAMETER): 'init.gradle'])
+        SBuildType buildType = mock(SBuildType)
+        when(buildType.getProject()).thenReturn(mock(SProject))
+        when(buildType.getBuildTypeId()).thenReturn('BuildTypeId')
+        when(buildType.getBuildRunners()).thenReturn([runner])
+        HealthStatusScope scope = mock(HealthStatusScope)
+        when(scope.getBuildTypes()).thenReturn([buildType])
+
+        HealthStatusItemConsumer resultConsumer = mock(HealthStatusItemConsumer)
+        report.report(scope, resultConsumer)
+
+        ArgumentCaptor<HealthStatusItem> itemCaptor = ArgumentCaptor.forClass(HealthStatusItem)
+        verify(resultConsumer).consumeForBuildType(eq(buildType), itemCaptor.capture())
+
+        HealthStatusItem item = itemCaptor.value
+        assertThat(item.getIdentity(), equalTo('missing_init_scripts_BuildTypeId'))
+        assertThat(item.getSeverity(), equalTo(WARN))
+        assertThat(item.getAdditionalData(), hasKey('buildType'))
+        assertThat(item.getAdditionalData().get('buildType'), is(buildType))
+        assertThat(item.getAdditionalData(), hasKey('scriptName'))
+        assertThat(item.getAdditionalData().get('scriptName'), equalTo('init.gradle'))
+    }
+
+    @Test
+    void 'build type runner with a valid script is not reported'() {
+        SBuildRunnerDescriptor runner = mock(SBuildRunnerDescriptor)
+        when(runner.getParameters()).thenReturn([(INIT_SCRIPT_NAME_PARAMETER): 'init.gradle'])
+        SBuildType buildType = mock(SBuildType)
+        when(buildType.getFullName()).thenReturn('BuildType')
+        when(buildType.getBuildRunners()).thenReturn([runner])
+        HealthStatusScope scope = mock(HealthStatusScope)
+        when(scope.getBuildTypes()).thenReturn([buildType])
+        SProject project = mock(SProject)
+        when(buildType.getProject()).thenReturn(project)
+        when(scriptsManager.findScript(eq(project), eq('init.gradle'))).thenReturn('script content')
+
+        HealthStatusItemConsumer resultConsumer = mock(HealthStatusItemConsumer)
+        report.report(scope, resultConsumer)
+
+        verify(resultConsumer, never()).consumeForBuildType(any(SBuildType), any(HealthStatusItem))
+    }
+
+    @Test
+    void 'build template runner with an invalid script is reported'() {
+        SBuildRunnerDescriptor runner = mock(SBuildRunnerDescriptor)
+        when(runner.getParameters()).thenReturn([(INIT_SCRIPT_NAME_PARAMETER): 'init.gradle'])
+        BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
+        when(buildTemplate.getProject()).thenReturn(mock(SProject))
+        when(buildTemplate.getTemplateId()).thenReturn('BuildTemplateId')
+        when(buildTemplate.getBuildRunners()).thenReturn([runner])
+        HealthStatusScope scope = mock(HealthStatusScope)
+        when(scope.getBuildTypeTemplates()).thenReturn([buildTemplate])
+
+        HealthStatusItemConsumer resultConsumer = mock(HealthStatusItemConsumer)
+        report.report(scope, resultConsumer)
+
+        ArgumentCaptor<HealthStatusItem> itemCaptor = ArgumentCaptor.forClass(HealthStatusItem)
+        verify(resultConsumer).consumeForTemplate(eq(buildTemplate), itemCaptor.capture())
+
+        HealthStatusItem item = itemCaptor.value
+        assertThat(item.getIdentity(), equalTo('missing_init_scripts_BuildTemplateId'))
+        assertThat(item.getSeverity(), equalTo(WARN))
+        assertThat(item.getAdditionalData(), hasKey('buildTemplate'))
+        assertThat(item.getAdditionalData().get('buildTemplate'), is(buildTemplate))
+        assertThat(item.getAdditionalData(), hasKey('scriptName'))
+        assertThat(item.getAdditionalData().get('scriptName'), equalTo('init.gradle'))
+    }
+
+    @Test
+    void 'build template runner with a valid script is not reported'() {
+        SBuildRunnerDescriptor runner = mock(SBuildRunnerDescriptor)
+        when(runner.getParameters()).thenReturn([(INIT_SCRIPT_NAME_PARAMETER): 'init.gradle'])
+        BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
+        when(buildTemplate.getFullName()).thenReturn('BuildType')
+        when(buildTemplate.getBuildRunners()).thenReturn([runner])
         HealthStatusScope scope = mock(HealthStatusScope)
         when(scope.getBuildTypeTemplates()).thenReturn([buildTemplate])
         SProject project = mock(SProject)
