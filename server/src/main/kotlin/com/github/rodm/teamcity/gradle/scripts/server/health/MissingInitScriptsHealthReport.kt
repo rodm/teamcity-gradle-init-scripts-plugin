@@ -69,7 +69,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
                         val data = HashMap<String, Any?>()
                         data.put("buildType", buildType)
                         data.put("scriptName", scriptName)
-                        val identity = CATEGORY.id + "_" + buildType.buildTypeId
+                        val identity = CATEGORY.id + "_runner_" + buildType.buildTypeId
                         val statusItem = HealthStatusItem(identity, CATEGORY, data)
                         resultConsumer.consumeForBuildType(buildType, statusItem)
                     }
@@ -83,7 +83,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
                     val data = HashMap<String, Any?>()
                     data.put("buildType", buildType)
                     data.put("scriptName", scriptName)
-                    val identity = CATEGORY.id + "_" + buildType.buildTypeId
+                    val identity = CATEGORY.id + "_feature_" + buildType.buildTypeId
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForBuildType(buildType, statusItem)
                 }
@@ -99,7 +99,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
                         val data = HashMap<String, Any?>()
                         data.put("buildTemplate", buildTemplate)
                         data.put("scriptName", scriptName)
-                        val identity = CATEGORY.id + "_" + buildTemplate.templateId
+                        val identity = CATEGORY.id + "_runner_" + buildTemplate.templateId
                         val statusItem = HealthStatusItem(identity, CATEGORY, data)
                         resultConsumer.consumeForTemplate(buildTemplate, statusItem)
                     }
@@ -113,7 +113,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
                     val data = HashMap<String, Any?>()
                     data.put("buildTemplate", buildTemplate)
                     data.put("scriptName", scriptName)
-                    val identity = CATEGORY.id + "_" + buildTemplate.templateId
+                    val identity = CATEGORY.id + "_feature_" + buildTemplate.templateId
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForTemplate(buildTemplate, statusItem)
                 }
