@@ -20,6 +20,7 @@ import com.github.rodm.teamcity.gradle.scripts.server.health.ProjectInspector
 import jetbrains.buildServer.controllers.admin.projects.EditProjectTab
 import jetbrains.buildServer.serverSide.BuildTypeTemplate
 import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor
+import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor
 import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.web.openapi.PagePlace
@@ -32,6 +33,7 @@ import org.junit.Test
 import javax.servlet.http.HttpServletRequest
 
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
+import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.hasItem
@@ -177,7 +179,7 @@ class GradleInitScriptsPageTest {
     }
 
     @Test
-    void 'usage map has a list of build types using a script'() {
+    void 'usage map has a list of build types using a script when configured as a build feature'() {
         Map<String, Object> model = [:]
         HttpServletRequest request = mock(HttpServletRequest)
         when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
@@ -199,7 +201,29 @@ class GradleInitScriptsPageTest {
     }
 
     @Test
-    void 'usage map has a list of build templates using a script'() {
+    void 'usage map has a list of build types using a script when configured on a build runner'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
+        Map<String, String> parameters = [(INIT_SCRIPT_NAME_PARAMETER): 'init1.gradle']
+        SBuildRunnerDescriptor runner = mock(SBuildRunnerDescriptor)
+        when(runner.getParameters()).thenReturn(parameters)
+        List<SBuildRunnerDescriptor> runners = [runner]
+        SBuildType buildType = mock(SBuildType)
+        when(buildType.getBuildRunners()).thenReturn(runners)
+        when(project.getOwnBuildTypes()).thenReturn([buildType])
+
+        page.fillModel(model, request)
+
+        Map<String, ScriptUsage> usage = model.get('usage') as Map
+        ScriptUsage scriptUsage = usage.get('init1.gradle')
+        assertThat(scriptUsage.buildTypes, hasSize(1))
+        assertThat(scriptUsage.buildTypes.get(0), equalTo(buildType))
+    }
+
+    @Test
+    void 'usage map has a list of build templates using a script when configured as a build feature'() {
         Map<String, Object> model = [:]
         HttpServletRequest request = mock(HttpServletRequest)
         when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
@@ -221,7 +245,29 @@ class GradleInitScriptsPageTest {
     }
 
     @Test
-    void 'usage map should not include builds referencing missing scripts'() {
+    void 'usage map has a list of build templates using a script when configured on a build runner'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
+        Map<String, String> parameters = [(INIT_SCRIPT_NAME_PARAMETER): 'init1.gradle']
+        SBuildRunnerDescriptor runner = mock(SBuildRunnerDescriptor)
+        when(runner.getParameters()).thenReturn(parameters)
+        List<SBuildRunnerDescriptor> runners = [runner]
+        BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
+        when(buildTemplate.getBuildRunners()).thenReturn(runners)
+        when(project.getOwnBuildTypeTemplates()).thenReturn([buildTemplate])
+
+        page.fillModel(model, request)
+
+        Map<String, ScriptUsage> usage = model.get('usage') as Map
+        ScriptUsage scriptUsage = usage.get('init1.gradle')
+        assertThat(scriptUsage.buildTemplates, hasSize(1))
+        assertThat(scriptUsage.buildTemplates.get(0), equalTo(buildTemplate))
+    }
+
+    @Test
+    void 'usage map should not include builds referencing missing scripts when configured as a build feature'() {
         Map<String, Object> model = [:]
         HttpServletRequest request = mock(HttpServletRequest)
         when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
@@ -241,7 +287,27 @@ class GradleInitScriptsPageTest {
     }
 
     @Test
-    void 'usage map should not include templates referencing missing scripts'() {
+    void 'usage map should not include builds referencing missing scripts when configured on a build runner'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
+        Map<String, String> parameters = ['initScriptName': 'missing.gradle']
+        SBuildRunnerDescriptor runner = mock(SBuildRunnerDescriptor)
+        when(runner.getParameters()).thenReturn(parameters)
+        List<SBuildRunnerDescriptor> runners = [runner]
+        SBuildType buildType = mock(SBuildType)
+        when(buildType.getBuildRunners()).thenReturn(runners)
+        when(project.getOwnBuildTypes()).thenReturn([buildType])
+
+        page.fillModel(model, request)
+
+        Map<String, ScriptUsage> usage = model.get('usage') as Map
+        assertThat(usage, not(hasKey('missing.gradle')))
+    }
+
+    @Test
+    void 'usage map should not include templates referencing missing scripts when configured as a build feature'() {
         Map<String, Object> model = [:]
         HttpServletRequest request = mock(HttpServletRequest)
         when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
@@ -252,6 +318,26 @@ class GradleInitScriptsPageTest {
         Collection<SBuildFeatureDescriptor> features = [feature]
         BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
         when(buildTemplate.getBuildFeaturesOfType(eq(FEATURE_TYPE))).thenReturn(features)
+        when(project.getOwnBuildTypeTemplates()).thenReturn([buildTemplate])
+
+        page.fillModel(model, request)
+
+        Map<String, ScriptUsage> usage = model.get('usage') as Map
+        assertThat(usage, not(hasKey('missing.gradle')))
+    }
+
+    @Test
+    void 'usage map should not include templates referencing missing scripts when configured on a build runner'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
+        Map<String, String> parameters = [(INIT_SCRIPT_NAME_PARAMETER): 'missing.gradle']
+        SBuildRunnerDescriptor runner = mock(SBuildRunnerDescriptor)
+        when(runner.getParameters()).thenReturn(parameters)
+        List<SBuildRunnerDescriptor> runners = [runner]
+        BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
+        when(buildTemplate.getBuildRunners()).thenReturn(runners)
         when(project.getOwnBuildTypeTemplates()).thenReturn([buildTemplate])
 
         page.fillModel(model, request)

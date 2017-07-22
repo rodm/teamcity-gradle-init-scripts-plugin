@@ -18,6 +18,7 @@ package com.github.rodm.teamcity.gradle.scripts.server
 
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
+import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
 import jetbrains.buildServer.serverSide.SProject
 import java.util.ArrayList
 import java.util.LinkedHashMap
@@ -55,6 +56,13 @@ class InitScriptsUsageAnalyzer(private val scriptsManager: GradleScriptsManager)
 
     private fun addScriptUsageForProject(name: String, project: SProject, usage: Map<String, ScriptUsage>) {
         for (buildType in project.ownBuildTypes) {
+            for (buildRunner in buildType.buildRunners) {
+                val params = buildRunner.parameters
+                val scriptName = params[INIT_SCRIPT_NAME_PARAMETER]
+                if (scriptName == name) {
+                    usage[name]?.addBuildType(buildType)
+                }
+            }
             for (feature in buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
                 val parameters = feature.parameters
                 val scriptName = parameters[INIT_SCRIPT_NAME]
@@ -64,6 +72,13 @@ class InitScriptsUsageAnalyzer(private val scriptsManager: GradleScriptsManager)
             }
         }
         for (buildTemplate in project.getOwnBuildTypeTemplates()) {
+            for (buildRunner in buildTemplate.buildRunners) {
+                val params = buildRunner.parameters
+                val scriptName = params[INIT_SCRIPT_NAME_PARAMETER]
+                if (scriptName == name) {
+                    usage[name]?.addBuildTemplate(buildTemplate)
+                }
+            }
             for (feature in buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
                 val parameters = feature.parameters
                 val scriptName = parameters[INIT_SCRIPT_NAME]
