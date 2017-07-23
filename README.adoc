@@ -2,7 +2,7 @@
 :uri-teamcity: https://www.jetbrains.com/teamcity/[TeamCity]
 :uri-gradle-docs: https://docs.gradle.org/current/userguide
 :uri-gradle-init-scripts: {uri-gradle-docs}/init_scripts.html[Gradle init scripts]
-:uri-download: https://bintray.com/rodm/teamcity-plugins-generic/teamcity-gradle-init-scripts-plugin
+:uri-download: https://bintray.com/rodm/teamcity-plugins-generic/gradle-init-scripts
 
 A {uri-teamcity} plugin that provides support for reusing {uri-gradle-init-scripts}
 between build configurations.
@@ -14,7 +14,9 @@ image:https://api.bintray.com/packages/rodm/teamcity-plugins-generic/gradle-init
 
 * Upload Gradle initialization scripts to a project
 
-* Apply a script to a build configuration as a Build Feature
+* Apply an init script to a build step using the Gradle build runner
+
+* Apply an init script to a build configuration as a Build Feature
 
 * Shows the build configurations and templates using the script
 
@@ -37,7 +39,8 @@ click on the link _Upload plugin zip_ to install the downloaded plugin file.
 
 * Edit a project, on the Gradle Init Scripts page upload an init script.
 
-* Edit a build configuration and add the Build Feature, Gradle Init Script, and select the init script to use.
+* Edit a build configuration and either configure an init script for a build step using the Gradle runner or
+add the Build Feature, Gradle Init Script, and select the init script to use.
 
 ## Compatibility
 
