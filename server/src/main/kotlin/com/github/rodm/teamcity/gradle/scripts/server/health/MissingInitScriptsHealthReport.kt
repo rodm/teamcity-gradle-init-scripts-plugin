@@ -31,7 +31,6 @@ import jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.WARN
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension
-import java.util.Collections
 import java.util.HashMap
 
 enum class StatusType {
@@ -48,9 +47,9 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
 
     init {
         val pageExtension = HealthStatusItemPageExtension(TYPE, pagePlaces)
-        pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("/health/missingInitScripts.jsp"))
+        pageExtension.includeUrl = descriptor.getPluginResourcesPath("/health/missingInitScripts.jsp")
+        pageExtension.isVisibleOutsideAdminArea = true
         pageExtension.addCssFile("/css/admin/buildTypeForm.css")
-        pageExtension.setVisibleOutsideAdminArea(true)
         pageExtension.register()
     }
 
@@ -58,7 +57,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
 
     override fun getDisplayName() = "Missing Gradle Init Scripts"
 
-    override fun getCategories() = Collections.singletonList(CATEGORY)
+    override fun getCategories() = listOf(CATEGORY)
 
     override fun canReportItemsFor(scope: HealthStatusScope): Boolean {
         return scope.isItemWithSeverityAccepted(CATEGORY.severity)
@@ -94,21 +93,21 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
             }
         }
         for (buildType in scope.buildTypes) {
-            for (runner in buildType.buildRunners) {
+            buildType.buildRunners.forEach { runner ->
                 val scriptName = runner.parameters[INIT_SCRIPT_NAME_PARAMETER]
                 reportBuildType(buildType, scriptName, StatusType.BUILD_RUNNER)
             }
-            for (feature in buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
+            buildType.getBuildFeaturesOfType(FEATURE_TYPE).forEach { feature ->
                 val scriptName = feature.parameters[INIT_SCRIPT_NAME]
                 reportBuildType(buildType, scriptName, StatusType.BUILD_FEATURE)
             }
         }
         for (buildTemplate in scope.buildTypeTemplates) {
-            for (runner in buildTemplate.buildRunners) {
+            buildTemplate.buildRunners.forEach { runner ->
                 val scriptName = runner.parameters[INIT_SCRIPT_NAME_PARAMETER]
                 reportBuildTemplate(buildTemplate, scriptName, StatusType.BUILD_RUNNER)
             }
-            for (feature in buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
+            buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE).forEach { feature ->
                 val scriptName = feature.parameters[INIT_SCRIPT_NAME]
                 reportBuildTemplate(buildTemplate, scriptName, StatusType.BUILD_FEATURE)
             }
