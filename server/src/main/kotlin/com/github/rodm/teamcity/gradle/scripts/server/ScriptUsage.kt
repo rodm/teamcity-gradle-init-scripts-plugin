@@ -18,13 +18,13 @@ package com.github.rodm.teamcity.gradle.scripts.server
 
 import jetbrains.buildServer.serverSide.BuildTypeTemplate
 import jetbrains.buildServer.serverSide.SBuildType
-import java.util.ArrayList
+import java.util.LinkedHashSet
 
 class ScriptUsage {
 
-    private val buildTypes = ArrayList<SBuildType>()
+    private val buildTypes = LinkedHashSet<SBuildType>()
 
-    private val buildTemplates = ArrayList<BuildTypeTemplate>()
+    private val buildTemplates = LinkedHashSet<BuildTypeTemplate>()
 
     fun getBuildTypes() = buildTypes
 

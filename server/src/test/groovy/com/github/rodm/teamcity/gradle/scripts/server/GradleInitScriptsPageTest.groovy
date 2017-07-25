@@ -197,7 +197,7 @@ class GradleInitScriptsPageTest {
         Map<String, ScriptUsage> usage = model.get('usage') as Map
         ScriptUsage scriptUsage = usage.get('init1.gradle')
         assertThat(scriptUsage.buildTypes, hasSize(1))
-        assertThat(scriptUsage.buildTypes.get(0), equalTo(buildType))
+        assertThat(scriptUsage.buildTypes.first(), equalTo(buildType))
     }
 
     @Test
@@ -219,7 +219,7 @@ class GradleInitScriptsPageTest {
         Map<String, ScriptUsage> usage = model.get('usage') as Map
         ScriptUsage scriptUsage = usage.get('init1.gradle')
         assertThat(scriptUsage.buildTypes, hasSize(1))
-        assertThat(scriptUsage.buildTypes.get(0), equalTo(buildType))
+        assertThat(scriptUsage.buildTypes.first(), equalTo(buildType))
     }
 
     @Test
@@ -241,7 +241,7 @@ class GradleInitScriptsPageTest {
         Map<String, ScriptUsage> usage = model.get('usage') as Map
         ScriptUsage scriptUsage = usage.get('init1.gradle')
         assertThat(scriptUsage.buildTemplates, hasSize(1))
-        assertThat(scriptUsage.buildTemplates.get(0), equalTo(buildTemplate))
+        assertThat(scriptUsage.buildTemplates.first(), equalTo(buildTemplate))
     }
 
     @Test
@@ -263,7 +263,7 @@ class GradleInitScriptsPageTest {
         Map<String, ScriptUsage> usage = model.get('usage') as Map
         ScriptUsage scriptUsage = usage.get('init1.gradle')
         assertThat(scriptUsage.buildTemplates, hasSize(1))
-        assertThat(scriptUsage.buildTemplates.get(0), equalTo(buildTemplate))
+        assertThat(scriptUsage.buildTemplates.first(), equalTo(buildTemplate))
     }
 
     @Test
@@ -344,5 +344,55 @@ class GradleInitScriptsPageTest {
 
         Map<String, ScriptUsage> usage = model.get('usage') as Map
         assertThat(usage, not(hasKey('missing.gradle')))
+    }
+
+    @Test
+    void 'usage map should not include duplicate build types'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
+        SBuildRunnerDescriptor runner = mock(SBuildRunnerDescriptor)
+        when(runner.getParameters()).thenReturn([(INIT_SCRIPT_NAME_PARAMETER): 'init1.gradle'])
+        List<SBuildRunnerDescriptor> runners = [runner]
+        SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
+        when(feature.getParameters()).thenReturn(['initScriptName': 'init1.gradle'])
+        Collection<SBuildFeatureDescriptor> features = [feature]
+        SBuildType buildType = mock(SBuildType)
+        when(buildType.getBuildRunners()).thenReturn(runners)
+        when(buildType.getBuildFeaturesOfType(eq(FEATURE_TYPE))).thenReturn(features)
+        when(project.getOwnBuildTypes()).thenReturn([buildType])
+
+        page.fillModel(model, request)
+
+        Map<String, ScriptUsage> usage = model.get('usage') as Map
+        ScriptUsage scriptUsage = usage.get('init1.gradle')
+        assertThat(scriptUsage.buildTypes, hasSize(1))
+        assertThat(scriptUsage.buildTypes.first(), equalTo(buildType))
+    }
+
+    @Test
+    void 'usage map should not include duplicate build templates'() {
+        Map<String, Object> model = [:]
+        HttpServletRequest request = mock(HttpServletRequest)
+        when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
+        when(scriptsManager.getScriptNames(eq(project))).thenReturn([(project): ['init1.gradle', 'init2.gradle']])
+        SBuildRunnerDescriptor runner = mock(SBuildRunnerDescriptor)
+        when(runner.getParameters()).thenReturn([(INIT_SCRIPT_NAME_PARAMETER): 'init1.gradle'])
+        List<SBuildRunnerDescriptor> runners = [runner]
+        SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
+        when(feature.getParameters()).thenReturn(['initScriptName': 'init1.gradle'])
+        Collection<SBuildFeatureDescriptor> features = [feature]
+        BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
+        when(buildTemplate.getBuildRunners()).thenReturn(runners)
+        when(buildTemplate.getBuildFeaturesOfType(eq(FEATURE_TYPE))).thenReturn(features)
+        when(project.getOwnBuildTypeTemplates()).thenReturn([buildTemplate])
+
+        page.fillModel(model, request)
+
+        Map<String, ScriptUsage> usage = model.get('usage') as Map
+        ScriptUsage scriptUsage = usage.get('init1.gradle')
+        assertThat(scriptUsage.buildTemplates, hasSize(1))
+        assertThat(scriptUsage.buildTemplates.first(), equalTo(buildTemplate))
     }
 }
