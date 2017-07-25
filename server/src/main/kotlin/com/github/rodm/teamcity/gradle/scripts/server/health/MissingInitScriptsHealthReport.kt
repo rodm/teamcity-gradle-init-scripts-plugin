@@ -20,6 +20,8 @@ import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_T
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
 import com.github.rodm.teamcity.gradle.scripts.server.GradleScriptsManager
+import jetbrains.buildServer.serverSide.BuildTypeTemplate
+import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusItem
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusItemConsumer
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusReport
@@ -63,68 +65,52 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
     }
 
     override fun report(scope: HealthStatusScope, resultConsumer: HealthStatusItemConsumer) {
-        for (buildType in scope.buildTypes) {
-            for (runner in buildType.buildRunners) {
-                val parameters = runner.parameters
-                val scriptName = parameters[INIT_SCRIPT_NAME_PARAMETER]
-                if (scriptName != null) {
-                    val scriptContents = scriptsManager.findScript(buildType.project, scriptName)
-                    if (scriptContents == null) {
-                        val data = HashMap<String, Any?>()
-                        data.put("buildType", buildType)
-                        data.put("scriptName", scriptName)
-                        data.put("statusType", StatusType.BUILD_RUNNER)
-                        val identity = CATEGORY.id + "_runner_" + buildType.buildTypeId
-                        val statusItem = HealthStatusItem(identity, CATEGORY, data)
-                        resultConsumer.consumeForBuildType(buildType, statusItem)
-                    }
-                }
-            }
-            for (feature in buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
-                val parameters = feature.parameters
-                val scriptName = parameters[INIT_SCRIPT_NAME]
-                val scriptContents = scriptsManager.findScript(buildType.project, scriptName!!)
+        val reportBuildType = { buildType: SBuildType, name: String?, statusType: StatusType ->
+            if (name != null) {
+                val scriptContents = scriptsManager.findScript(buildType.project, name)
                 if (scriptContents == null) {
                     val data = HashMap<String, Any?>()
                     data.put("buildType", buildType)
-                    data.put("scriptName", scriptName)
-                    data.put("statusType", StatusType.BUILD_FEATURE)
-                    val identity = CATEGORY.id + "_feature_" + buildType.buildTypeId
+                    data.put("scriptName", name)
+                    data.put("statusType", statusType)
+                    val identity = CATEGORY.id + "_" + statusType + "_" + buildType.buildTypeId
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForBuildType(buildType, statusItem)
                 }
             }
         }
-        for (buildTemplate in scope.buildTypeTemplates) {
-            for (runner in buildTemplate.buildRunners) {
-                val parameters = runner.parameters
-                val scriptName = parameters[INIT_SCRIPT_NAME_PARAMETER]
-                if (scriptName != null) {
-                    val scriptContents = scriptsManager.findScript(buildTemplate.project, scriptName)
-                    if (scriptContents == null) {
-                        val data = HashMap<String, Any?>()
-                        data.put("buildTemplate", buildTemplate)
-                        data.put("scriptName", scriptName)
-                        data.put("statusType", StatusType.BUILD_RUNNER)
-                        val identity = CATEGORY.id + "_runner_" + buildTemplate.templateId
-                        val statusItem = HealthStatusItem(identity, CATEGORY, data)
-                        resultConsumer.consumeForTemplate(buildTemplate, statusItem)
-                    }
-                }
-            }
-            for (feature in buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
-                val parameters = feature.parameters
-                val scriptName = parameters[INIT_SCRIPT_NAME]
-                val scriptContents = scriptsManager.findScript(buildTemplate.project, scriptName!!)
+        val reportBuildTemplate = { buildTemplate: BuildTypeTemplate, name: String?, statusType: StatusType ->
+            if (name != null) {
+                val scriptContents = scriptsManager.findScript(buildTemplate.project, name)
                 if (scriptContents == null) {
                     val data = HashMap<String, Any?>()
                     data.put("buildTemplate", buildTemplate)
-                    data.put("scriptName", scriptName)
-                    data.put("statusType", StatusType.BUILD_FEATURE)
-                    val identity = CATEGORY.id + "_feature_" + buildTemplate.templateId
+                    data.put("scriptName", name)
+                    data.put("statusType", statusType)
+                    val identity = CATEGORY.id + "_" + statusType + "_" + buildTemplate.templateId
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForTemplate(buildTemplate, statusItem)
                 }
+            }
+        }
+        for (buildType in scope.buildTypes) {
+            for (runner in buildType.buildRunners) {
+                val scriptName = runner.parameters[INIT_SCRIPT_NAME_PARAMETER]
+                reportBuildType(buildType, scriptName, StatusType.BUILD_RUNNER)
+            }
+            for (feature in buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
+                val scriptName = feature.parameters[INIT_SCRIPT_NAME]
+                reportBuildType(buildType, scriptName, StatusType.BUILD_FEATURE)
+            }
+        }
+        for (buildTemplate in scope.buildTypeTemplates) {
+            for (runner in buildTemplate.buildRunners) {
+                val scriptName = runner.parameters[INIT_SCRIPT_NAME_PARAMETER]
+                reportBuildTemplate(buildTemplate, scriptName, StatusType.BUILD_RUNNER)
+            }
+            for (feature in buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
+                val scriptName = feature.parameters[INIT_SCRIPT_NAME]
+                reportBuildTemplate(buildTemplate, scriptName, StatusType.BUILD_FEATURE)
             }
         }
     }

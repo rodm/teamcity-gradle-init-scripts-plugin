@@ -107,7 +107,7 @@ class MissingInitScriptsHealthReportTest {
         verify(resultConsumer).consumeForBuildType(eq(buildType), itemCaptor.capture())
 
         HealthStatusItem item = itemCaptor.value
-        assertThat(item.getIdentity(), equalTo('missing_init_scripts_feature_BuildTypeId'))
+        assertThat(item.getIdentity(), equalTo('missing_init_scripts_BUILD_FEATURE_BuildTypeId'))
         assertThat(item.getSeverity(), equalTo(WARN))
         assertThat(item.getAdditionalData(), hasKey('buildType'))
         assertThat(item.getAdditionalData().get('buildType'), is(buildType))
@@ -154,7 +154,7 @@ class MissingInitScriptsHealthReportTest {
         verify(resultConsumer).consumeForTemplate(eq(buildTemplate), itemCaptor.capture())
 
         HealthStatusItem item = itemCaptor.value
-        assertThat(item.getIdentity(), equalTo('missing_init_scripts_feature_BuildTemplateId'))
+        assertThat(item.getIdentity(), equalTo('missing_init_scripts_BUILD_FEATURE_BuildTemplateId'))
         assertThat(item.getSeverity(), equalTo(WARN))
         assertThat(item.getAdditionalData(), hasKey('buildTemplate'))
         assertThat(item.getAdditionalData().get('buildTemplate'), is(buildTemplate))
@@ -201,7 +201,7 @@ class MissingInitScriptsHealthReportTest {
         verify(resultConsumer).consumeForBuildType(eq(buildType), itemCaptor.capture())
 
         HealthStatusItem item = itemCaptor.value
-        assertThat(item.getIdentity(), equalTo('missing_init_scripts_runner_BuildTypeId'))
+        assertThat(item.getIdentity(), equalTo('missing_init_scripts_BUILD_RUNNER_BuildTypeId'))
         assertThat(item.getSeverity(), equalTo(WARN))
         assertThat(item.getAdditionalData(), hasKey('buildType'))
         assertThat(item.getAdditionalData().get('buildType'), is(buildType))
@@ -248,7 +248,7 @@ class MissingInitScriptsHealthReportTest {
         verify(resultConsumer).consumeForTemplate(eq(buildTemplate), itemCaptor.capture())
 
         HealthStatusItem item = itemCaptor.value
-        assertThat(item.getIdentity(), equalTo('missing_init_scripts_runner_BuildTemplateId'))
+        assertThat(item.getIdentity(), equalTo('missing_init_scripts_BUILD_RUNNER_BuildTemplateId'))
         assertThat(item.getSeverity(), equalTo(WARN))
         assertThat(item.getAdditionalData(), hasKey('buildTemplate'))
         assertThat(item.getAdditionalData().get('buildTemplate'), is(buildTemplate))
