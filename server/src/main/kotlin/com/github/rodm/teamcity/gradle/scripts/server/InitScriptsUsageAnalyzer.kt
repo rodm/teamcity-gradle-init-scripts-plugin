@@ -19,6 +19,9 @@ package com.github.rodm.teamcity.gradle.scripts.server
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
+import jetbrains.buildServer.serverSide.BuildTypeSettings
+import jetbrains.buildServer.serverSide.BuildTypeTemplate
+import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.SProject
 import java.util.ArrayList
 import java.util.LinkedHashMap
@@ -55,38 +58,28 @@ class InitScriptsUsageAnalyzer(private val scriptsManager: GradleScriptsManager)
     }
 
     private fun addScriptUsageForProject(name: String, project: SProject, usage: Map<String, ScriptUsage>) {
-        for (buildType in project.ownBuildTypes) {
-            for (buildRunner in buildType.buildRunners) {
-                val params = buildRunner.parameters
-                val scriptName = params[INIT_SCRIPT_NAME_PARAMETER]
+        val collectUsage = { settings: BuildTypeSettings ->
+            settings.buildRunners.forEach { buildRunner ->
+                val scriptName = buildRunner.parameters[INIT_SCRIPT_NAME_PARAMETER]
                 if (scriptName == name) {
-                    usage[name]?.addBuildType(buildType)
+                    when (settings) {
+                        is SBuildType -> usage[name]?.addBuildType(settings)
+                        is BuildTypeTemplate -> usage[name]?.addBuildTemplate(settings)
+                    }
                 }
             }
-            for (feature in buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
-                val parameters = feature.parameters
-                val scriptName = parameters[INIT_SCRIPT_NAME]
-                if (scriptName!! == name) {
-                    usage[scriptName]!!.addBuildType(buildType)
+            settings.getBuildFeaturesOfType(FEATURE_TYPE).forEach { feature ->
+                val scriptName = feature.parameters[INIT_SCRIPT_NAME]
+                if (scriptName == name) {
+                    when (settings) {
+                        is SBuildType -> usage[name]?.addBuildType(settings)
+                        is BuildTypeTemplate -> usage[name]?.addBuildTemplate(settings)
+                    }
                 }
             }
         }
-        for (buildTemplate in project.getOwnBuildTypeTemplates()) {
-            for (buildRunner in buildTemplate.buildRunners) {
-                val params = buildRunner.parameters
-                val scriptName = params[INIT_SCRIPT_NAME_PARAMETER]
-                if (scriptName == name) {
-                    usage[name]?.addBuildTemplate(buildTemplate)
-                }
-            }
-            for (feature in buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
-                val parameters = feature.parameters
-                val scriptName = parameters[INIT_SCRIPT_NAME]
-                if (scriptName!! == name) {
-                    usage[scriptName]!!.addBuildTemplate(buildTemplate)
-                }
-            }
-        }
+        project.ownBuildTypes.forEach { collectUsage(it) }
+        project.ownBuildTypeTemplates.forEach { collectUsage(it) }
     }
 
     private fun getProjectScripts(project: SProject): List<String> {
