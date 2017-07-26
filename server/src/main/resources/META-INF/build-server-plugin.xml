@@ -19,4 +19,5 @@
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.health.MissingInitScriptsHealthReport"/>
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.health.UnusedInitScriptsHealthReport"/>
     <bean class="com.github.rodm.teamcity.gradle.scripts.server.health.InvalidInitScriptsHealthReport"/>
+    <bean class="com.github.rodm.teamcity.gradle.scripts.server.health.SameInitScriptsHealthReport"/>
 </beans>
