@@ -26,5 +26,7 @@ interface GradleScriptsManager {
 
     fun findScript(project: SProject, name: String): String?
 
+    fun saveScript(project: SProject, name: String, content: String)
+
     fun deleteScript(project: SProject, name: String): Boolean
 }

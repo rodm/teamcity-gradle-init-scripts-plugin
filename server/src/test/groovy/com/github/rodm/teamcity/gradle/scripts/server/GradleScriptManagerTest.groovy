@@ -161,6 +161,32 @@ class GradleScriptManagerTest {
     }
 
     @Test
+    void 'save writes a script to a project '() {
+        SProject project = mock(SProject)
+        when(project.getProjectPath()).thenReturn([project])
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+
+        scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
+
+        assertThat(new File(pluginDir, 'test.gradle').exists(), is(true))
+        String contents = scriptsManager.findScript(project, 'test.gradle')
+        assertThat(contents, equalTo('contents of test.gradle'))
+    }
+
+    @Test
+    void 'save overwrites contents of an existing script'() {
+        SProject project = mock(SProject)
+        when(project.getProjectPath()).thenReturn([project])
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+
+        scriptsManager.saveScript(project, 'test.gradle', 'initial contents of test.gradle')
+        scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
+
+        String contents = scriptsManager.findScript(project, 'test.gradle')
+        assertThat(contents, equalTo('updated contents of test.gradle'))
+    }
+
+    @Test
     void 'delete removes a script from a project'() {
         SProject project = mock(SProject)
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)

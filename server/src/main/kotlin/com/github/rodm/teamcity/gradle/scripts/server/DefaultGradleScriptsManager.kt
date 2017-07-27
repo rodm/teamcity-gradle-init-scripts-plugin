@@ -116,6 +116,11 @@ class DefaultGradleScriptsManager : GradleScriptsManager, CustomSettingsMapper {
         return null
     }
 
+    override fun saveScript(project: SProject, name: String, content: String) {
+        val file = File(getPluginDataDirectory(project), name)
+        file.writeText(content)
+    }
+
     override fun deleteScript(project: SProject, name: String): Boolean {
         var result = false
         try {
