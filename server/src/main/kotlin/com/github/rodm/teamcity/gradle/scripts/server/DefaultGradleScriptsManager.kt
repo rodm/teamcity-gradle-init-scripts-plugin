@@ -18,9 +18,12 @@ package com.github.rodm.teamcity.gradle.scripts.server
 
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.PLUGIN_NAME
 import jetbrains.buildServer.log.Loggers.SERVER_CATEGORY
+import jetbrains.buildServer.serverSide.ConfigActionFactory
+import jetbrains.buildServer.serverSide.ConfigFileChangesListener
 import jetbrains.buildServer.serverSide.CopiedObjects
 import jetbrains.buildServer.serverSide.CustomSettingsMapper
 import jetbrains.buildServer.serverSide.SProject
+import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
 import jetbrains.buildServer.util.ExceptionUtil
 import jetbrains.buildServer.util.FileUtil
 import org.apache.log4j.Logger
@@ -29,9 +32,16 @@ import java.io.IOException
 import java.lang.Exception
 import kotlin.reflect.KFunction1
 
-class DefaultGradleScriptsManager : GradleScriptsManager, CustomSettingsMapper {
-
+class DefaultGradleScriptsManager(registry: VersionedSettingsRegistry,
+                                  val configChangesListener: ConfigFileChangesListener,
+                                  val configActionFactory: ConfigActionFactory)
+    : GradleScriptsManager, CustomSettingsMapper
+{
     private val LOG = Logger.getLogger(SERVER_CATEGORY + ".GradleInitScripts")
+
+    init {
+        registry.registerDir("pluginData/" + PLUGIN_NAME)
+    }
 
     override fun mapData(copiedObjects: CopiedObjects) {
         for (entry in copiedObjects.copiedProjectsMap.entries) {
@@ -118,7 +128,10 @@ class DefaultGradleScriptsManager : GradleScriptsManager, CustomSettingsMapper {
 
     override fun saveScript(project: SProject, name: String, content: String) {
         val file = File(getPluginDataDirectory(project), name)
+        val exists = file.exists()
         file.writeText(content)
+        val message = "Gradle init script ${name} was ${if (exists) "updated" else "uploaded"}"
+        configChangesListener.onPersist(project, file, configActionFactory.createAction(project, message));
     }
 
     override fun deleteScript(project: SProject, name: String): Boolean {
@@ -126,6 +139,10 @@ class DefaultGradleScriptsManager : GradleScriptsManager, CustomSettingsMapper {
         try {
             val file = File(getPluginDataDirectory(project), name)
             result = FileUtil.delete(file)
+            if (result) {
+                val message = "Gradle init script ${name} was deleted"
+                configChangesListener.onDelete(project, file, configActionFactory.createAction(project, message));
+            }
         }
         catch (e: IOException) {
             LOG.error(e.message)
