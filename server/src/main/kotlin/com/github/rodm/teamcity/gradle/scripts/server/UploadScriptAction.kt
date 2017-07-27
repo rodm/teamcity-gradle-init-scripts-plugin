@@ -16,22 +16,20 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server
 
-import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.PLUGIN_NAME
 import jetbrains.buildServer.controllers.ActionMessages
 import jetbrains.buildServer.controllers.MultipartFormController
 import jetbrains.buildServer.serverSide.ProjectManager
-import jetbrains.buildServer.util.FileUtil
 import jetbrains.buildServer.util.StringUtil
 import jetbrains.buildServer.web.openapi.WebControllerManager
 import org.springframework.web.servlet.ModelAndView
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import java.io.File
 import java.io.IOException
 import java.lang.IllegalStateException
 
 class UploadScriptAction(val projectManager: ProjectManager,
-                         controllerManager: WebControllerManager) : MultipartFormController()
+                         controllerManager: WebControllerManager,
+                         val scriptsManager: GradleScriptsManager) : MultipartFormController()
 {
     init {
         controllerManager.registerController("/admin/uploadInitScript.html", this)
@@ -60,11 +58,10 @@ class UploadScriptAction(val projectManager: ProjectManager,
                 return modelAndView
             }
 
-            val pluginDataDirectory = FileUtil.createDir(project.getPluginDataDirectory(PLUGIN_NAME))
-            val destinationFile = File(pluginDataDirectory, fileName)
-            val exists = destinationFile.exists()
+            val exists = scriptsManager.findScript(project, fileName) != null
             val message = "Gradle init script ${fileName} was ${if (exists) "updated" else "uploaded"}"
-            file.transferTo(destinationFile)
+            val content = String(file.bytes, Charsets.UTF_8)
+            scriptsManager.saveScript(project, fileName, content)
             ActionMessages.getOrCreateMessages(request).addMessage("initScriptsMessage", message)
         }
         catch (e: IOException) {
