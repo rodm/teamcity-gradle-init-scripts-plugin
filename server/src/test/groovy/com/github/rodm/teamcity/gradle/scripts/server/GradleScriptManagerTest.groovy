@@ -142,6 +142,7 @@ class GradleScriptManagerTest {
     @Test
     void 'find returns null for a script that doesn\'t exist'() {
         SProject project = mock(SProject)
+        when(project.getProjectPath()).thenReturn([project])
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
 
         String contents = scriptsManager.findScript(project, 'dummy.gradle')
