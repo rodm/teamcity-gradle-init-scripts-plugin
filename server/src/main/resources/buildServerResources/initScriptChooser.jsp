@@ -18,6 +18,11 @@
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
 
 <props:selectProperty id="${chooserId}" name="${chooserName}" enableFilter="true" className="longField">
+    <%--@elvariable id="missingScript" type="String"--%>
+    <c:if test="${not empty missingScript}">
+        <props:option value="${missingScript}"><c:out value="Missing script: ${missingScript}"/></props:option>
+    </c:if>
+
     <props:option value="">-- Choose an initialization script --</props:option>
     <c:forEach var="projects" items="${scripts}">
         <c:set var="project" value="${projects.key}"/>

@@ -31,6 +31,7 @@
         <label for="${INIT_SCRIPT_NAME}">Gradle initialization script:</label>
     </th>
     <td>
+        <c:set var="selectedScript" value="${propertiesBean.properties[INIT_SCRIPT_NAME]}" scope="request"/>
         <jsp:include page="/admin/initScripts.html?projectId=${buildForm.project.projectId}"/>
         <span class="error" id="error_${INIT_SCRIPT_NAME}"></span>
     </td>

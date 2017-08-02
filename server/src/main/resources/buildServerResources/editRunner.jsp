@@ -23,6 +23,7 @@
     <tr class="advancedSetting">
     <th class="noBorder"><label for="${INIT_SCRIPT_NAME_PARAMETER}">Initialization script:</label></th>
     <td class="noBorder">
+        <c:set var="selectedScript" value="${propertiesBean.properties[INIT_SCRIPT_NAME_PARAMETER]}" scope="request"/>
         <jsp:include page="/admin/initScripts.html?projectId=${buildForm.project.projectId}&chooserName=${INIT_SCRIPT_NAME_PARAMETER}"/>
         <span class="smallNote">Select one of the predefined scripts.</span>
         <span>

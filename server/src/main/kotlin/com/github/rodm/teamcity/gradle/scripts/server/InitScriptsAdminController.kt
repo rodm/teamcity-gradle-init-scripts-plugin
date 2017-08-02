@@ -46,6 +46,7 @@ class InitScriptsAdminController(server: SBuildServer,
         model.addObject("scripts", getScriptNames(request))
         model.addObject("chooserName", getChooserName(request))
         model.addObject("chooserId", "gradleInitScript")
+        model.addObject("missingScript", getMissingName(request))
         return model
     }
 
@@ -66,5 +67,25 @@ class InitScriptsAdminController(server: SBuildServer,
     private fun getChooserName(request: HttpServletRequest): String {
         val name = request.getParameter("chooserName")
         return if (name == null) INIT_SCRIPT_NAME else name
+    }
+
+    private fun getMissingName(request: HttpServletRequest): String? {
+        val project = getProject(request)
+        if (project != null) {
+            val selectedScript = request.getAttribute("selectedScript") as String?
+            if (selectedScript != null) {
+                scriptsManager.findScript(project, selectedScript) ?: return selectedScript
+            }
+        }
+        return null
+    }
+
+    private fun getProject(request: HttpServletRequest): SProject? {
+        val projectId = request.getParameter("projectId")
+        if (projectId == null) {
+            LOG.error("Missing request parameter 'projectId'")
+            return null
+        }
+        return projectManager.findProjectById(projectId)
     }
 }
