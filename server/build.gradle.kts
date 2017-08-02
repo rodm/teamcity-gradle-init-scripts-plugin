@@ -16,6 +16,12 @@ extra["downloadsDir"] = project.findProperty("downloads.dir") ?: "${rootDir}/dow
 extra["serversDir"] = project.findProperty("servers.dir") ?: "${rootDir}/servers"
 extra["java8Home"] = project.findProperty("java8.home") ?: "/opt/jdk1.8.0_131"
 
+configurations {
+    all {
+        exclude(module = "xom")
+    }
+}
+
 val agent = configurations.getByName("agent")
 
 dependencies {

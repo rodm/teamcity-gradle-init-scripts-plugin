@@ -20,6 +20,12 @@ apply {
     plugin("com.github.rodm.teamcity-agent")
 }
 
+configurations {
+    all {
+        exclude(module = "xom")
+    }
+}
+
 dependencies {
     compile (project(":common"))
     runtime (group = "org.jetbrains.kotlin", name = "kotlin-runtime", version = "1.1.3-2")
