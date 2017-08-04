@@ -33,7 +33,7 @@ class GradleInitScriptsPage(pagePlaces: PagePlaces,
     private val TITLE = "Gradle Init Scripts"
 
     init {
-        setTabTitle(TITLE)
+        tabTitle = TITLE
         addCssFile("/css/admin/buildTypeForm.css")
         addJsFile(descriptor.getPluginResourcesPath("initScripts.js"))
     }

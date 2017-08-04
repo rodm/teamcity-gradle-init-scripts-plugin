@@ -37,9 +37,8 @@ class InitScriptsUsageAnalyzer(private val scriptsManager: GradleScriptsManager)
 
     fun getScriptsUsage(scripts: Map<SProject, List<String>>): Map<String, ScriptUsage> {
         val usage = LinkedHashMap<String, ScriptUsage>()
-        for (entry in scripts.entries) {
-            val project = entry.key
-            for (script in entry.value) {
+        for ((project, value) in scripts) {
+            for (script in value) {
                 usage.put(script, ScriptUsage())
                 addScriptUsageForSubProjects(script, project, usage)
             }

@@ -44,12 +44,10 @@ class DefaultGradleScriptsManager(registry: VersionedSettingsRegistry,
     }
 
     override fun mapData(copiedObjects: CopiedObjects) {
-        for (entry in copiedObjects.copiedProjectsMap.entries) {
-            val source = entry.key
-            val target = entry.value
+        for ((source, target) in copiedObjects.copiedProjectsMap) {
             val sourceDir = source.getPluginDataDirectory(PLUGIN_NAME)
             val files = sourceDir.listFiles()
-            if (files != null && files.size > 0) {
+            if (files != null && files.isNotEmpty()) {
                 var targetDir: File?
                 try {
                     targetDir = FileUtil.createDir(target.getPluginDataDirectory(PLUGIN_NAME))
@@ -58,7 +56,7 @@ class DefaultGradleScriptsManager(registry: VersionedSettingsRegistry,
                     continue
                 }
                 for (sourceFile in files) {
-                    val targetFile = File(targetDir, sourceFile.getName())
+                    val targetFile = File(targetDir, sourceFile.name)
                     try {
                         FileUtil.copy(sourceFile, targetFile)
                     } catch (e: IOException) {
@@ -83,7 +81,7 @@ class DefaultGradleScriptsManager(registry: VersionedSettingsRegistry,
             try {
                 val pluginDataDirectory = getPluginDataDirectory(currentProject)
                 val files = pluginDataDirectory.listFiles(filter)
-                if (files != null && files.size > 0) {
+                if (files != null && files.isNotEmpty()) {
                     val scripts = ArrayList<String>()
                     for (file in files) {
                         if (!foundNames.contains(file.name)) {
@@ -130,8 +128,8 @@ class DefaultGradleScriptsManager(registry: VersionedSettingsRegistry,
         val file = File(getPluginDataDirectory(project), name)
         val exists = file.exists()
         file.writeText(content)
-        val message = "Gradle init script ${name} was ${if (exists) "updated" else "uploaded"}"
-        configChangesListener.onPersist(project, file, configActionFactory.createAction(project, message));
+        val message = "Gradle init script $name was ${if (exists) "updated" else "uploaded"}"
+        configChangesListener.onPersist(project, file, configActionFactory.createAction(project, message))
     }
 
     override fun deleteScript(project: SProject, name: String): Boolean {
@@ -140,8 +138,8 @@ class DefaultGradleScriptsManager(registry: VersionedSettingsRegistry,
             val file = File(getPluginDataDirectory(project), name)
             result = FileUtil.delete(file)
             if (result) {
-                val message = "Gradle init script ${name} was deleted"
-                configChangesListener.onDelete(project, file, configActionFactory.createAction(project, message));
+                val message = "Gradle init script $name was deleted"
+                configChangesListener.onDelete(project, file, configActionFactory.createAction(project, message))
             }
         }
         catch (e: IOException) {

@@ -44,7 +44,7 @@ class DeleteScriptAction(controller: InitScriptsActionsController,
             val project = projectManager.findProjectById(projectId)
             if (project != null) {
                 val deleted = scriptsManager.deleteScript(project, name)
-                val message = "Gradle init script ${name} ${if (deleted) "was deleted" else "cannot be deleted"}"
+                val message = "Gradle init script $name ${if (deleted) "was deleted" else "cannot be deleted"}"
                 ActionMessages.getOrCreateMessages(request).addMessage("initScriptsMessage", message)
             }
         }

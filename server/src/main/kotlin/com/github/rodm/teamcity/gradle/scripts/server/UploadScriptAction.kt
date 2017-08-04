@@ -59,7 +59,7 @@ class UploadScriptAction(val projectManager: ProjectManager,
             }
 
             val exists = scriptsManager.findScript(project, fileName) != null
-            val message = "Gradle init script ${fileName} was ${if (exists) "updated" else "uploaded"}"
+            val message = "Gradle init script $fileName was ${if (exists) "updated" else "uploaded"}"
             val content = String(file.bytes, Charsets.UTF_8)
             scriptsManager.saveScript(project, fileName, content)
             ActionMessages.getOrCreateMessages(request).addMessage("initScriptsMessage", message)
