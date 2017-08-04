@@ -36,9 +36,7 @@ open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCy
 
     private val GRADLE_CMD_PARAMS = "ui.gradleRunner.additional.gradle.cmd.params"
 
-    private var settingsInitScriptFile: File? = null
-
-    private var featureInitScriptFile: File? = null
+    private val initScriptFiles = mutableListOf<File>()
 
     init {
         eventDispatcher.addListener(this)
@@ -46,41 +44,32 @@ open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCy
 
     override fun beforeRunnerStart(runner: BuildRunnerContext) {
         val runnerParameters = runner.runnerParameters
-        val initScriptName = runnerParameters.get(INIT_SCRIPT_NAME_PARAMETER)
-        val initScriptContent = runnerParameters.get(INIT_SCRIPT_CONTENT_PARAMETER)
+        val initScriptName = runnerParameters[INIT_SCRIPT_NAME_PARAMETER]
         if (initScriptName != null) {
-            if (initScriptContent == null) {
-                throw RuntimeException("Runner is configured to use init script '$initScriptName', but no content was found. Please check runner settings.")
-            }
-
-            try {
-                settingsInitScriptFile = FileUtil.createTempFile(getBuildTempDirectory(runner), "init_", ".gradle", true)
-                FileUtil.writeFile(settingsInitScriptFile!!, initScriptContent, "UTF-8")
-
-                val params = runnerParameters.getOrDefault(GRADLE_CMD_PARAMS, "")
-                val initScriptParams = "--init-script " + settingsInitScriptFile!!.absolutePath
-                runner.addRunnerParameter(GRADLE_CMD_PARAMS, initScriptParams + " " + params)
-            } catch (e: IOException) {
-                LOG.info("Failed to write init script: " + e.message)
-            }
+            addInitScriptParameters(runner, initScriptName, runnerParameters[INIT_SCRIPT_CONTENT_PARAMETER])
         }
 
         if (hasGradleInitScriptFeature(runner)) {
-            val runnerParameters = runner.runnerParameters
-            val initScriptName = runnerParameters.get(INIT_SCRIPT_NAME)
-            val initScriptContent = runnerParameters.get(INIT_SCRIPT_CONTENT)
+            addInitScriptParameters(runner, runnerParameters[INIT_SCRIPT_NAME], runnerParameters[INIT_SCRIPT_CONTENT])
+        }
+    }
 
-            if (initScriptContent == null) {
-                throw RuntimeException("Runner is configured to use init script '$initScriptName', but no content was found. Please check runner settings.")
+    private fun addInitScriptParameters(runner: BuildRunnerContext, name: String?, content: String?) {
+        if (name != null) {
+            if (content == null) {
+                throw RuntimeException("Runner is configured to use init script '$name', but no content was found. Please check runner settings.")
             }
 
             try {
-                featureInitScriptFile = FileUtil.createTempFile(getBuildTempDirectory(runner), "init_", ".gradle", true)
-                FileUtil.writeFile(featureInitScriptFile!!, initScriptContent, "UTF-8")
+                val initScriptFile = FileUtil.createTempFile(getBuildTempDirectory(runner), "init_", ".gradle", true)
+                if (initScriptFile != null) {
+                    FileUtil.writeFile(initScriptFile, content, "UTF-8")
+                    initScriptFiles.add(initScriptFile)
 
-                val params = runnerParameters.getOrDefault(GRADLE_CMD_PARAMS, "")
-                val initScriptParams = "--init-script " + featureInitScriptFile!!.absolutePath
-                runner.addRunnerParameter(GRADLE_CMD_PARAMS, initScriptParams + " " + params)
+                    val params = runner.runnerParameters.getOrDefault(GRADLE_CMD_PARAMS, "")
+                    val initScriptParams = "--init-script " + initScriptFile.absolutePath
+                    runner.addRunnerParameter(GRADLE_CMD_PARAMS, initScriptParams + " " + params)
+                }
             } catch (e: IOException) {
                 LOG.info("Failed to write init script: " + e.message)
             }
@@ -88,14 +77,10 @@ open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCy
     }
 
     override fun runnerFinished(runner: BuildRunnerContext, status: BuildFinishedStatus) {
-        if (settingsInitScriptFile != null) {
-            FileUtil.delete(settingsInitScriptFile!!)
-            settingsInitScriptFile = null
+        initScriptFiles.forEach { file ->
+            FileUtil.delete(file)
         }
-        if (featureInitScriptFile != null) {
-            FileUtil.delete(featureInitScriptFile!!)
-            featureInitScriptFile = null
-        }
+        initScriptFiles.clear()
     }
 
     open fun hasGradleInitScriptFeature(context: BuildRunnerContext) : Boolean {
