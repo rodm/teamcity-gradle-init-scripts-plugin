@@ -28,7 +28,6 @@ import jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.INFO
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension
-import java.util.Collections
 import java.util.HashMap
 
 open class InvalidInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: PluginDescriptor) : HealthStatusReport() {
@@ -39,9 +38,9 @@ open class InvalidInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: Pl
 
     init {
         val pageExtension =  HealthStatusItemPageExtension(TYPE, pagePlaces)
-        pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("/health/invalidInitScripts.jsp"))
+        pageExtension.includeUrl = descriptor.getPluginResourcesPath("/health/invalidInitScripts.jsp")
+        pageExtension.isVisibleOutsideAdminArea = true
         pageExtension.addCssFile("/css/admin/buildTypeForm.css")
-        pageExtension.setVisibleOutsideAdminArea(true)
         pageExtension.register()
     }
 
@@ -49,7 +48,7 @@ open class InvalidInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: Pl
 
     override fun getDisplayName() = "Invalid Gradle Init Scripts configuration"
 
-    override fun getCategories() = Collections.singletonList(CATEGORY)
+    override fun getCategories() = listOf(CATEGORY)
 
     override fun canReportItemsFor(scope: HealthStatusScope) : Boolean {
         return scope.isItemWithSeverityAccepted(CATEGORY.severity)
@@ -87,7 +86,7 @@ open class InvalidInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: Pl
     }
 
     open fun hasGradleRunnerBuildStep(buildTypeSettings: BuildTypeSettings): Boolean {
-        for (runner in buildTypeSettings.buildRunners) {
+        buildTypeSettings.buildRunners.forEach { runner ->
             if ("gradle-runner" == runner.runType.type) {
                 return true
             }

@@ -26,7 +26,6 @@ import jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.INFO
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension
-import java.util.Collections
 import java.util.HashMap
 
 class UnusedInitScriptsHealthReport(pagePlaces: PagePlaces,
@@ -39,8 +38,8 @@ class UnusedInitScriptsHealthReport(pagePlaces: PagePlaces,
 
     init {
         val pageExtension = HealthStatusItemPageExtension(TYPE, pagePlaces)
-        pageExtension.setIncludeUrl(descriptor.getPluginResourcesPath("/health/unusedInitScripts.jsp"))
-        pageExtension.setVisibleOutsideAdminArea(true)
+        pageExtension.includeUrl = descriptor.getPluginResourcesPath("/health/unusedInitScripts.jsp")
+        pageExtension.isVisibleOutsideAdminArea = true
         pageExtension.register()
     }
 
@@ -48,7 +47,7 @@ class UnusedInitScriptsHealthReport(pagePlaces: PagePlaces,
 
     override fun getDisplayName() = "Unused Gradle init scripts"
 
-    override fun getCategories() = Collections.singletonList(CATEGORY)
+    override fun getCategories() = listOf(CATEGORY)
 
     override fun canReportItemsFor(scope: HealthStatusScope) : Boolean {
         return scope.isItemWithSeverityAccepted(CATEGORY.severity)
@@ -57,9 +56,7 @@ class UnusedInitScriptsHealthReport(pagePlaces: PagePlaces,
     override fun report(scope: HealthStatusScope, resultConsumer: HealthStatusItemConsumer) {
         for (project in scope.projects) {
             val usage = analyzer.getProjectScriptsUsage(project)
-            for (entry in usage.entries)  {
-                val scriptName = entry.key
-                val scriptUsage = entry.value
+            for ((scriptName, scriptUsage) in usage)  {
                 if (scriptUsage.getBuildTypes().isEmpty() && scriptUsage.getBuildTemplates().isEmpty()) {
                     val data = HashMap<String, Any?>()
                     data.put("project", project)

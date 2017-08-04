@@ -27,7 +27,7 @@ class ProjectInspector(val scriptsManager: GradleScriptsManager) {
 
     fun report(project: SProject) : List<ProjectReport> {
         val result = ArrayList<ProjectReport>()
-        val projects = mutableListOf<SProject>(project)
+        val projects = mutableListOf(project)
         projects.addAll(project.projects)
 
         for (p in projects) {
