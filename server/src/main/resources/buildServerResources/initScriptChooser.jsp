@@ -17,13 +17,16 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
 
+<%--@elvariable id="chooserId" type="java.lang.String"--%>
+<%--@elvariable id="chooserName" type="java.lang.String"--%>
 <props:selectProperty id="${chooserId}" name="${chooserName}" enableFilter="true" className="longField">
-    <%--@elvariable id="missingScript" type="String"--%>
+    <%--@elvariable id="missingScript" type="java.lang.String"--%>
     <c:if test="${not empty missingScript}">
         <props:option value="${missingScript}"><c:out value="Missing script: ${missingScript}"/></props:option>
     </c:if>
 
     <props:option value="">-- Choose an initialization script --</props:option>
+    <%--@elvariable id="scripts" type="java.util.Map<jetbrains.buildServer.serverSide.SProject, List<java.lang.String>>"--%>
     <c:forEach var="projects" items="${scripts}">
         <c:set var="project" value="${projects.key}"/>
         <optgroup label="&ndash;&ndash; ${project.name} scripts &ndash;&ndash;">
