@@ -26,7 +26,7 @@ val agent = configurations.getByName("agent")
 
 dependencies {
     compile (project(":common"))
-    compile (group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version = "1.1.3-2")
+    compile (group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version = "1.1.4-3")
 
     agent (project(path = ":agent", configuration = "plugin"))
 
@@ -35,7 +35,7 @@ dependencies {
     testCompile (group = "org.hamcrest", name = "hamcrest-library", version = "1.3")
     testCompile (group = "org.mockito", name = "mockito-core", version = "2.7.22")
 
-    testRuntime (group = "org.jetbrains.kotlin", name = "kotlin-runtime", version = "1.1.3-2")
+    testRuntime (group = "org.jetbrains.kotlin", name = "kotlin-runtime", version = "1.1.4-3")
 }
 
 teamcity {

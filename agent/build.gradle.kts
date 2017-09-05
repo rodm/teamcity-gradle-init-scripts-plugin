@@ -28,13 +28,13 @@ configurations {
 
 dependencies {
     compile (project(":common"))
-    compile (group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version = "1.1.3-2")
-    runtime (group = "org.jetbrains.kotlin", name = "kotlin-runtime", version = "1.1.3-2")
+    compile (group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version = "1.1.4-3")
+    runtime (group = "org.jetbrains.kotlin", name = "kotlin-runtime", version = "1.1.4-3")
 
     testCompile (group = "junit", name = "junit", version = "4.12")
     testCompile (group = "org.hamcrest", name = "hamcrest-library", version = "1.3")
     testCompile (group = "org.mockito", name = "mockito-core", version = "2.7.22")
-    testCompile (group = "org.jetbrains.kotlin", name = "kotlin-reflect", version = "1.1.3-2")
+    testCompile (group = "org.jetbrains.kotlin", name = "kotlin-reflect", version = "1.1.4-3")
     testCompile ("org.jetbrains.spek:spek-api:1.1.2") {
         exclude (group = "org.jetbrains.kotlin")
     }
