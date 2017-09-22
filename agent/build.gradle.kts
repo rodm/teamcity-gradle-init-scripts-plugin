@@ -1,7 +1,4 @@
 
-import com.github.rodm.teamcity.AgentPluginConfiguration
-import com.github.rodm.teamcity.AgentPluginDescriptor
-import com.github.rodm.teamcity.PluginDeployment
 import com.github.rodm.teamcity.TeamCityPluginExtension
 
 buildscript {
@@ -47,18 +44,14 @@ dependencies {
 teamcity {
     agent {
         archiveName = "gradle-init-scripts-agent.zip"
-        descriptor(closureOf<AgentPluginDescriptor> {
-            pluginDeployment(closureOf<PluginDeployment> {
+        descriptor {
+            pluginDeployment {
                 useSeparateClassloader = true
-            })
-        })
+            }
+        }
     }
 }
 
 fun Project.teamcity(configuration: TeamCityPluginExtension.() -> Unit) {
     configure(configuration)
-}
-
-fun TeamCityPluginExtension.agent(configuration: AgentPluginConfiguration.() -> Unit) {
-    this.agent(closureOf<AgentPluginConfiguration>(configuration))
 }
