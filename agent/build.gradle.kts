@@ -10,6 +10,10 @@ buildscript {
     }
 }
 
+plugins {
+    `kotlin-dsl`
+}
+
 apply {
     plugin("kotlin")
     plugin("org.gradle.jacoco")

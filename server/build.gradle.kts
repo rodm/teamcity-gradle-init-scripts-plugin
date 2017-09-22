@@ -2,6 +2,10 @@
 import com.github.rodm.teamcity.TeamCityEnvironment
 import com.github.rodm.teamcity.TeamCityPluginExtension
 
+plugins {
+    `kotlin-dsl`
+}
+
 apply {
     plugin("kotlin")
     plugin("groovy")
@@ -16,6 +20,7 @@ extra["java8Home"] = project.findProperty("java8.home") ?: "/opt/jdk1.8.0_131"
 configurations {
     all {
         exclude(module = "xom")
+        exclude(module = "slf4j-log4j12")
     }
 }
 
