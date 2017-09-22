@@ -3,11 +3,10 @@ import com.github.rodm.teamcity.TeamCityEnvironment
 import com.github.rodm.teamcity.TeamCityPluginExtension
 
 plugins {
-    `kotlin-dsl`
+    kotlin("jvm")
 }
 
 apply {
-    plugin("kotlin")
     plugin("groovy")
     plugin("org.gradle.jacoco")
     plugin("com.github.rodm.teamcity-server")
@@ -28,7 +27,7 @@ val agent = configurations.getByName("agent")
 
 dependencies {
     compile (project(":common"))
-    compile (group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version = "1.1.4-3")
+    compile (kotlin("stdlib"))
 
     agent (project(path = ":agent", configuration = "plugin"))
 
@@ -37,7 +36,7 @@ dependencies {
     testCompile (group = "org.hamcrest", name = "hamcrest-library", version = "1.3")
     testCompile (group = "org.mockito", name = "mockito-core", version = "2.7.22")
 
-    testRuntime (group = "org.jetbrains.kotlin", name = "kotlin-runtime", version = "1.1.4-3")
+    testRuntime (kotlin("runtime"))
 }
 
 teamcity {
