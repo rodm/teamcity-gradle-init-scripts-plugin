@@ -2,6 +2,7 @@
 import com.github.rodm.teamcity.TeamCityPluginExtension
 import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.RecordingCopyTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.2.0" apply false
@@ -12,6 +13,14 @@ plugins {
 
 group = "com.github.rodm"
 version = "0.9-SNAPSHOT"
+
+subprojects {
+    tasks.withType<KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+}
 
 teamcity {
     version = "10.0"
