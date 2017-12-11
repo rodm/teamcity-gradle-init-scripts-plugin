@@ -47,6 +47,8 @@ import static org.mockito.Mockito.when
 
 class GradleInitScriptsPageTest {
 
+    private static final String PLUGIN_NAME = "gradleInitScripts"
+
     private PagePlaces places
 
     private PluginDescriptor descriptor
@@ -65,6 +67,7 @@ class GradleInitScriptsPageTest {
         project = mock(SProject)
 
         when(places.getPlaceById(eq(PlaceId.EDIT_PROJECT_PAGE_TAB))).thenReturn(mock(PagePlace))
+        when(descriptor.getPluginName()).thenReturn(PLUGIN_NAME)
         when(descriptor.getPluginResourcesPath(eq('projectPage.jsp'))).thenReturn('pluginResourcesPath/projectPage.jsp')
         when(descriptor.getPluginResourcesPath(eq('initScripts.js'))).thenReturn('pluginResourcesPath/initScripts.js')
 

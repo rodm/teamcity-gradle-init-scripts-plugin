@@ -18,8 +18,6 @@ package com.github.rodm.teamcity.gradle.scripts;
 
 object GradleInitScriptsPlugin {
 
-    const val PLUGIN_NAME = "gradleInitScripts"
-
     const val FEATURE_TYPE = "gradle-init-scripts"
 
     const val INIT_SCRIPT_NAME = "initScriptName"

@@ -16,7 +16,6 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server
 
-import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.PLUGIN_NAME
 import com.github.rodm.teamcity.gradle.scripts.server.health.ProjectInspector
 import jetbrains.buildServer.controllers.admin.projects.EditProjectTab
 import jetbrains.buildServer.web.openapi.PagePlaces
@@ -28,7 +27,7 @@ class GradleInitScriptsPage(pagePlaces: PagePlaces,
                             val scriptsManager: GradleScriptsManager,
                             val analyzer: InitScriptsUsageAnalyzer,
                             val inspector: ProjectInspector) :
-        EditProjectTab(pagePlaces, PLUGIN_NAME, descriptor.getPluginResourcesPath("projectPage.jsp"), "")
+        EditProjectTab(pagePlaces, descriptor.pluginName, descriptor.getPluginResourcesPath("projectPage.jsp"), "")
 {
     private val TITLE = "Gradle Init Scripts"
 

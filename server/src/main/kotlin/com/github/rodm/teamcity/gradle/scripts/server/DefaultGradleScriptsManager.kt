@@ -16,7 +16,6 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server
 
-import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.PLUGIN_NAME
 import jetbrains.buildServer.log.Loggers.SERVER_CATEGORY
 import jetbrains.buildServer.serverSide.ConfigActionFactory
 import jetbrains.buildServer.serverSide.ConfigFileChangesListener
@@ -26,31 +25,35 @@ import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
 import jetbrains.buildServer.util.ExceptionUtil
 import jetbrains.buildServer.util.FileUtil
+import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.apache.log4j.Logger
 import java.io.File
 import java.io.IOException
 import java.lang.Exception
 import kotlin.reflect.KFunction1
 
-class DefaultGradleScriptsManager(registry: VersionedSettingsRegistry,
+class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
+                                  registry: VersionedSettingsRegistry,
                                   val configChangesListener: ConfigFileChangesListener,
                                   val configActionFactory: ConfigActionFactory)
     : GradleScriptsManager, CustomSettingsMapper
 {
     private val LOG = Logger.getLogger(SERVER_CATEGORY + ".GradleInitScripts")
 
+    private val pluginName = descriptor.pluginName
+
     init {
-        registry.registerDir("pluginData/" + PLUGIN_NAME)
+        registry.registerDir("pluginData/" + descriptor.pluginName)
     }
 
     override fun mapData(copiedObjects: CopiedObjects) {
         for ((source, target) in copiedObjects.copiedProjectsMap) {
-            val sourceDir = source.getPluginDataDirectory(PLUGIN_NAME)
+            val sourceDir = source.getPluginDataDirectory(pluginName)
             val files = sourceDir.listFiles()
             if (files != null && files.isNotEmpty()) {
                 var targetDir: File?
                 try {
-                    targetDir = FileUtil.createDir(target.getPluginDataDirectory(PLUGIN_NAME))
+                    targetDir = FileUtil.createDir(target.getPluginDataDirectory(pluginName))
                 } catch (e: IOException) {
                     LOG.warn("Could not create directory for project Gradle init scripts", e)
                     continue
@@ -149,6 +152,6 @@ class DefaultGradleScriptsManager(registry: VersionedSettingsRegistry,
     }
 
     private fun getPluginDataDirectory(project: SProject): File {
-        return FileUtil.createDir(project.getPluginDataDirectory(PLUGIN_NAME))
+        return FileUtil.createDir(project.getPluginDataDirectory(pluginName))
     }
 }

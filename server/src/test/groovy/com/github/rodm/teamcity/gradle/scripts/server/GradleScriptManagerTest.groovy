@@ -21,6 +21,7 @@ import jetbrains.buildServer.serverSide.ConfigActionFactory
 import jetbrains.buildServer.serverSide.ConfigFileChangesListener
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
+import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -40,9 +41,10 @@ import static org.mockito.Mockito.eq
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.verify
 import static org.mockito.Mockito.when
-import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.PLUGIN_NAME
 
 class GradleScriptManagerTest {
+
+    private static final String PLUGIN_NAME = "gradleInitScripts"
 
     private GradleScriptsManager scriptsManager
 
@@ -64,10 +66,12 @@ class GradleScriptManagerTest {
 
     @Before
     void setup() {
+        PluginDescriptor descriptor = mock(PluginDescriptor)
+        when(descriptor.getPluginName()).thenReturn(PLUGIN_NAME)
         settingsRegistry = mock(VersionedSettingsRegistry)
         changesListener = mock(ConfigFileChangesListener)
         actionFactory = mock(ConfigActionFactory)
-        scriptsManager = new DefaultGradleScriptsManager(settingsRegistry, changesListener, actionFactory)
+        scriptsManager = new DefaultGradleScriptsManager(descriptor, settingsRegistry, changesListener, actionFactory)
         pluginDir = projectDir.newFolder(PLUGIN_NAME)
         new File(pluginDir, 'init1.gradle') << 'contents of script1'
         new File(pluginDir, 'init2.gradle') << 'contents of script2'
