@@ -71,8 +71,12 @@ teamcity {
             agentOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006")
         }
 
-        "teamcity2017" {
-            version = "2017.1.2"
+        "teamcity2017.1" {
+            version = "2017.1.5"
+        }
+
+        "teamcity2017.2" {
+            version = "2017.2"
         }
     }
 }
