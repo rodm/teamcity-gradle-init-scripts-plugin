@@ -44,7 +44,7 @@ add the Build Feature, Gradle Init Script, and select the init script to use.
 
 ## Compatibility
 
-The plugin is compatible with TeamCity 10.0 and later.
+The plugin is compatible with TeamCity 10.0 and later and requires the build agent to be running with Java 8.
 
 ## License
 
