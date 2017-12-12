@@ -11,6 +11,8 @@ plugins {
     id ("org.sonarqube") version "2.6.1"
 }
 
+extra["teamcityVersion"] = project.findProperty("teamcity.version") as String? ?: "10.0"
+
 group = "com.github.rodm"
 version = "0.9-SNAPSHOT"
 
@@ -23,7 +25,7 @@ subprojects {
 }
 
 teamcity {
-    version = "10.0"
+    version = extra["teamcityVersion"] as String
 }
 
 bintray {
