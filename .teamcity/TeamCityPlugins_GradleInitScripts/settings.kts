@@ -36,6 +36,7 @@ project {
             rootExtId = vcsId
             showChanges = true
             settingsFormat = VersionedSettings.Format.KOTLIN
+            buildSettingsMode = VersionedSettings.BuildSettingsMode.PREFER_SETTINGS_FROM_VCS
         }
     }
 
