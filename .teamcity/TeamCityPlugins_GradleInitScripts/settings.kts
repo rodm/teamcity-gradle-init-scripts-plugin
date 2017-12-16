@@ -66,6 +66,7 @@ project {
             gradle {
                 id = "RUNNER_1"
                 tasks = "%gradle.tasks%"
+                buildFile = "build.gradle.kts"
                 gradleParams = "%gradle.opts%"
                 useGradleWrapper = true
                 enableStacktrace = true
