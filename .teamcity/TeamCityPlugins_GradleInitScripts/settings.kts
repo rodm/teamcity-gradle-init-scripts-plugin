@@ -109,6 +109,26 @@ project {
     }))
     buildType(BuildType({
         template(buildTemplate)
+        uuid = "5f3fa0bd-698c-4494-a0a1-723b2b6dcd68"
+        id = "TeamCityPlugins_GradleInitScripts_BuildTeamCity20171"
+        name = "Build - TeamCity 2017.1"
+
+        params {
+            param("gradle.opts", "-Pteamcity.api.version=2017.1")
+        }
+    }))
+    buildType(BuildType({
+        template(buildTemplate)
+        uuid = "5f3fa0bd-698c-4494-a0a1-723b2b6dcd69"
+        id = "TeamCityPlugins_GradleInitScripts_BuildTeamCity20172"
+        name = "Build - TeamCity 2017.2"
+
+        params {
+            param("gradle.opts", "-Pteamcity.api.version=2017.2")
+        }
+    }))
+    buildType(BuildType({
+        template(buildTemplate)
         uuid = "b7332c3b-11ba-46ba-9da4-6defe8caf4e1"
         id = "TeamCityPlugins_GradleInitScripts_ReportCodeQuality"
         name = "Report - Code Quality"
