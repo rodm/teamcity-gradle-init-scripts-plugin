@@ -1,6 +1,7 @@
 
 import com.github.rodm.teamcity.TeamCityEnvironment
 import com.github.rodm.teamcity.TeamCityPluginExtension
+import com.github.rodm.teamcity.tasks.PublishTask
 
 plugins {
     kotlin("jvm")
@@ -37,6 +38,11 @@ dependencies {
     testCompile (group = "org.mockito", name = "mockito-core", version = "2.7.22")
 
     testRuntime (kotlin("runtime"))
+}
+
+tasks.withType<PublishTask> {
+    username = findProperty("jetbrains.username") as String?
+    password = findProperty("jetbrains.password") as String?
 }
 
 teamcity {

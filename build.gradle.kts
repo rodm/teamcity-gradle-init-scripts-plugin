@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.2.0" apply false
-    id ("com.github.rodm.teamcity-server") version "1.1-beta-1" apply true
+    id ("com.github.rodm.teamcity-server") version "1.1-beta-2" apply true
     id ("com.jfrog.bintray") version "1.8.0"
     id ("org.sonarqube") version "2.6.1"
 }
