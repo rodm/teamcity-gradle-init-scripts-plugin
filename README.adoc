@@ -2,7 +2,8 @@
 :uri-teamcity: https://www.jetbrains.com/teamcity/[TeamCity]
 :uri-gradle-docs: https://docs.gradle.org/current/userguide
 :uri-gradle-init-scripts: {uri-gradle-docs}/init_scripts.html[Gradle init scripts]
-:uri-download: https://bintray.com/rodm/teamcity-plugins-generic/gradle-init-scripts
+:uri-jetbrains-plugin: https://plugins.jetbrains.com/plugin/9665-gradle-init-scripts
+:uri-bintray-plugin: https://bintray.com/rodm/teamcity-plugins-generic/gradle-init-scripts
 
 A {uri-teamcity} plugin that provides support for reusing {uri-gradle-init-scripts}
 between build configurations.
@@ -22,13 +23,16 @@ image:https://api.bintray.com/packages/rodm/teamcity-plugins-generic/gradle-init
 
 * Reports missing scripts, unused scripts and invalid configurations on the Server Health page
 
+* Supports saving scripts to the Versioned Settings VCS repository
+
 ### Example Scripts
 
 Example scripts can be found in the link:scripts[scripts] directory.
 
 ## Installation
 
-* Download the plugin file from {uri-download} (see _Downloads_ section at the bottom of the page).
+* Download the plugin from {uri-jetbrains-plugin}[JetBrains TeamCity Plugin Repository] or {uri-bintray-plugin}[Bintray]
+(see _Downloads_ section at the bottom of the page).
 
 * Go to the plugin list of your TeamCity installation at `&lt;TeamCity URL&gt;/admin/admin.html?item=plugins` and
 click on the link _Upload plugin zip_ to install the downloaded plugin file.
