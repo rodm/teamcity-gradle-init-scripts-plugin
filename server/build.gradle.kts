@@ -25,10 +25,13 @@ configurations {
 }
 
 val agent = configurations.getByName("agent")
+val provided = configurations.getByName("provided")
 
 dependencies {
     compile (project(":common"))
     compile (kotlin("stdlib"))
+
+    provided (group = "org.jetbrains.teamcity.internal", name = "server", version = rootProject.extra["teamcityVersion"] as String?)
 
     agent (project(path = ":agent", configuration = "plugin"))
 
