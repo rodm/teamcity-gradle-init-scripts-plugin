@@ -1,14 +1,14 @@
 
 import com.github.rodm.teamcity.TeamCityPluginExtension
 import com.jfrog.bintray.gradle.BintrayExtension
-import com.jfrog.bintray.gradle.RecordingCopyTask
+import com.jfrog.bintray.gradle.tasks.RecordingCopyTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.2.30" apply false
-    id ("com.github.rodm.teamcity-server") version "1.1" apply true
-    id ("com.jfrog.bintray") version "1.8.0"
-    id ("org.sonarqube") version "2.6.1"
+    kotlin("jvm") version "1.2.50" apply false
+    id ("com.github.rodm.teamcity-server") version "1.1.1" apply true
+    id ("com.jfrog.bintray") version "1.8.3"
+    id ("org.sonarqube") version "2.6.2"
 }
 
 extra["teamcityVersion"] = project.findProperty("teamcity.api.version") as String? ?: "10.0"
