@@ -85,7 +85,11 @@ teamcity {
         }
 
         "teamcity2017.2" {
-            version = "2017.2"
+            version = "2017.2.4"
+        }
+
+        "teamcity2018.1" {
+            version = "2018.1"
         }
     }
 }
