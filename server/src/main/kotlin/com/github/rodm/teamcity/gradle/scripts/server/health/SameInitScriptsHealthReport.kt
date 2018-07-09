@@ -80,7 +80,7 @@ class SameInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: PluginDesc
                         val data = HashMap<String, Any?>()
                         data.put("buildTemplate", buildTemplate)
                         data.put("scriptName", scriptName)
-                        val identity = CATEGORY.id + "_" + buildTemplate.templateId
+                        val identity = CATEGORY.id + "_" + buildTemplate.id
                         val statusItem = HealthStatusItem(identity, CATEGORY, data)
                         resultConsumer.consumeForTemplate(buildTemplate, statusItem)
                     }
