@@ -86,7 +86,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
                     data.put("buildTemplate", buildTemplate)
                     data.put("scriptName", name)
                     data.put("statusType", statusType)
-                    val identity = CATEGORY.id + "_" + statusType + "_" + buildTemplate.templateId
+                    val identity = CATEGORY.id + "_" + statusType + "_" + buildTemplate.id
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForTemplate(buildTemplate, statusItem)
                 }

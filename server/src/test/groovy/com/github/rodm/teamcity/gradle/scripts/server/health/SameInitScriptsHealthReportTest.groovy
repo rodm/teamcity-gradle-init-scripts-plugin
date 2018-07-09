@@ -133,7 +133,7 @@ class SameInitScriptsHealthReportTest {
         SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
         when(feature.getParameters()).thenReturn([(INIT_SCRIPT_NAME): 'init.gradle'])
         BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
-        when(buildTemplate.getTemplateId()).thenReturn('BuildTemplateId')
+        when(buildTemplate.getId()).thenReturn('BuildTemplateId')
         when(buildTemplate.getBuildRunners()).thenReturn([runner])
         when(buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)).thenReturn([feature])
         HealthStatusScope scope = mock(HealthStatusScope)

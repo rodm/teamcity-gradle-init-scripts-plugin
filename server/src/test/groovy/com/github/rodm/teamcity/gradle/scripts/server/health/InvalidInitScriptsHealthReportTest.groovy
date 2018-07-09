@@ -130,7 +130,7 @@ class InvalidInitScriptsHealthReportTest {
         SBuildFeatureDescriptor feature = mock(SBuildFeatureDescriptor)
         when(feature.getParameters()).thenReturn([(INIT_SCRIPT_NAME): 'init.gradle'])
         BuildTypeTemplate buildTemplate = mock(BuildTypeTemplate)
-        when(buildTemplate.getTemplateId()).thenReturn('BuildTemplateId')
+        when(buildTemplate.getId()).thenReturn('BuildTemplateId')
         when(buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)).thenReturn([feature])
         HealthStatusScope scope = mock(HealthStatusScope)
         when(scope.getBuildTypeTemplates()).thenReturn([buildTemplate])
