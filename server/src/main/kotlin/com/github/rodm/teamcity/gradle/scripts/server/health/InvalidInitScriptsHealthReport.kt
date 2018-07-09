@@ -28,7 +28,6 @@ import jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.INFO
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension
-import java.util.HashMap
 
 open class InvalidInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: PluginDescriptor) : HealthStatusReport() {
 
@@ -58,11 +57,8 @@ open class InvalidInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: Pl
         for (buildType in scope.buildTypes) {
             for (feature in buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
                 if (!hasGradleRunnerBuildStep(buildType)) {
-                    val parameters = feature.parameters
-                    val scriptName = parameters[INIT_SCRIPT_NAME]
-                    val data = HashMap<String, Any?>()
-                    data.put("buildType", buildType)
-                    data.put("scriptName", scriptName)
+                    val scriptName = feature.parameters[INIT_SCRIPT_NAME]
+                    val data = mapOf("buildType" to buildType, "scriptName" to scriptName)
                     val identity = CATEGORY.id + "_" + buildType.buildTypeId
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForBuildType(buildType, statusItem)
@@ -72,11 +68,8 @@ open class InvalidInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: Pl
         for (buildTemplate in scope.buildTypeTemplates) {
             for (feature in buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
                 if (!hasGradleRunnerBuildStep(buildTemplate)) {
-                    val parameters = feature.parameters
-                    val scriptName = parameters[INIT_SCRIPT_NAME]
-                    val data = HashMap<String, Any?>()
-                    data.put("buildTemplate", buildTemplate)
-                    data.put("scriptName", scriptName)
+                    val scriptName = feature.parameters[INIT_SCRIPT_NAME]
+                    val data = mapOf("buildTemplate" to buildTemplate, "scriptName" to scriptName)
                     val identity = CATEGORY.id + "_" + buildTemplate.id
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForTemplate(buildTemplate, statusItem)

@@ -26,7 +26,6 @@ import jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.INFO
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension
-import java.util.HashMap
 
 class UnusedInitScriptsHealthReport(pagePlaces: PagePlaces,
                                     descriptor: PluginDescriptor,
@@ -58,9 +57,7 @@ class UnusedInitScriptsHealthReport(pagePlaces: PagePlaces,
             val usage = analyzer.getProjectScriptsUsage(project)
             for ((scriptName, scriptUsage) in usage)  {
                 if (scriptUsage.getBuildTypes().isEmpty() && scriptUsage.getBuildTemplates().isEmpty()) {
-                    val data = HashMap<String, Any?>()
-                    data.put("project", project)
-                    data.put("scriptName", scriptName)
+                    val data = mapOf("project" to project, "scriptName" to scriptName)
                     val identity = CATEGORY.id + "_" + project.projectId + "_" + scriptName
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForProject(project, statusItem)

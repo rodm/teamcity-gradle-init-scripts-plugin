@@ -31,7 +31,6 @@ import jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.WARN
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension
-import java.util.HashMap
 
 enum class StatusType {
     BUILD_RUNNER, BUILD_FEATURE
@@ -68,10 +67,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
             if (name != null) {
                 val scriptContents = scriptsManager.findScript(buildType.project, name)
                 if (scriptContents == null) {
-                    val data = HashMap<String, Any?>()
-                    data.put("buildType", buildType)
-                    data.put("scriptName", name)
-                    data.put("statusType", statusType)
+                    val data = mapOf("buildType" to buildType, "scriptName" to name, "statusType" to statusType)
                     val identity = CATEGORY.id + "_" + statusType + "_" + buildType.buildTypeId
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForBuildType(buildType, statusItem)
@@ -82,10 +78,7 @@ class MissingInitScriptsHealthReport(private val scriptsManager: GradleScriptsMa
             if (name != null) {
                 val scriptContents = scriptsManager.findScript(buildTemplate.project, name)
                 if (scriptContents == null) {
-                    val data = HashMap<String, Any?>()
-                    data.put("buildTemplate", buildTemplate)
-                    data.put("scriptName", name)
-                    data.put("statusType", statusType)
+                    val data = mapOf("buildTemplate" to buildTemplate, "scriptName" to name, "statusType" to statusType)
                     val identity = CATEGORY.id + "_" + statusType + "_" + buildTemplate.id
                     val statusItem = HealthStatusItem(identity, CATEGORY, data)
                     resultConsumer.consumeForTemplate(buildTemplate, statusItem)

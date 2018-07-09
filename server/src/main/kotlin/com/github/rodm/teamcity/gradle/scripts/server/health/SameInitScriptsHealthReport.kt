@@ -28,7 +28,6 @@ import jetbrains.buildServer.serverSide.healthStatus.ItemSeverity.WARN
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension
-import java.util.HashMap
 
 class SameInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: PluginDescriptor) : HealthStatusReport() {
 
@@ -61,9 +60,7 @@ class SameInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: PluginDesc
                 buildType.buildRunners.forEach { runner ->
                     val scriptName = runner.parameters[INIT_SCRIPT_NAME_PARAMETER]
                     if (scriptName != null && scriptName == featureScriptName) {
-                        val data = HashMap<String, Any?>()
-                        data.put("buildType", buildType)
-                        data.put("scriptName", scriptName)
+                        val data = mapOf("buildType" to buildType, "scriptName" to scriptName)
                         val identity = CATEGORY.id + "_" + buildType.buildTypeId
                         val statusItem = HealthStatusItem(identity, CATEGORY, data)
                         resultConsumer.consumeForBuildType(buildType, statusItem)
@@ -77,9 +74,7 @@ class SameInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: PluginDesc
                 buildTemplate.buildRunners.forEach { runner ->
                     val scriptName = runner.parameters[INIT_SCRIPT_NAME_PARAMETER]
                     if (scriptName != null && scriptName == featureScriptName) {
-                        val data = HashMap<String, Any?>()
-                        data.put("buildTemplate", buildTemplate)
-                        data.put("scriptName", scriptName)
+                        val data = mapOf("buildTemplate" to buildTemplate, "scriptName" to scriptName)
                         val identity = CATEGORY.id + "_" + buildTemplate.id
                         val statusItem = HealthStatusItem(identity, CATEGORY, data)
                         resultConsumer.consumeForTemplate(buildTemplate, statusItem)
