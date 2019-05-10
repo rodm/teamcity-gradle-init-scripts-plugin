@@ -1,9 +1,7 @@
 
 import jetbrains.buildServer.configs.kotlin.v2018_2.version
 import jetbrains.buildServer.configs.kotlin.v2018_2.project
-import jetbrains.buildServer.configs.kotlin.v2018_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2018_2.CheckoutMode
-import jetbrains.buildServer.configs.kotlin.v2018_2.Template
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.VcsTrigger
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.vcs
@@ -14,12 +12,12 @@ version = "2018.2"
 project {
 
     val vcsId = "GradleInitScripts"
-    val vcs = GitVcsRoot({
+    val vcs = GitVcsRoot {
         id(vcsId)
         name = "gradle-init-scripts"
         url = "https://github.com/rodm/teamcity-gradle-init-scripts-plugin.git"
         useMirrors = false
-    })
+    }
     vcsRoot(vcs)
 
     params {
@@ -29,7 +27,7 @@ project {
         """.trimIndent())
     }
 
-    val buildTemplate = Template({
+    val buildTemplate = template {
         id("Build")
         name = "build"
 
@@ -72,10 +70,9 @@ project {
                 type = "perfmon"
             }
         }
-    })
-    template(buildTemplate)
+    }
 
-    buildType(BuildType({
+    buildType {
         templates(buildTemplate)
         id("BuildTeamCity100")
         name = "Build - TeamCity 10.0"
@@ -86,8 +83,9 @@ project {
                 type = "jvm-monitor-plugin"
             }
         }
-    }))
-    buildType(BuildType({
+    }
+
+    buildType {
         templates(buildTemplate)
         id("BuildTeamCity20171")
         name = "Build - TeamCity 2017.1"
@@ -95,8 +93,9 @@ project {
         params {
             param("gradle.opts", "-Pteamcity.api.version=2017.1")
         }
-    }))
-    buildType(BuildType({
+    }
+
+    buildType {
         templates(buildTemplate)
         id("BuildTeamCity20172")
         name = "Build - TeamCity 2017.2"
@@ -104,8 +103,9 @@ project {
         params {
             param("gradle.opts", "-Pteamcity.api.version=2017.2")
         }
-    }))
-    buildType(BuildType({
+    }
+
+    buildType {
         templates(buildTemplate)
         id("BuildTeamCity20181")
         name = "Build - TeamCity 2018.1"
@@ -113,8 +113,9 @@ project {
         params {
             param("gradle.opts", "-Pteamcity.api.version=2018.1")
         }
-    }))
-    buildType(BuildType({
+    }
+
+    buildType {
         templates(buildTemplate)
         id("ReportCodeQuality")
         name = "Report - Code Quality"
@@ -123,5 +124,5 @@ project {
             param("gradle.opts", "%sonar.opts%")
             param("gradle.tasks", "clean build sonarqube")
         }
-    }))
+    }
 }
