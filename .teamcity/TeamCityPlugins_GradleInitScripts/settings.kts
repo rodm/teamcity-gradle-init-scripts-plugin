@@ -12,7 +12,8 @@ import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.VcsTrigger
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.v2018_2.vcs.GitVcsRoot
 
-version = "2017.2"
+version = "2018.2"
+
 project {
     uuid = "2e06c443-72c3-4edb-96fa-14adba937d27"
     id("TeamCityPlugins_GradleInitScripts")
