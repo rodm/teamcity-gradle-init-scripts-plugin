@@ -21,6 +21,8 @@ project {
     vcsRoot(vcs)
 
     params {
+        param("teamcity.ui.settings.readOnly", "true")
+
         param("env.GRADLE_OPTS", """
             -Dorg.gradle.daemon=false -Dkotlin.daemon.enabled=false -Dkotlin.compiler.execution.strategy=in-process
             -Dkotlin.colors.enabled=false
