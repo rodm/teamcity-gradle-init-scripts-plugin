@@ -119,6 +119,16 @@ project {
 
     buildType {
         templates(buildTemplate)
+        id("BuildTeamCity20182")
+        name = "Build - TeamCity 2018.2"
+
+        params {
+            param("gradle.opts", "-Pteamcity.api.version=2018.2")
+        }
+    }
+
+    buildType {
+        templates(buildTemplate)
         id("ReportCodeQuality")
         name = "Report - Code Quality"
 
