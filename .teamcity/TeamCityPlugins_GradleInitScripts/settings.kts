@@ -1,28 +1,28 @@
 package TeamCityPlugins_GradleInitScripts
 
-import jetbrains.buildServer.configs.kotlin.v2017_2.version
-import jetbrains.buildServer.configs.kotlin.v2017_2.project
-import jetbrains.buildServer.configs.kotlin.v2017_2.BuildType
-import jetbrains.buildServer.configs.kotlin.v2017_2.CheckoutMode
-import jetbrains.buildServer.configs.kotlin.v2017_2.Template
-import jetbrains.buildServer.configs.kotlin.v2017_2.buildSteps.gradle
-import jetbrains.buildServer.configs.kotlin.v2017_2.projectFeatures.VersionedSettings
-import jetbrains.buildServer.configs.kotlin.v2017_2.projectFeatures.versionedSettings
-import jetbrains.buildServer.configs.kotlin.v2017_2.triggers.VcsTrigger
-import jetbrains.buildServer.configs.kotlin.v2017_2.triggers.vcs
-import jetbrains.buildServer.configs.kotlin.v2017_2.vcs.GitVcsRoot
+import jetbrains.buildServer.configs.kotlin.v2018_2.version
+import jetbrains.buildServer.configs.kotlin.v2018_2.project
+import jetbrains.buildServer.configs.kotlin.v2018_2.BuildType
+import jetbrains.buildServer.configs.kotlin.v2018_2.CheckoutMode
+import jetbrains.buildServer.configs.kotlin.v2018_2.Template
+import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.gradle
+import jetbrains.buildServer.configs.kotlin.v2018_2.projectFeatures.VersionedSettings
+import jetbrains.buildServer.configs.kotlin.v2018_2.projectFeatures.versionedSettings
+import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.VcsTrigger
+import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.vcs
+import jetbrains.buildServer.configs.kotlin.v2018_2.vcs.GitVcsRoot
 
 version = "2017.2"
 project {
     uuid = "2e06c443-72c3-4edb-96fa-14adba937d27"
-    id = "TeamCityPlugins_GradleInitScripts"
-    parentId = "TeamCityPlugins"
+    id("TeamCityPlugins_GradleInitScripts")
+    parentId("TeamCityPlugins")
     name = "Gradle Init Scripts"
 
     val vcsId = "TeamCityPlugins_GradleInitScripts_GradleInitScripts"
     val vcs = GitVcsRoot({
         uuid = "0521af81-2e0a-44ef-9004-3c7bb142d05d"
-        id = vcsId
+        id(vcsId)
         name = "gradle-init-scripts"
         url = "https://github.com/rodm/teamcity-gradle-init-scripts-plugin.git"
         useMirrors = false
@@ -49,7 +49,7 @@ project {
 
     val buildTemplate = Template({
         uuid = "268a7880-3505-4283-b6eb-e9b6ec471150"
-        id = "TeamCityPlugins_GradleInitScripts_Build"
+        id("TeamCityPlugins_GradleInitScripts_Build")
         name = "build"
 
         params {
@@ -95,9 +95,9 @@ project {
     template(buildTemplate)
 
     buildType(BuildType({
-        template(buildTemplate)
+        templates(buildTemplate)
         uuid = "5f3fa0bd-698c-4494-a0a1-723b2b6dcd67"
-        id = "TeamCityPlugins_GradleInitScripts_BuildTeamCity100"
+        id("TeamCityPlugins_GradleInitScripts_BuildTeamCity100")
         name = "Build - TeamCity 10.0"
 
         features {
@@ -108,9 +108,9 @@ project {
         }
     }))
     buildType(BuildType({
-        template(buildTemplate)
+        templates(buildTemplate)
         uuid = "5f3fa0bd-698c-4494-a0a1-723b2b6dcd68"
-        id = "TeamCityPlugins_GradleInitScripts_BuildTeamCity20171"
+        id("TeamCityPlugins_GradleInitScripts_BuildTeamCity20171")
         name = "Build - TeamCity 2017.1"
 
         params {
@@ -118,9 +118,9 @@ project {
         }
     }))
     buildType(BuildType({
-        template(buildTemplate)
+        templates(buildTemplate)
         uuid = "5f3fa0bd-698c-4494-a0a1-723b2b6dcd69"
-        id = "TeamCityPlugins_GradleInitScripts_BuildTeamCity20172"
+        id("TeamCityPlugins_GradleInitScripts_BuildTeamCity20172")
         name = "Build - TeamCity 2017.2"
 
         params {
@@ -128,9 +128,9 @@ project {
         }
     }))
     buildType(BuildType({
-        template(buildTemplate)
+        templates(buildTemplate)
         uuid = "5f3fa0bd-698c-4494-a0a1-6dcd69723b2b"
-        id = "TeamCityPlugins_GradleInitScripts_BuildTeamCity20181"
+        id("TeamCityPlugins_GradleInitScripts_BuildTeamCity20181")
         name = "Build - TeamCity 2018.1"
 
         params {
@@ -138,9 +138,9 @@ project {
         }
     }))
     buildType(BuildType({
-        template(buildTemplate)
+        templates(buildTemplate)
         uuid = "b7332c3b-11ba-46ba-9da4-6defe8caf4e1"
-        id = "TeamCityPlugins_GradleInitScripts_ReportCodeQuality"
+        id("TeamCityPlugins_GradleInitScripts_ReportCodeQuality")
         name = "Report - Code Quality"
 
         params {
