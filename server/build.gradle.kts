@@ -29,6 +29,16 @@ dependencies {
     testRuntime (kotlin("runtime"))
 }
 
+tasks.getByName<Test>("test") {
+    finalizedBy(tasks.getByName("jacocoTestReport"))
+}
+
+tasks.getByName<JacocoReport>("jacocoTestReport") {
+    reports {
+        xml.isEnabled = true
+    }
+}
+
 teamcity {
     server {
         archiveName = "gradle-init-scripts-${rootProject.version}.zip"

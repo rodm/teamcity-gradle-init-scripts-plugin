@@ -16,6 +16,16 @@ dependencies {
     testCompile (group = "org.mockito", name = "mockito-core", version = "2.7.22")
 }
 
+tasks.getByName<Test>("test") {
+    finalizedBy(tasks.getByName("jacocoTestReport"))
+}
+
+tasks.getByName<JacocoReport>("jacocoTestReport") {
+    reports {
+        xml.isEnabled = true
+    }
+}
+
 teamcity {
     agent {
         archiveName = "gradle-init-scripts-agent.zip"
