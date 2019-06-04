@@ -1,31 +1,17 @@
 
 import com.github.rodm.teamcity.TeamCityEnvironment
-import com.github.rodm.teamcity.TeamCityPluginExtension
-import com.github.rodm.teamcity.tasks.PublishTask
 
 plugins {
     kotlin("jvm")
-}
-
-apply {
-    plugin("groovy")
-    plugin("org.gradle.jacoco")
-    plugin("com.github.rodm.teamcity-server")
+    id ("groovy")
+    id ("org.gradle.jacoco")
+    id ("com.github.rodm.teamcity-server")
+    id ("com.github.rodm.teamcity-environments")
 }
 
 extra["downloadsDir"] = project.findProperty("downloads.dir") ?: "${rootDir}/downloads"
 extra["serversDir"] = project.findProperty("servers.dir") ?: "${rootDir}/servers"
 extra["java8Home"] = project.findProperty("java8.home") ?: "/opt/jdk1.8.0_131"
-
-configurations {
-    all {
-        exclude(module = "xom")
-        exclude(module = "slf4j-log4j12")
-    }
-}
-
-val agent = configurations.getByName("agent")
-val provided = configurations.getByName("provided")
 
 dependencies {
     compile (project(":common"))
@@ -43,11 +29,6 @@ dependencies {
     testRuntime (kotlin("runtime"))
 }
 
-tasks.withType<PublishTask> {
-    username = findProperty("jetbrains.username") as String?
-    password = findProperty("jetbrains.password") as String?
-}
-
 teamcity {
     server {
         archiveName = "gradle-init-scripts-${rootProject.version}.zip"
@@ -62,6 +43,10 @@ teamcity {
             downloadUrl = "https://github.com/rodm/teamcity-gradle-init-scripts-plugin"
             email = "rod.n.mackenzie@gmail.com"
             useSeparateClassloader = true
+        }
+
+        publish {
+            token = findProperty("jetbrains.token") as String?
         }
     }
 
@@ -92,8 +77,4 @@ teamcity {
             version = "2018.1"
         }
     }
-}
-
-fun Project.teamcity(configuration: TeamCityPluginExtension.() -> Unit) {
-    configure(configuration)
 }

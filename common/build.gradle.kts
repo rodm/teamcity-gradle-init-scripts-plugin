@@ -1,15 +1,6 @@
 
 plugins {
     kotlin("jvm")
-}
-
-apply {
-    plugin("org.gradle.jacoco")
-    plugin("com.github.rodm.teamcity-common")
-}
-
-configurations {
-    all {
-        exclude(module = "xom")
-    }
+    id ("org.gradle.jacoco")
+    id ("com.github.rodm.teamcity-common")
 }

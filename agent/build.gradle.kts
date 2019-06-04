@@ -1,19 +1,8 @@
 
-import com.github.rodm.teamcity.TeamCityPluginExtension
-
 plugins {
     kotlin("jvm")
-}
-
-apply {
-    plugin("org.gradle.jacoco")
-    plugin("com.github.rodm.teamcity-agent")
-}
-
-configurations {
-    all {
-        exclude(module = "xom")
-    }
+    id ("org.gradle.jacoco")
+    id ("com.github.rodm.teamcity-agent")
 }
 
 dependencies {
@@ -36,8 +25,4 @@ teamcity {
             }
         }
     }
-}
-
-fun Project.teamcity(configuration: TeamCityPluginExtension.() -> Unit) {
-    configure(configuration)
 }

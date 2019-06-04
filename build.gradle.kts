@@ -1,5 +1,4 @@
 
-import com.github.rodm.teamcity.TeamCityPluginExtension
 import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.tasks.RecordingCopyTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -56,12 +55,4 @@ bintray {
             name = project.version as String
         })
     })
-}
-
-fun Project.teamcity(configuration: TeamCityPluginExtension.() -> Unit) {
-    configure(configuration)
-}
-
-fun Project.bintray(configuration: BintrayExtension.() -> Unit) {
-    configure(configuration)
 }
