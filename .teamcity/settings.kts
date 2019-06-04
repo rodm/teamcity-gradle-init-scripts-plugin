@@ -76,8 +76,8 @@ project {
 
     buildType {
         templates(buildTemplate)
-        id("BuildTeamCity100")
-        name = "Build - TeamCity 10.0"
+        id("BuildTeamCity1")
+        name = "Build - TeamCity 2018.1"
 
         features {
             feature {
@@ -89,41 +89,21 @@ project {
 
     buildType {
         templates(buildTemplate)
-        id("BuildTeamCity20171")
-        name = "Build - TeamCity 2017.1"
-
-        params {
-            param("gradle.opts", "-Pteamcity.api.version=2017.1")
-        }
-    }
-
-    buildType {
-        templates(buildTemplate)
-        id("BuildTeamCity20172")
-        name = "Build - TeamCity 2017.2"
-
-        params {
-            param("gradle.opts", "-Pteamcity.api.version=2017.2")
-        }
-    }
-
-    buildType {
-        templates(buildTemplate)
-        id("BuildTeamCity20181")
-        name = "Build - TeamCity 2018.1"
-
-        params {
-            param("gradle.opts", "-Pteamcity.api.version=2018.1")
-        }
-    }
-
-    buildType {
-        templates(buildTemplate)
-        id("BuildTeamCity20182")
+        id("BuildTeamCity2")
         name = "Build - TeamCity 2018.2"
 
         params {
             param("gradle.opts", "-Pteamcity.api.version=2018.2")
+        }
+    }
+
+    buildType {
+        templates(buildTemplate)
+        id("BuildTeamCity3")
+        name = "Build - TeamCity 2019.1"
+
+        params {
+            param("gradle.opts", "-Pteamcity.api.version=2019.1")
         }
     }
 

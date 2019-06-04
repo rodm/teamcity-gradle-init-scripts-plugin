@@ -11,7 +11,7 @@ plugins {
     id ("org.sonarqube") version "2.6.2"
 }
 
-extra["teamcityVersion"] = project.findProperty("teamcity.api.version") as String? ?: "10.0"
+extra["teamcityVersion"] = project.findProperty("teamcity.api.version") as String? ?: "2018.1"
 
 group = "com.github.rodm"
 version = "1.1-SNAPSHOT"
