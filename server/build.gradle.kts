@@ -43,6 +43,7 @@ teamcity {
             downloadUrl = "https://github.com/rodm/teamcity-gradle-init-scripts-plugin"
             email = "rod.n.mackenzie@gmail.com"
             useSeparateClassloader = true
+            minimumBuild = "58245"
         }
 
         publish {
