@@ -55,26 +55,20 @@ teamcity {
         baseHomeDir = extra["serversDir"] as String
         baseDataDir = "${rootDir}/data"
 
-        operator fun String.invoke(block: TeamCityEnvironment.() -> Unit) {
-            environments.create(this, closureOf<TeamCityEnvironment>(block))
-        }
+        operator fun String.invoke(block: TeamCityEnvironment.() -> Unit) = environments.create(this, closureOf(block))
 
-        "teamcity10" {
-            version = "10.0.5"
+        "teamcity2018.1" {
+            version = "2018.1.5"
             serverOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
             agentOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006")
         }
 
-        "teamcity2017.1" {
-            version = "2017.1.5"
+        "teamcity2018.2" {
+            version = "2018.2.4"
         }
 
-        "teamcity2017.2" {
-            version = "2017.2.4"
-        }
-
-        "teamcity2018.1" {
-            version = "2018.1"
+        "teamcity2019.1" {
+            version = "2019.1"
         }
     }
 }
