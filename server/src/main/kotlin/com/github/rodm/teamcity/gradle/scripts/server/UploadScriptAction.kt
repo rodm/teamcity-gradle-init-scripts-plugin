@@ -35,11 +35,11 @@ class UploadScriptAction(val projectManager: ProjectManager,
         controllerManager.registerController("/admin/uploadInitScript.html", this)
     }
 
-    override fun doPost(request: HttpServletRequest?, response: HttpServletResponse?): ModelAndView {
+    override fun doPost(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
         val modelAndView = ModelAndView("/_fileUploadResponse.jsp")
         val model = modelAndView.model
         model.put("jsBase", "BS.GradleAddInitScripts")
-        val fileName = request!!.getParameter("fileName")
+        val fileName = request.getParameter("fileName")
         if (StringUtil.isEmpty(fileName)) {
             model.put("error", "File name must be provided")
             return modelAndView
