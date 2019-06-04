@@ -19,6 +19,8 @@ package com.github.rodm.teamcity.gradle.scripts.server
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
 import jetbrains.buildServer.serverSide.BuildFeature
+import jetbrains.buildServer.serverSide.InvalidProperty
+import jetbrains.buildServer.serverSide.PropertiesProcessor
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 
 class InitScriptsBuildFeature(private val descriptor: PluginDescriptor) : BuildFeature() {
@@ -34,5 +36,20 @@ class InitScriptsBuildFeature(private val descriptor: PluginDescriptor) : BuildF
     override fun describeParameters(params: MutableMap<String, String>): String {
         val initScriptName = params[INIT_SCRIPT_NAME]
         return "Runs Gradle build steps with the '$initScriptName' initialization script"
+    }
+
+    override fun getParametersProcessor(): PropertiesProcessor? {
+        return InitScriptsParametersProcessor()
+    }
+}
+
+class InitScriptsParametersProcessor : PropertiesProcessor {
+    override fun process(properties: MutableMap<String, String>?): MutableCollection<InvalidProperty> {
+        val invalidProperties = mutableListOf<InvalidProperty>()
+        val scriptName = properties?.get(INIT_SCRIPT_NAME)
+        if (scriptName == null) {
+            invalidProperties.add(InvalidProperty(INIT_SCRIPT_NAME, "An init script must be selected"))
+        }
+        return invalidProperties
     }
 }
