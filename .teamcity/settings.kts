@@ -1,9 +1,9 @@
 
 import jetbrains.buildServer.configs.kotlin.v2018_2.version
 import jetbrains.buildServer.configs.kotlin.v2018_2.project
-import jetbrains.buildServer.configs.kotlin.v2018_2.CheckoutMode
+import jetbrains.buildServer.configs.kotlin.v2018_2.CheckoutMode.ON_SERVER
 import jetbrains.buildServer.configs.kotlin.v2018_2.buildSteps.gradle
-import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.VcsTrigger
+import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.VcsTrigger.QuietPeriodMode.USE_DEFAULT
 import jetbrains.buildServer.configs.kotlin.v2018_2.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.v2018_2.vcs.GitVcsRoot
 
@@ -16,6 +16,11 @@ project {
         id(vcsId)
         name = "gradle-init-scripts"
         url = "https://github.com/rodm/teamcity-gradle-init-scripts-plugin.git"
+        branchSpec = """
+            +:refs/heads/(master)
+            +:refs/tags/(*)
+        """.trimIndent()
+        useTagsAsBranches = true
         useMirrors = false
     }
     vcsRoot(vcs)
@@ -40,7 +45,7 @@ project {
 
         vcs {
             root(vcs)
-            checkoutMode = CheckoutMode.ON_SERVER
+            checkoutMode = ON_SERVER
         }
 
         steps {
@@ -58,7 +63,8 @@ project {
         triggers {
             vcs {
                 id = "vcsTrigger"
-                quietPeriodMode = VcsTrigger.QuietPeriodMode.USE_DEFAULT
+                quietPeriodMode = USE_DEFAULT
+                branchFilter = "+:*"
             }
         }
 
