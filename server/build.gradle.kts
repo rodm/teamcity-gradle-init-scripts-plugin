@@ -14,17 +14,17 @@ extra["serversDir"] = project.findProperty("servers.dir") ?: "${rootDir}/servers
 extra["java8Home"] = project.findProperty("java8.home") ?: "/opt/jdk1.8.0_131"
 
 dependencies {
-    compile (project(":common"))
-    compile (kotlin("stdlib"))
+    implementation (project(":common"))
+    implementation (kotlin("stdlib"))
 
     provided (group = "org.jetbrains.teamcity.internal", name = "server", version = rootProject.extra["teamcityVersion"] as String?)
 
     agent (project(path = ":agent", configuration = "plugin"))
 
-    testCompile (localGroovy())
-    testCompile (group = "junit", name = "junit", version = "4.12")
-    testCompile (group = "org.hamcrest", name = "hamcrest-library", version = "1.3")
-    testCompile (group = "org.mockito", name = "mockito-core", version = "2.7.22")
+    testImplementation (localGroovy())
+    testImplementation (group = "junit", name = "junit", version = "4.12")
+    testImplementation (group = "org.hamcrest", name = "hamcrest-library", version = "1.3")
+    testImplementation (group = "org.mockito", name = "mockito-core", version = "2.7.22")
 }
 
 tasks.getByName<Test>("test") {
