@@ -1,6 +1,4 @@
 
-import com.github.rodm.teamcity.TeamCityEnvironment
-
 plugins {
     kotlin("jvm")
     id ("groovy")
@@ -27,11 +25,11 @@ dependencies {
     testImplementation (group = "org.mockito", name = "mockito-core", version = "2.7.22")
 }
 
-tasks.getByName<Test>("test") {
-    finalizedBy(tasks.getByName("jacocoTestReport"))
+tasks.named("test") {
+    finalizedBy(tasks.named("jacocoTestReport"))
 }
 
-tasks.getByName<JacocoReport>("jacocoTestReport") {
+tasks.named<JacocoReport>("jacocoTestReport") {
     reports {
         xml.isEnabled = true
     }
@@ -64,19 +62,17 @@ teamcity {
         baseHomeDir = extra["serversDir"] as String
         baseDataDir = "${rootDir}/data"
 
-        operator fun String.invoke(block: TeamCityEnvironment.() -> Unit) = environments.create(this, closureOf(block))
-
-        "teamcity2018.1" {
+        register("teamcity2018.1") {
             version = "2018.1.5"
             serverOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
             agentOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006")
         }
 
-        "teamcity2018.2" {
+        register("teamcity2018.2") {
             version = "2018.2.4"
         }
 
-        "teamcity2019.1" {
+        register("teamcity2019.1") {
             version = "2019.1"
         }
     }

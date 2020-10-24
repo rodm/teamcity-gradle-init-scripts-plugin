@@ -15,11 +15,11 @@ dependencies {
     testImplementation (group = "org.mockito", name = "mockito-core", version = "2.7.22")
 }
 
-tasks.getByName<Test>("test") {
-    finalizedBy(tasks.getByName("jacocoTestReport"))
+tasks.named("test") {
+    finalizedBy (tasks.named("jacocoTestReport"))
 }
 
-tasks.getByName<JacocoReport>("jacocoTestReport") {
+tasks.named<JacocoReport>("jacocoTestReport") {
     reports {
         xml.isEnabled = true
     }
