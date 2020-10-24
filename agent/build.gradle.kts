@@ -8,7 +8,6 @@ plugins {
 dependencies {
     compile (project(":common"))
     compile (kotlin("stdlib"))
-    runtime (kotlin("runtime"))
 
     testCompile (kotlin("reflect"))
     testCompile (group = "junit", name = "junit", version = "4.12")

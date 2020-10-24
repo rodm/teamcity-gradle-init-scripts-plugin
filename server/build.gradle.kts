@@ -25,8 +25,6 @@ dependencies {
     testCompile (group = "junit", name = "junit", version = "4.12")
     testCompile (group = "org.hamcrest", name = "hamcrest-library", version = "1.3")
     testCompile (group = "org.mockito", name = "mockito-core", version = "2.7.22")
-
-    testRuntime (kotlin("runtime"))
 }
 
 tasks.getByName<Test>("test") {
@@ -57,7 +55,7 @@ teamcity {
         }
 
         publish {
-            token = findProperty("jetbrains.token") as String?
+            token.set(findProperty("jetbrains.token") as String?)
         }
     }
 

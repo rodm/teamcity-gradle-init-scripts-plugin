@@ -4,10 +4,10 @@ import com.jfrog.bintray.gradle.tasks.RecordingCopyTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.2.71" apply false
-    id ("com.github.rodm.teamcity-server") version "1.2.1" apply true
-    id ("com.jfrog.bintray") version "1.8.4"
-    id ("org.sonarqube") version "2.7.1"
+    kotlin("jvm") version "1.3.72" apply false
+    id ("com.github.rodm.teamcity-server") version "1.3.1" apply true
+    id ("com.jfrog.bintray") version "1.8.5"
+    id ("org.sonarqube") version "3.0"
 }
 
 extra["teamcityVersion"] = project.findProperty("teamcity.api.version") as String? ?: "2018.1"
