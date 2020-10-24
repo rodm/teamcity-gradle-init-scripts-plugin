@@ -20,9 +20,9 @@ dependencies {
     agent (project(path = ":agent", configuration = "plugin"))
 
     testImplementation (localGroovy())
-    testImplementation (group = "junit", name = "junit", version = "4.12")
-    testImplementation (group = "org.hamcrest", name = "hamcrest-library", version = "1.3")
-    testImplementation (group = "org.mockito", name = "mockito-core", version = "2.7.22")
+    testImplementation (group = "junit", name = "junit", version = "4.13.1")
+    testImplementation (group = "org.hamcrest", name = "hamcrest-library", version = "2.2")
+    testImplementation (group = "org.mockito", name = "mockito-core", version = "3.5.15")
 }
 
 tasks.named("test") {
