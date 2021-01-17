@@ -4,12 +4,14 @@
 :uri-gradle-init-scripts: {uri-gradle-docs}/init_scripts.html[Gradle init scripts]
 :uri-jetbrains-plugin: https://plugins.jetbrains.com/plugin/9665-gradle-init-scripts
 :uri-bintray-plugin: https://bintray.com/rodm/teamcity-plugins-generic/gradle-init-scripts
+:uri-github-project: https://github.com/rodm/teamcity-gradle-init-scripts-plugin/actions
+:uri-github-status: https://github.com/rodm/teamcity-gradle-init-scripts-plugin/workflows/Build/badge.svg
 
 A {uri-teamcity} plugin that provides support for reusing {uri-gradle-init-scripts}
 between build configurations.
 
-image:https://travis-ci.org/rodm/teamcity-gradle-init-scripts-plugin.svg?branch=master["Build Status", link="https://travis-ci.org/rodm/teamcity-gradle-init-scripts-plugin"]
-image:https://api.bintray.com/packages/rodm/teamcity-plugins-generic/gradle-init-scripts/images/download.svg[link="https://bintray.com/rodm/teamcity-plugins-generic/gradle-init-scripts/_latestVersion"]
+image:{uri-github-status}?branch=master["Build Status", link="{uri-github-project}"]
+image:https://api.bintray.com/packages/rodm/teamcity-plugins-generic/gradle-init-scripts/images/download.svg[link="{uri-bintray-plugin}/_latestVersion"]
 
 ## Features
 
