@@ -68,12 +68,8 @@ teamcity {
             agentOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006")
         }
 
-        register("teamcity2018.2") {
-            version = "2018.2.4"
-        }
-
-        register("teamcity2019.1") {
-            version = "2019.1"
+        register("teamcity2020.2") {
+            version = "2020.2.1"
         }
     }
 }
