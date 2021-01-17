@@ -96,20 +96,10 @@ project {
     buildType {
         templates(buildTemplate)
         id("BuildTeamCity2")
-        name = "Build - TeamCity 2018.2"
+        name = "Build - TeamCity 2020.2"
 
         params {
-            param("gradle.opts", "-Pteamcity.api.version=2018.2")
-        }
-    }
-
-    buildType {
-        templates(buildTemplate)
-        id("BuildTeamCity3")
-        name = "Build - TeamCity 2019.1"
-
-        params {
-            param("gradle.opts", "-Pteamcity.api.version=2019.1")
+            param("gradle.opts", "-Pteamcity.api.version=2020.2")
         }
     }
 
