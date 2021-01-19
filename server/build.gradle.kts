@@ -52,6 +52,12 @@ teamcity {
             minimumBuild = "58245"
         }
 
+        files {
+            into("kotlin-dsl") {
+                from("kotlin-dsl")
+            }
+        }
+
         publish {
             token.set(findProperty("jetbrains.token") as String?)
         }
