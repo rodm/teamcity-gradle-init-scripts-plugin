@@ -21,6 +21,11 @@
     </extends>
 
     <params>
-        <param name="gradle.init.script.name" dslName="initScriptName"  description="The name of the Gradle Init Script"/>
+        <param name="gradle.init.script.name" dslName="initScriptName">
+            <description>
+                The name of the Gradle Init Script.
+                Build step [example](https://github.com/rodm/teamcity-gradle-init-scripts-plugin/blob/master/README.adoc#gradle-build-step)
+            </description>
+        </param>
     </params>
 </dsl-add-on>

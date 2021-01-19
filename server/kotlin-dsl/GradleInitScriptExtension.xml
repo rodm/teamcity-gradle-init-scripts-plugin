@@ -26,8 +26,8 @@
 
     <function name="gradleInitScript">
         <description>
-            Adds a [build feature](https://github.com/rodm/teamcity-gradle-init-scripts-plugin) that applies a Gradle Init Script
-            to each Gradle Build Step.
+            Adds a [build feature](https://github.com/rodm/teamcity-gradle-init-scripts-plugin/blob/master/README.adoc#gradle-build-feature)
+            that applies a Gradle Init Script to each Gradle Build Step.
         </description>
     </function>
 
