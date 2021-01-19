@@ -48,6 +48,40 @@ click on the link _Upload plugin zip_ to install the downloaded plugin file.
 * Edit a build configuration and either configure an init script for a build step using the Gradle runner or
 add the Build Feature, Gradle Init Script, and select the init script to use.
 
+== Kotlin DSL
+
+The plugin extends the Kotlin DSL to support applying a Gradle init script to a Gradle build step or to each
+Gradle build step in build configuration via a build feature.
+
+=== Gradle build step
+
+The example below shows applying an init script to a Gradle build step.
+
+[source, kotlin]
+----
+    steps {
+        gradle {
+            tasks = "clean build"
+            enableStacktrace = true
+            jdkHome = "%env.JDK_18%"
+            initScriptName = "init-script.gradle"
+        }
+    }
+----
+
+=== Gradle build feature
+
+The example below shows applying an init script as a build feature.
+
+[source, kotlin]
+----
+    features {
+        gradleInitScript {
+            scriptName = "init-script.gradle"
+        }
+    }
+----
+
 == Compatibility
 
 The plugin is compatible with TeamCity 2018.1 and later and requires the build agent to be running with Java 8.
