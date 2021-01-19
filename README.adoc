@@ -13,7 +13,7 @@ between build configurations.
 image:{uri-github-status}?branch=master["Build Status", link="{uri-github-project}"]
 image:https://api.bintray.com/packages/rodm/teamcity-plugins-generic/gradle-init-scripts/images/download.svg[link="{uri-bintray-plugin}/_latestVersion"]
 
-## Features
+== Features
 
 * Upload Gradle initialization scripts to a project
 
@@ -27,11 +27,11 @@ image:https://api.bintray.com/packages/rodm/teamcity-plugins-generic/gradle-init
 
 * Supports saving scripts to the Versioned Settings VCS repository
 
-### Example Scripts
+=== Example Scripts
 
 Example scripts can be found in the link:scripts[scripts] directory.
 
-## Installation
+== Installation
 
 * Download the plugin from {uri-jetbrains-plugin}[JetBrains TeamCity Plugin Repository] or {uri-bintray-plugin}[Bintray]
 (see _Downloads_ section at the bottom of the page).
@@ -41,17 +41,17 @@ click on the link _Upload plugin zip_ to install the downloaded plugin file.
 
 * Restart TeamCity.
 
-## Using the plugin
+== Using the plugin
 
 * Edit a project, on the Gradle Init Scripts page upload an init script.
 
 * Edit a build configuration and either configure an init script for a build step using the Gradle runner or
 add the Build Feature, Gradle Init Script, and select the init script to use.
 
-## Compatibility
+== Compatibility
 
-The plugin is compatible with TeamCity 10.0 and later and requires the build agent to be running with Java 8.
+The plugin is compatible with TeamCity 2018.1 and later and requires the build agent to be running with Java 8.
 
-## License
+== License
 
 This plugin is available under the http://www.apache.org/licenses/LICENSE-2.0.html[Apache License, Version 2.0].
