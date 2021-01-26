@@ -19,6 +19,8 @@ package com.github.rodm.teamcity.gradle.scripts.server.health
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME_PARAMETER
+import jetbrains.buildServer.serverSide.BuildTypeTemplate
+import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusItem
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusItemConsumer
 import jetbrains.buildServer.serverSide.healthStatus.HealthStatusReport
@@ -55,32 +57,48 @@ class SameInitScriptsHealthReport(pagePlaces: PagePlaces, descriptor: PluginDesc
 
     override fun report(scope: HealthStatusScope, resultConsumer: HealthStatusItemConsumer) {
         for (buildType in scope.buildTypes) {
-            for (feature in buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
-                val featureScriptName = feature.parameters[INIT_SCRIPT_NAME]
-                buildType.buildRunners.forEach { runner ->
-                    val scriptName = runner.parameters[INIT_SCRIPT_NAME_PARAMETER]
-                    if (scriptName != null && scriptName == featureScriptName) {
-                        val data = mapOf("buildType" to buildType, "scriptName" to scriptName)
-                        val identity = CATEGORY.id + "_" + buildType.buildTypeId
-                        val statusItem = HealthStatusItem(identity, CATEGORY, data)
-                        resultConsumer.consumeForBuildType(buildType, statusItem)
-                    }
-                }
-            }
+            reportBuildType(resultConsumer, buildType)
         }
         for (buildTemplate in scope.buildTypeTemplates) {
-            for (feature in buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
-                val featureScriptName = feature.parameters[INIT_SCRIPT_NAME]
-                buildTemplate.buildRunners.forEach { runner ->
-                    val scriptName = runner.parameters[INIT_SCRIPT_NAME_PARAMETER]
-                    if (scriptName != null && scriptName == featureScriptName) {
-                        val data = mapOf("buildTemplate" to buildTemplate, "scriptName" to scriptName)
-                        val identity = CATEGORY.id + "_" + buildTemplate.id
-                        val statusItem = HealthStatusItem(identity, CATEGORY, data)
-                        resultConsumer.consumeForTemplate(buildTemplate, statusItem)
-                    }
+            reportBuildTemplate(resultConsumer, buildTemplate)
+        }
+    }
+
+    private fun reportBuildType(resultConsumer: HealthStatusItemConsumer, buildType: SBuildType) {
+        for (feature in buildType.getBuildFeaturesOfType(FEATURE_TYPE)) {
+            val featureScriptName = feature.parameters[INIT_SCRIPT_NAME]
+            buildType.buildRunners.forEach { runner ->
+                val scriptName = runner.parameters[INIT_SCRIPT_NAME_PARAMETER]
+                if (scriptName != null && scriptName == featureScriptName) {
+                    val statusItem = createBuildTypeStatusItem(buildType, scriptName)
+                    resultConsumer.consumeForBuildType(buildType, statusItem)
                 }
             }
         }
+    }
+
+    private fun createBuildTypeStatusItem(buildType: SBuildType, scriptName: String): HealthStatusItem {
+        val identity = CATEGORY.id + "_" + buildType.buildTypeId
+        val data = mapOf("buildType" to buildType, "scriptName" to scriptName)
+        return HealthStatusItem(identity, CATEGORY, data)
+    }
+
+    private fun reportBuildTemplate(resultConsumer: HealthStatusItemConsumer, buildTemplate: BuildTypeTemplate) {
+        for (feature in buildTemplate.getBuildFeaturesOfType(FEATURE_TYPE)) {
+            val featureScriptName = feature.parameters[INIT_SCRIPT_NAME]
+            buildTemplate.buildRunners.forEach { runner ->
+                val scriptName = runner.parameters[INIT_SCRIPT_NAME_PARAMETER]
+                if (scriptName != null && scriptName == featureScriptName) {
+                    val statusItem = createBuildTemplateStatusItem(buildTemplate, scriptName)
+                    resultConsumer.consumeForTemplate(buildTemplate, statusItem)
+                }
+            }
+        }
+    }
+
+    private fun createBuildTemplateStatusItem(buildTemplate: BuildTypeTemplate, scriptName: String): HealthStatusItem {
+        val identity = CATEGORY.id + "_" + buildTemplate.id
+        val data = mapOf("buildTemplate" to buildTemplate, "scriptName" to scriptName)
+        return HealthStatusItem(identity, CATEGORY, data)
     }
 }
