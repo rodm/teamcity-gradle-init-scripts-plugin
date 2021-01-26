@@ -1,7 +1,6 @@
 
 import jetbrains.buildServer.configs.kotlin.v2019_2.version
 import jetbrains.buildServer.configs.kotlin.v2019_2.project
-import jetbrains.buildServer.configs.kotlin.v2019_2.CheckoutMode.ON_SERVER
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.VcsTrigger.QuietPeriodMode.USE_DEFAULT
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.vcs
@@ -45,7 +44,6 @@ project {
 
         vcs {
             root(vcs)
-            checkoutMode = ON_SERVER
         }
 
         steps {
