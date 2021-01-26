@@ -73,7 +73,6 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
     override fun getScriptNames(project: SProject): Map<SProject, List<String>> {
         val foundNames = HashSet<String>()
         val result = LinkedHashMap<SProject, List<String>>()
-        val filter: KFunction1<File, Boolean> = File::isFile
 
         val projectPath = project.projectPath
         val iter = projectPath.listIterator(projectPath.size)
@@ -82,19 +81,11 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
             val currentProject = iter.previous()
 
             try {
-                val pluginDataDirectory = getPluginDataDirectory(currentProject)
-                val files = pluginDataDirectory.listFiles(filter)
-                if (files != null && files.isNotEmpty()) {
-                    val scripts = ArrayList<String>()
-                    for (file in files) {
-                        if (!foundNames.contains(file.name)) {
-                            scripts.add(file.name)
-                            foundNames.add(file.name)
-                        }
-                    }
-                    if (scripts.size > 0) {
-                        result.put(currentProject, scripts)
-                    }
+                val scripts = getScriptNamesForProject(currentProject)
+                scripts.removeAll(foundNames)
+                foundNames.addAll(scripts)
+                if (scripts.size > 0) {
+                    result[currentProject] = scripts
                 }
             } catch (e: IOException) {
                 LOG.error(e.message)
@@ -102,6 +93,19 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
             }
         }
         return result
+    }
+
+    private val filter: KFunction1<File, Boolean> = File::isFile
+
+    private fun getScriptNamesForProject(project: SProject): MutableList<String> {
+        val scripts = mutableListOf<String>()
+        val files = getPluginDataDirectory(project).listFiles(filter)
+        if (files != null && files.isNotEmpty()) {
+            for (file in files) {
+                scripts.add(file.name)
+            }
+        }
+        return scripts
     }
 
     override fun getScriptsCount(project: SProject): Int {
