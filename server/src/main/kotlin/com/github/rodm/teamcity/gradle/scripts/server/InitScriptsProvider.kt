@@ -24,6 +24,7 @@ import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRI
 import jetbrains.buildServer.log.Loggers.SERVER_CATEGORY
 import jetbrains.buildServer.serverSide.BuildStartContext
 import jetbrains.buildServer.serverSide.BuildStartContextProcessor
+import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.SRunnerContext
 import org.apache.log4j.Logger
 
@@ -36,31 +37,36 @@ open class InitScriptsProvider(private val scriptsManager: GradleScriptsManager)
             if (isGradleRunner(runnerContext)) {
                 val buildType = context.build.buildType
                 if (buildType != null) {
-                    val project = buildType.project
-
-                    var scriptName = runnerContext.parameters[INIT_SCRIPT_NAME_PARAMETER]
-                    if (scriptName != null) {
-                        val scriptContent = scriptsManager.findScript(project, scriptName)
-                        if (scriptContent != null) {
-                            runnerContext.addRunnerParameter(INIT_SCRIPT_NAME_PARAMETER, scriptName)
-                            runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT_PARAMETER, scriptContent)
-                        } else {
-                            log.error("Init script '$scriptName' not found")
-                        }
-                    }
-
-                    val features = buildType.getBuildFeaturesOfType(FEATURE_TYPE)
-                    for (feature in features) {
-                        scriptName = feature.parameters[INIT_SCRIPT_NAME]
-                        val scriptContent = scriptsManager.findScript(project, scriptName!!)
-                        runnerContext.addRunnerParameter(INIT_SCRIPT_NAME, scriptName)
-                        if (scriptContent != null) {
-                            runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT, scriptContent)
-                        } else {
-                            log.error("Init script '$scriptName' not found")
-                        }
-                    }
+                    applyBuildRunnerParameters(runnerContext, buildType)
+                    applyBuildFeatureParameters(runnerContext, buildType)
                 }
+            }
+        }
+    }
+
+    private fun applyBuildRunnerParameters(runnerContext: SRunnerContext, buildType: SBuildType) {
+        val scriptName = runnerContext.parameters[INIT_SCRIPT_NAME_PARAMETER]
+        if (scriptName != null) {
+            val scriptContent = scriptsManager.findScript(buildType.project, scriptName)
+            if (scriptContent != null) {
+                runnerContext.addRunnerParameter(INIT_SCRIPT_NAME_PARAMETER, scriptName)
+                runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT_PARAMETER, scriptContent)
+            } else {
+                log.error("Init script '$scriptName' not found")
+            }
+        }
+    }
+
+    private fun applyBuildFeatureParameters(runnerContext: SRunnerContext, buildType: SBuildType) {
+        val features = buildType.getBuildFeaturesOfType(FEATURE_TYPE)
+        for (feature in features) {
+            val scriptName = feature.parameters[INIT_SCRIPT_NAME]
+            val scriptContent = scriptsManager.findScript(buildType.project, scriptName!!)
+            runnerContext.addRunnerParameter(INIT_SCRIPT_NAME, scriptName)
+            if (scriptContent != null) {
+                runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT, scriptContent)
+            } else {
+                log.error("Init script '$scriptName' not found")
             }
         }
     }
