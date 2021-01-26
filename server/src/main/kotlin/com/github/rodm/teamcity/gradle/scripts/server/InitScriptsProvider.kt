@@ -29,7 +29,7 @@ import org.apache.log4j.Logger
 
 open class InitScriptsProvider(private val scriptsManager: GradleScriptsManager) : BuildStartContextProcessor {
 
-    private val LOG = Logger.getLogger(SERVER_CATEGORY + ".GradleInitScripts")
+    private val log = Logger.getLogger("$SERVER_CATEGORY.GradleInitScripts")
 
     override fun updateParameters(context: BuildStartContext) {
         for (runnerContext in context.runnerContexts) {
@@ -45,7 +45,7 @@ open class InitScriptsProvider(private val scriptsManager: GradleScriptsManager)
                             runnerContext.addRunnerParameter(INIT_SCRIPT_NAME_PARAMETER, scriptName)
                             runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT_PARAMETER, scriptContent)
                         } else {
-                            LOG.error("Init script '$scriptName' not found")
+                            log.error("Init script '$scriptName' not found")
                         }
                     }
 
@@ -57,7 +57,7 @@ open class InitScriptsProvider(private val scriptsManager: GradleScriptsManager)
                         if (scriptContent != null) {
                             runnerContext.addRunnerParameter(INIT_SCRIPT_CONTENT, scriptContent)
                         } else {
-                            LOG.error("Init script '$scriptName' not found")
+                            log.error("Init script '$scriptName' not found")
                         }
                     }
                 }

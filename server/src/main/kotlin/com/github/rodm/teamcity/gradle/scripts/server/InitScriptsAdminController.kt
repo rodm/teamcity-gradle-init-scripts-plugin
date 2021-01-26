@@ -35,13 +35,13 @@ class InitScriptsAdminController(server: SBuildServer,
                                  controllerManager: WebControllerManager,
                                  val scriptsManager: GradleScriptsManager) : BaseController(server)
 {
-    private val LOG = Logger.getLogger(SERVER_CATEGORY + ".GradleInitScripts")
+    private val log = Logger.getLogger("$SERVER_CATEGORY.GradleInitScripts")
 
     init {
         controllerManager.registerController("/admin/initScripts.html", this)
     }
 
-    override fun doHandle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView? {
+    override fun doHandle(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
         val model = ModelAndView(pluginDescriptor.getPluginResourcesPath("initScriptChooser.jsp"))
         model.addObject("scripts", getScriptNames(request))
         model.addObject("chooserName", getChooserName(request))
@@ -53,12 +53,12 @@ class InitScriptsAdminController(server: SBuildServer,
     private fun getScriptNames(request: HttpServletRequest): Map<SProject, List<String>> {
         val projectId = request.getParameter("projectId")
         if (projectId == null) {
-            LOG.error("Missing request parameter 'projectId'")
+            log.error("Missing request parameter 'projectId'")
             return emptyMap()
         }
         val project = projectManager.findProjectById(projectId)
         if (project == null) {
-            LOG.error("Project not found: projectId: " + projectId)
+            log.error("Project not found: projectId: " + projectId)
             return emptyMap()
         }
         return scriptsManager.getScriptNames(project)
@@ -83,7 +83,7 @@ class InitScriptsAdminController(server: SBuildServer,
     private fun getProject(request: HttpServletRequest): SProject? {
         val projectId = request.getParameter("projectId")
         if (projectId == null) {
-            LOG.error("Missing request parameter 'projectId'")
+            log.error("Missing request parameter 'projectId'")
             return null
         }
         return projectManager.findProjectById(projectId)

@@ -34,11 +34,11 @@ import kotlin.reflect.KFunction1
 
 class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
                                   registry: VersionedSettingsRegistry,
-                                  val configChangesListener: ConfigFileChangesListener,
-                                  val configActionFactory: ConfigActionFactory)
+                                  private val configChangesListener: ConfigFileChangesListener,
+                                  private val configActionFactory: ConfigActionFactory)
     : GradleScriptsManager, CustomSettingsMapper
 {
-    private val LOG = Logger.getLogger(SERVER_CATEGORY + ".GradleInitScripts")
+    private val log = Logger.getLogger("$SERVER_CATEGORY.GradleInitScripts")
 
     private val pluginName = descriptor.pluginName
 
@@ -55,7 +55,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
                 try {
                     targetDir = FileUtil.createDir(target.getPluginDataDirectory(pluginName))
                 } catch (e: IOException) {
-                    LOG.warn("Could not create directory for project Gradle init scripts", e)
+                    log.warn("Could not create directory for project Gradle init scripts", e)
                     continue
                 }
                 for (sourceFile in files) {
@@ -63,7 +63,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
                     try {
                         FileUtil.copy(sourceFile, targetFile)
                     } catch (e: IOException) {
-                        LOG.warn("Could not copy script file: " + sourceFile.absolutePath + " to: " + targetFile.absolutePath, e)
+                        log.warn("Could not copy script file: " + sourceFile.absolutePath + " to: " + targetFile.absolutePath, e)
                     }
                 }
             }
@@ -88,7 +88,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
                     result[currentProject] = scripts
                 }
             } catch (e: IOException) {
-                LOG.error(e.message)
+                log.error(e.message)
                 result.clear()
             }
         }
@@ -150,7 +150,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
             }
         }
         catch (e: IOException) {
-            LOG.error(e.message)
+            log.error(e.message)
         }
         return result
     }
