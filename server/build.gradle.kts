@@ -75,7 +75,7 @@ teamcity {
         }
 
         register("teamcity2020.2") {
-            version = "2020.2.1"
+            version = "2020.2.2"
         }
     }
 }
