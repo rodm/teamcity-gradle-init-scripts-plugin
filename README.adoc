@@ -3,7 +3,6 @@
 :uri-gradle-docs: https://docs.gradle.org/current/userguide
 :uri-gradle-init-scripts: {uri-gradle-docs}/init_scripts.html[Gradle init scripts]
 :uri-jetbrains-plugin: https://plugins.jetbrains.com/plugin/9665-gradle-init-scripts
-:uri-bintray-plugin: https://bintray.com/rodm/teamcity-plugins-generic/gradle-init-scripts
 :uri-github-project: https://github.com/rodm/teamcity-gradle-init-scripts-plugin/actions
 :uri-github-status: https://github.com/rodm/teamcity-gradle-init-scripts-plugin/workflows/Build/badge.svg
 
@@ -11,7 +10,6 @@ A {uri-teamcity} plugin that provides support for reusing {uri-gradle-init-scrip
 between build configurations.
 
 image:{uri-github-status}?branch=master["Build Status", link="{uri-github-project}"]
-image:https://api.bintray.com/packages/rodm/teamcity-plugins-generic/gradle-init-scripts/images/download.svg[link="{uri-bintray-plugin}/_latestVersion"]
 
 == Features
 
@@ -33,8 +31,7 @@ Example scripts can be found in the link:scripts[scripts] directory.
 
 == Installation
 
-* Download the plugin from {uri-jetbrains-plugin}[JetBrains TeamCity Plugin Repository] or {uri-bintray-plugin}[Bintray]
-(see _Downloads_ section at the bottom of the page).
+* Download the plugin from {uri-jetbrains-plugin}[JetBrains TeamCity Plugin Repository].
 
 * Go to the plugin list of your TeamCity installation at `&lt;TeamCity URL&gt;/admin/admin.html?item=plugins` and
 click on the link _Upload plugin zip_ to install the downloaded plugin file.
