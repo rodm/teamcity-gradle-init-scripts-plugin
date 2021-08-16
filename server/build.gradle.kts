@@ -59,7 +59,7 @@ teamcity {
         }
 
         publish {
-            token.set(findProperty("jetbrains.token") as String?)
+            token = findProperty("jetbrains.token") as String?
         }
     }
 
