@@ -1,15 +1,26 @@
-= Gradle Init Scripts plugin
 :uri-teamcity: https://www.jetbrains.com/teamcity/[TeamCity]
 :uri-gradle-docs: https://docs.gradle.org/current/userguide
 :uri-gradle-init-scripts: {uri-gradle-docs}/init_scripts.html[Gradle init scripts]
-:uri-jetbrains-plugin: https://plugins.jetbrains.com/plugin/9665-gradle-init-scripts
-:uri-github-project: https://github.com/rodm/teamcity-gradle-init-scripts-plugin/actions
-:uri-github-status: https://github.com/rodm/teamcity-gradle-init-scripts-plugin/workflows/Build/badge.svg
+:uri-github: https://github.com
+:uri-shields: https://img.shields.io
+:uri-apache-license: https://www.apache.org/licenses/LICENSE-2.0.html[Apache License, Version 2.0]
+:plugin-id: 9665-gradle-init-scripts
+:plugin-name: teamcity-gradle-init-scripts-plugin
+:uri-project: {uri-github}/rodm/{plugin-name}
+:uri-download: https://plugins.jetbrains.com/plugin/{plugin-id}
+:uri-version: {uri-shields}/jetbrains/plugin/v/{plugin-id}?label=TeamCity%20plugin
+:uri-downloads: {uri-shields}/jetbrains/plugin/d/{plugin-id}?label=Downloads
+:uri-build-history: {uri-project}/actions
+:uri-build-status: {uri-project}/workflows/Build/badge.svg
+
+= Gradle Init Scripts plugin
 
 A {uri-teamcity} plugin that provides support for reusing {uri-gradle-init-scripts}
 between build configurations.
 
-image:{uri-github-status}?branch=master["Build Status", link="{uri-github-project}"]
+image:{uri-build-status}?branch=master["Build Status", link="{uri-build-history}"]
+image:{uri-version}["Version", link={uri-download}]
+image:{uri-downloads}["Downloads", link="{uri-download}"]
 
 == Features
 
@@ -85,4 +96,4 @@ The plugin is compatible with TeamCity 2018.1 and later and requires the build a
 
 == License
 
-This plugin is available under the http://www.apache.org/licenses/LICENSE-2.0.html[Apache License, Version 2.0].
+This plugin is available under the {uri-apache-license}.
