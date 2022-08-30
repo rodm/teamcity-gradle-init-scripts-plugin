@@ -2,7 +2,7 @@
 plugins {
     kotlin("jvm")
     id ("org.gradle.jacoco")
-    id ("com.github.rodm.teamcity-agent")
+    id ("io.github.rodm.teamcity-agent")
 }
 
 dependencies {
@@ -21,7 +21,7 @@ tasks.named("test") {
 
 tasks.named<JacocoReport>("jacocoTestReport") {
     reports {
-        xml.isEnabled = true
+        xml.required.set(true)
     }
 }
 

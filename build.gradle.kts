@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.3.72" apply false
-    id ("com.github.rodm.teamcity-server") version "1.4" apply true
-    id ("org.sonarqube") version "3.1"
+    id ("io.github.rodm.teamcity-base") version "1.5" apply true
+    id ("org.sonarqube") version "3.4.0.2513"
 }
 
 extra["teamcityVersion"] = project.findProperty("teamcity.api.version") as String? ?: "2018.1"

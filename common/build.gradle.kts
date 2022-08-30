@@ -2,5 +2,5 @@
 plugins {
     kotlin("jvm")
     id ("org.gradle.jacoco")
-    id ("com.github.rodm.teamcity-common")
+    id ("io.github.rodm.teamcity-common")
 }

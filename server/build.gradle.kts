@@ -3,8 +3,8 @@ plugins {
     kotlin("jvm")
     id ("groovy")
     id ("org.gradle.jacoco")
-    id ("com.github.rodm.teamcity-server")
-    id ("com.github.rodm.teamcity-environments")
+    id ("io.github.rodm.teamcity-server")
+    id ("io.github.rodm.teamcity-environments")
 }
 
 extra["downloadsDir"] = project.findProperty("downloads.dir") ?: "${rootDir}/downloads"
@@ -31,7 +31,7 @@ tasks.named("test") {
 
 tasks.named<JacocoReport>("jacocoTestReport") {
     reports {
-        xml.isEnabled = true
+        xml.required.set(true)
     }
 }
 
