@@ -1,30 +1,18 @@
 
-import com.github.rodm.teamcity.TeamCityPluginExtension
-
 plugins {
     kotlin("jvm")
-}
-
-apply {
-    plugin("org.gradle.jacoco")
-    plugin("com.github.rodm.teamcity-agent")
-}
-
-configurations {
-    all {
-        exclude(module = "xom")
-    }
+    id ("org.gradle.jacoco")
+    id ("io.github.rodm.teamcity-agent")
 }
 
 dependencies {
-    compile (project(":common"))
-    compile (kotlin("stdlib"))
-    runtime (kotlin("runtime"))
+    implementation (project(":common"))
+    implementation (kotlin("stdlib"))
 
-    testCompile (kotlin("reflect"))
-    testCompile (group = "junit", name = "junit", version = "4.12")
-    testCompile (group = "org.hamcrest", name = "hamcrest-library", version = "1.3")
-    testCompile (group = "org.mockito", name = "mockito-core", version = "2.7.22")
+    testImplementation (kotlin("reflect"))
+    testImplementation (group = "junit", name = "junit", version = "4.12")
+    testImplementation (group = "org.hamcrest", name = "hamcrest-library", version = "1.3")
+    testImplementation (group = "org.mockito", name = "mockito-core", version = "2.7.22")
 }
 
 teamcity {
@@ -36,8 +24,4 @@ teamcity {
             }
         }
     }
-}
-
-fun Project.teamcity(configuration: TeamCityPluginExtension.() -> Unit) {
-    configure(configuration)
 }

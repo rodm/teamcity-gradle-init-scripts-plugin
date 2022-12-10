@@ -1,14 +1,13 @@
 
-import com.github.rodm.teamcity.TeamCityPluginExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.2.0" apply false
-    id ("com.github.rodm.teamcity-server") version "1.1-beta-2" apply true
-    id ("org.sonarqube") version "2.6.1"
+    kotlin("jvm") version "1.3.72" apply false
+    id ("io.github.rodm.teamcity-base") version "1.5" apply true
+    id ("org.sonarqube") version "3.4.0.2513"
 }
 
-extra["teamcityVersion"] = project.findProperty("teamcity.api.version") as String? ?: "10.0"
+extra["teamcityVersion"] = project.findProperty("teamcity.api.version") as String? ?: "2018.1"
 
 group = "com.github.rodm"
 version = "1.0.2"
@@ -23,8 +22,4 @@ subprojects {
 
 teamcity {
     version = extra["teamcityVersion"] as String
-}
-
-fun Project.teamcity(configuration: TeamCityPluginExtension.() -> Unit) {
-    configure(configuration)
 }
