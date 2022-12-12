@@ -21,6 +21,7 @@ import jetbrains.buildServer.serverSide.ConfigActionFactory
 import jetbrains.buildServer.serverSide.ConfigFileChangesListener
 import jetbrains.buildServer.serverSide.CopiedObjects
 import jetbrains.buildServer.serverSide.CustomSettingsMapper
+import jetbrains.buildServer.serverSide.SBuildServer
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
 import jetbrains.buildServer.util.ExceptionUtil
@@ -35,7 +36,8 @@ import kotlin.reflect.KFunction1
 class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
                                   registry: VersionedSettingsRegistry,
                                   val configChangesListener: ConfigFileChangesListener,
-                                  val configActionFactory: ConfigActionFactory)
+                                  val configActionFactory: ConfigActionFactory,
+                                  val buildServer: SBuildServer)
     : GradleScriptsManager, CustomSettingsMapper
 {
     private val LOG = Logger.getLogger(SERVER_CATEGORY + ".GradleInitScripts")
@@ -140,9 +142,11 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
         try {
             val file = File(getPluginDataDirectory(project), name)
             result = FileUtil.delete(file)
-            if (result) {
-                val message = "Gradle init script $name was deleted"
-                configChangesListener.onDelete(project, file, configActionFactory.createAction(project, message))
+            if (canNotifyChangesListener()) {
+                if (result) {
+                    val message = "Gradle init script $name was deleted"
+                    configChangesListener.onDelete(project, file, configActionFactory.createAction(project, message))
+                }
             }
         }
         catch (e: IOException) {
@@ -153,5 +157,12 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
 
     private fun getPluginDataDirectory(project: SProject): File {
         return FileUtil.createDir(project.getPluginDataDirectory(pluginName))
+    }
+
+    private fun canNotifyChangesListener(): Boolean {
+        val version = buildServer.version
+        if (version.displayVersionMajor > 2022) return false
+        if (version.displayVersionMajor == 2022 && version.displayVersionMinor >= 10) return false
+        return true
     }
 }

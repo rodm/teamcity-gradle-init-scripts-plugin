@@ -19,8 +19,10 @@ package com.github.rodm.teamcity.gradle.scripts.server
 import jetbrains.buildServer.serverSide.ConfigAction
 import jetbrains.buildServer.serverSide.ConfigActionFactory
 import jetbrains.buildServer.serverSide.ConfigFileChangesListener
+import jetbrains.buildServer.serverSide.SBuildServer
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
+import jetbrains.buildServer.version.ServerVersionInfo
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.junit.Before
 import org.junit.Rule
@@ -71,7 +73,10 @@ class GradleScriptManagerTest {
         settingsRegistry = mock(VersionedSettingsRegistry)
         changesListener = mock(ConfigFileChangesListener)
         actionFactory = mock(ConfigActionFactory)
-        scriptsManager = new DefaultGradleScriptsManager(descriptor, settingsRegistry, changesListener, actionFactory)
+        def buildServer = mock(SBuildServer)
+        def serverVersion = new ServerVersionInfo('', '', '', '', new Date(), 2022, 4)
+        when(buildServer.getVersion()).thenReturn(serverVersion)
+        scriptsManager = new DefaultGradleScriptsManager(descriptor, settingsRegistry, changesListener, actionFactory, buildServer)
         pluginDir = projectDir.newFolder(PLUGIN_NAME)
         new File(pluginDir, 'init1.gradle') << 'contents of script1'
         new File(pluginDir, 'init2.gradle') << 'contents of script2'
