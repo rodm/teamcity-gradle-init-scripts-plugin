@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import java.io.IOException
 import java.lang.IllegalStateException
+import java.nio.file.Paths
 
 class UploadScriptAction(val projectManager: ProjectManager,
                          controllerManager: WebControllerManager,
@@ -42,6 +43,14 @@ class UploadScriptAction(val projectManager: ProjectManager,
         val fileName = request.getParameter("fileName")
         if (StringUtil.isEmpty(fileName)) {
             model.put("error", "File name must be provided")
+            return modelAndView
+        }
+        if (!validFileName(fileName)) {
+            model.put("error", "Invalid file name provided for init script")
+            return modelAndView
+        }
+        if (!validFileNameExtension(fileName)) {
+            model.put("error", "Invalid extension provided for init script")
             return modelAndView
         }
 
@@ -71,5 +80,14 @@ class UploadScriptAction(val projectManager: ProjectManager,
              model.put("error", e.message)
         }
         return modelAndView
+    }
+
+    private fun validFileName(name: String): Boolean {
+        val path = Paths.get(name)
+        return path.equals(path.fileName)
+    }
+
+    private fun validFileNameExtension(name: String): Boolean {
+        return name.endsWith(".gradle") || name.endsWith(".gradle.kts")
     }
 }
