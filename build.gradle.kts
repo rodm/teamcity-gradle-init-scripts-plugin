@@ -1,6 +1,6 @@
 
 plugins {
-    id ("io.github.rodm.teamcity-base") version "1.5" apply true
+    id ("teamcity.base")
     id ("org.sonarqube") version "3.4.0.2513"
 }
 
