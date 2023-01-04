@@ -7,7 +7,7 @@ plugins {
 
 extra["downloadsDir"] = project.findProperty("downloads.dir") ?: "${rootDir}/downloads"
 extra["serversDir"] = project.findProperty("servers.dir") ?: "${rootDir}/servers"
-extra["java8Home"] = project.findProperty("java8.home") ?: "/opt/jdk1.8.0_131"
+extra["java11Home"] = project.findProperty("java11.home") ?: "/opt/jdk-11.0.2"
 
 dependencies {
     implementation (project(":common"))
@@ -60,7 +60,12 @@ teamcity {
         }
 
         register("teamcity2020.2") {
-            version = "2020.2.2"
+            version = "2020.2.4"
+        }
+
+        register("teamcity2022.10") {
+            version = "2022.10.1"
+            javaHome = extra["java11Home"] as String
         }
     }
 }
