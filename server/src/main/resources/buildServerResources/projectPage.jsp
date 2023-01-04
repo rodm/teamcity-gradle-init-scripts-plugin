@@ -54,43 +54,48 @@
             <c:if test="${not empty inspections}">
                 <%@include file="health/report.jspf"%>
             </c:if>
-            <div class="upload">
-                <forms:addButton
-                        onclick="return BS.GradleAddInitScripts.show();">Upload init script file</forms:addButton>
-            </div>
-            <bs:dialog dialogId="addInitScripts"
-                       dialogClass="uploadDialog"
-                       title="Upload Gradle Init Scripts"
-                       titleId="addInitScriptsTitle"
-                       closeCommand="BS.GradleAddInitScripts.close();">
-                <c:url var="actionUrl" value="/admin/uploadInitScript.html"/>
-                <forms:multipartForm id="addInitScriptsForm"
-                                     action="${actionUrl}"
-                                     onsubmit="return BS.GradleAddInitScripts.validate();"
-                                     targetIframe="hidden-iframe">
-                    <div>
-                        <table class="runnerFormTable">
-                            <tr>
-                                <th><label for="fileName">Name: </label></th>
-                                <td><input type="text" id="fileName" name="fileName" value=""/></td>
-                            </tr>
-                            <tr>
-                                <th>File: <l:star/></th>
-                                <td>
-                                    <forms:file name="fileToUpload" size="28"/>
-                                    <span id="uploadError" class="error hidden"></span>
-                                </td>
-                            </tr>
-                        </table>
+            <authz:authorize projectId="${currentProject.projectId}" allPermissions="EDIT_PROJECT">
+                <jsp:attribute name="ifAccessGranted">
+                    <div class="upload">
+                        <forms:addButton
+                                onclick="return BS.GradleAddInitScripts.show();">Upload init script file</forms:addButton>
                     </div>
-                    <div class="popupSaveButtonsBlock">
-                        <forms:submit label="Save"/>
-                        <forms:cancel onclick="BS.GradleAddInitScripts.close()" showdiscardchangesmessage="false"/>
-                        <input type="hidden" id="projectId" name="project" value="${currentProject.externalId}"/>
-                        <forms:saving id="saving"/>
-                    </div>
-                </forms:multipartForm>
-            </bs:dialog>
+                    <bs:dialog dialogId="addInitScripts"
+                               dialogClass="uploadDialog"
+                               title="Upload Gradle Init Scripts"
+                               titleId="addInitScriptsTitle"
+                               closeCommand="BS.GradleAddInitScripts.close();">
+                        <c:url var="actionUrl" value="/admin/uploadInitScript.html"/>
+                        <forms:multipartForm id="addInitScriptsForm"
+                                             action="${actionUrl}"
+                                             onsubmit="return BS.GradleAddInitScripts.validate();"
+                                             targetIframe="hidden-iframe">
+                            <div>
+                                <table class="runnerFormTable">
+                                    <tr>
+                                        <th><label for="fileName">Name: </label></th>
+                                        <td><input type="text" id="fileName" name="fileName" value=""/></td>
+                                    </tr>
+                                    <tr>
+                                        <th>File: <l:star/></th>
+                                        <td>
+                                            <forms:file name="fileToUpload" size="28"/>
+                                            <span id="uploadError" class="error hidden"></span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="popupSaveButtonsBlock">
+                                <forms:submit label="Save"/>
+                                <forms:cancel onclick="BS.GradleAddInitScripts.close()" showdiscardchangesmessage="false"/>
+                                <input type="hidden" id="projectId" name="project" value="${currentProject.externalId}"/>
+                                <forms:saving id="saving"/>
+                            </div>
+                        </forms:multipartForm>
+                    </bs:dialog>
+                </jsp:attribute>
+            </authz:authorize>
+
             <script type="text/javascript">
                 BS.GradleAddInitScripts.setFiles([<c:forEach var="script" items="${scripts[currentProject]}">'${script}', </c:forEach>]);
                 BS.GradleAddInitScripts.prepareFileUpload();
@@ -111,14 +116,26 @@
                         <c:url var="fileUrl" value="/admin/editProject.html?projectId=${currentProject.externalId}&tab=gradleInitScripts&file=${script}"/>
                         <c:set var="onclick" value="document.location.href = '${fileUrl}';"/>
                         <tr>
-                            <td class="highlight" onclick="${onclick}"><c:out value="${script}"/></td>
-                            <td class="highlight" onclick="${onclick}" style="white-space: nowrap">
-                                <%@ include file="scriptUsage.jspf" %>
-                            </td>
-                            <td class="edit highlight"><a href="#" onclick="${onclick}">View</a></td>
-                            <td class="edit">
-                                <a href="#" onclick="BS.GradleInitScripts.deleteScript('${currentProject.projectId}', '${script}')">Delete</a>
-                            </td>
+                            <authz:authorize projectId="${currentProject.projectId}" allPermissions="EDIT_PROJECT">
+                                <jsp:attribute name="ifAccessGranted">
+                                    <td class="highlight" onclick="${onclick}"><c:out value="${script}"/></td>
+                                    <td class="highlight" onclick="${onclick}" style="white-space: nowrap">
+                                        <%@ include file="scriptUsage.jspf" %>
+                                    </td>
+                                    <td class="edit highlight"><a href="#" onclick="${onclick}">View</a></td>
+                                    <td class="edit">
+                                        <a href="#" onclick="BS.GradleInitScripts.deleteScript('${currentProject.projectId}', '${script}')">Delete</a>
+                                    </td>
+                                </jsp:attribute>
+                                <jsp:attribute name="ifAccessDenied">
+                                    <td class="highlight" onclick="${onclick}"><c:out value="${script}"/></td>
+                                    <td class="highlight" onclick="${onclick}" style="white-space: nowrap">
+                                        <%@ include file="scriptUsage.jspf" %>
+                                    </td>
+                                    <td class="edit"><div class="clearfix" style="color: #737577"><i>View</i></div></td>
+                                    <td class="edit"><div class="clearfix" style="color: #737577"><i>Delete</i></div></td>
+                                </jsp:attribute>
+                            </authz:authorize>
                         </tr>
                     </c:forEach>
                 </table>
