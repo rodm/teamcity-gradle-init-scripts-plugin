@@ -43,7 +43,7 @@ teamcity {
 
         publish {
             token = findProperty("jetbrains.token") as String?
-            notes = "Improves init script name validation"
+            notes = "Improves user permission checks on managing Gradle init scripts"
         }
     }
 
