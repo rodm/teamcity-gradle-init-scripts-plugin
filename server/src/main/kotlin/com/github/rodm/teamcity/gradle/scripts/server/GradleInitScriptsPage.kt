@@ -18,6 +18,8 @@ package com.github.rodm.teamcity.gradle.scripts.server
 
 import com.github.rodm.teamcity.gradle.scripts.server.health.ProjectInspector
 import jetbrains.buildServer.controllers.admin.projects.EditProjectTab
+import jetbrains.buildServer.serverSide.auth.Permission
+import jetbrains.buildServer.serverSide.auth.SecurityContext
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import javax.servlet.http.HttpServletRequest
@@ -26,7 +28,8 @@ class GradleInitScriptsPage(pagePlaces: PagePlaces,
                             descriptor: PluginDescriptor,
                             val scriptsManager: GradleScriptsManager,
                             val analyzer: InitScriptsUsageAnalyzer,
-                            val inspector: ProjectInspector) :
+                            val inspector: ProjectInspector,
+                            val securityContext: SecurityContext) :
         EditProjectTab(pagePlaces, descriptor.pluginName, descriptor.getPluginResourcesPath("projectPage.jsp"), "")
 {
     private val TITLE = "Gradle Init Scripts"
@@ -42,7 +45,7 @@ class GradleInitScriptsPage(pagePlaces: PagePlaces,
         val project = getProject(request)
         if (project != null) {
             val fileName = request.getParameter("file")
-            if (fileName != null) {
+            if (fileName != null && hasPermission(project.projectId)) {
                 val fileContent = scriptsManager.findScript(project, fileName)
                 if (fileContent != null) {
                     model.put("fileName", fileName)
@@ -67,5 +70,9 @@ class GradleInitScriptsPage(pagePlaces: PagePlaces,
             }
         }
         return TITLE
+    }
+
+    private fun hasPermission(projectId: String): Boolean {
+        return securityContext.authorityHolder.isPermissionGrantedForProject(projectId, Permission.EDIT_PROJECT)
     }
 }

@@ -16,8 +16,12 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server
 
+import jetbrains.buildServer.controllers.ActionErrors
 import jetbrains.buildServer.controllers.ActionMessages
 import jetbrains.buildServer.serverSide.ProjectManager
+import jetbrains.buildServer.serverSide.auth.Permission
+import jetbrains.buildServer.serverSide.auth.SecurityContext
+import jetbrains.buildServer.util.StringUtil.isNotEmpty
 import jetbrains.buildServer.web.openapi.ControllerAction
 import org.jdom.Element
 import javax.servlet.http.HttpServletRequest
@@ -25,7 +29,8 @@ import javax.servlet.http.HttpServletResponse
 
 class DeleteScriptAction(controller: InitScriptsActionsController,
                          val projectManager: ProjectManager,
-                         val scriptsManager: GradleScriptsManager) : ControllerAction
+                         val scriptsManager: GradleScriptsManager,
+                         val securityContext: SecurityContext) : ControllerAction
 {
     private val NAME = "deleteScript"
 
@@ -39,14 +44,27 @@ class DeleteScriptAction(controller: InitScriptsActionsController,
 
     override fun process(request: HttpServletRequest, response: HttpServletResponse, ajaxResponse: Element?) {
         val name = request.getParameter("name")
-        if (name != null) {
-            val projectId = request.getParameter("projectId")
+        val projectId = request.getParameter("projectId")
+        if (isNotEmpty(name) && isNotEmpty(projectId)) {
+            val actionErrors = ActionErrors()
             val project = projectManager.findProjectById(projectId)
-            if (project != null) {
-                val deleted = scriptsManager.deleteScript(project, name)
-                val message = "Gradle init script $name ${if (deleted) "was deleted" else "cannot be deleted"}"
-                ActionMessages.getOrCreateMessages(request).addMessage("initScriptsMessage", message)
+            if (project == null) {
+                actionErrors.addError("initScriptsError", "File $name cannot be deleted. Project $projectId was not found")
+                if (ajaxResponse != null) actionErrors.serialize(ajaxResponse)
+                return
             }
+            if (!hasPermission(projectId)) {
+                actionErrors.addError("initScriptsError", "You do not have permissions to edit project settings")
+                if (ajaxResponse != null) actionErrors.serialize(ajaxResponse)
+                return
+            }
+            val deleted = scriptsManager.deleteScript(project, name)
+            val message = "Gradle init script $name ${if (deleted) "was deleted" else "cannot be deleted"}"
+            ActionMessages.getOrCreateMessages(request).addMessage("initScriptsMessage", message)
         }
+    }
+
+    private fun hasPermission(projectId: String): Boolean {
+        return securityContext.authorityHolder.isPermissionGrantedForProject(projectId, Permission.EDIT_PROJECT)
     }
 }

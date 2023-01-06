@@ -23,6 +23,9 @@ import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor
 import jetbrains.buildServer.serverSide.SBuildRunnerDescriptor
 import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.SProject
+import jetbrains.buildServer.serverSide.auth.AuthorityHolder
+import jetbrains.buildServer.serverSide.auth.Permission
+import jetbrains.buildServer.serverSide.auth.SecurityContext
 import jetbrains.buildServer.web.openapi.PagePlace
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PlaceId
@@ -41,6 +44,7 @@ import static org.hamcrest.Matchers.hasKey
 import static org.hamcrest.Matchers.hasSize
 import static org.hamcrest.Matchers.isA
 import static org.hamcrest.Matchers.not
+import static org.mockito.ArgumentMatchers.anyString
 import static org.mockito.Mockito.eq
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.when
@@ -50,13 +54,10 @@ class GradleInitScriptsPageTest {
     private static final String PLUGIN_NAME = "gradleInitScripts"
 
     private PagePlaces places
-
     private PluginDescriptor descriptor
-
     private GradleScriptsManager scriptsManager
-
+    private SecurityContext securityContext
     private SProject project
-
     private GradleInitScriptsPage page
 
     @Before
@@ -64,6 +65,7 @@ class GradleInitScriptsPageTest {
         places = mock(PagePlaces)
         descriptor = mock(PluginDescriptor)
         scriptsManager = mock(GradleScriptsManager)
+        securityContext = mock(SecurityContext)
         project = mock(SProject)
 
         when(places.getPlaceById(eq(PlaceId.EDIT_PROJECT_PAGE_TAB))).thenReturn(mock(PagePlace))
@@ -73,7 +75,7 @@ class GradleInitScriptsPageTest {
 
         InitScriptsUsageAnalyzer analyzer = new InitScriptsUsageAnalyzer(scriptsManager)
         ProjectInspector inspector = new ProjectInspector(scriptsManager)
-        page = new GradleInitScriptsPage(places, descriptor, scriptsManager, analyzer, inspector)
+        page = new GradleInitScriptsPage(places, descriptor, scriptsManager, analyzer, inspector, securityContext)
     }
 
     @Test
@@ -117,6 +119,10 @@ class GradleInitScriptsPageTest {
         when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
         when(request.getParameter("file")).thenReturn("init.gradle")
         when(scriptsManager.findScript(eq(project), eq('init.gradle'))).thenReturn('file contents')
+        when(project.getProjectId()).thenReturn("projectId")
+        AuthorityHolder authorityHolder = mock(AuthorityHolder)
+        when(authorityHolder.isPermissionGrantedForProject(anyString(), eq(Permission.EDIT_PROJECT))).thenReturn(true)
+        when(securityContext.getAuthorityHolder()).thenReturn(authorityHolder)
 
         page.fillModel(model, request)
 
@@ -133,6 +139,10 @@ class GradleInitScriptsPageTest {
         when(request.getAttribute(EditProjectTab.CURRENT_PROJECT_ATTRIBUTE)).thenReturn(project)
         when(request.getParameter("file")).thenReturn("init.gradle")
         when(scriptsManager.findScript(eq(project), eq('init.gradle'))).thenReturn(null)
+        when(project.getProjectId()).thenReturn("projectId")
+        AuthorityHolder authorityHolder = mock(AuthorityHolder)
+        when(authorityHolder.isPermissionGrantedForProject(anyString(), eq(Permission.EDIT_PROJECT))).thenReturn(true)
+        when(securityContext.getAuthorityHolder()).thenReturn(authorityHolder)
 
         page.fillModel(model, request)
 
