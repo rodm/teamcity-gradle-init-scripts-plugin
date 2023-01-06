@@ -128,10 +128,8 @@
                                     </td>
                                 </jsp:attribute>
                                 <jsp:attribute name="ifAccessDenied">
-                                    <td class="highlight" onclick="${onclick}"><c:out value="${script}"/></td>
-                                    <td class="highlight" onclick="${onclick}" style="white-space: nowrap">
-                                        <%@ include file="scriptUsage.jspf" %>
-                                    </td>
+                                    <td><c:out value="${script}"/></td>
+                                    <td style="white-space: nowrap"><%@ include file="scriptUsage.jspf" %></td>
                                     <td class="edit"><div class="clearfix" style="color: #737577"><i>View</i></div></td>
                                     <td class="edit"><div class="clearfix" style="color: #737577"><i>Delete</i></div></td>
                                 </jsp:attribute>
