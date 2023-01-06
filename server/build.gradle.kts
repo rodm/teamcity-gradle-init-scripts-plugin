@@ -27,7 +27,7 @@ dependencies {
 
 teamcity {
     server {
-        archiveName = "gradle-init-scripts-${rootProject.version}.zip"
+        archiveName = "gradle-init-scripts.zip"
 
         descriptor {
             name = "gradleInitScripts"
@@ -43,7 +43,7 @@ teamcity {
 
         publish {
             token = findProperty("jetbrains.token") as String?
-            notes = "Improves user permission checks on managing Gradle init scripts"
+            notes = "Fixes user permission checks on managing Gradle init scripts"
         }
     }
 

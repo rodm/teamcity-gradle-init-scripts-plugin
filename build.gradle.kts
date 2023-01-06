@@ -10,7 +10,7 @@ plugins {
 extra["teamcityVersion"] = project.findProperty("teamcity.api.version") as String? ?: "2018.1"
 
 group = "com.github.rodm"
-version = "1.0.4"
+version = "1.0.5"
 
 subprojects {
     tasks.withType<KotlinCompile> {
