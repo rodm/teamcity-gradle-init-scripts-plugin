@@ -18,7 +18,11 @@ package com.github.rodm.teamcity.gradle.scripts.server
 
 import jetbrains.buildServer.serverSide.ProjectManager
 import jetbrains.buildServer.serverSide.SProject
+import jetbrains.buildServer.serverSide.auth.AuthorityHolder
+import jetbrains.buildServer.serverSide.auth.Permission
+import jetbrains.buildServer.serverSide.auth.SecurityContext
 import jetbrains.buildServer.web.openapi.WebControllerManager
+import org.jdom.Element
 import org.junit.Before
 import org.junit.Test
 
@@ -40,10 +44,10 @@ import static org.mockito.Mockito.when
 class DeleteScriptActionTest {
 
     private InitScriptsActionsController actionsController
-
     private ProjectManager projectManager
-
     private GradleScriptsManager scriptsManager
+    private SecurityContext securityContext
+    private Element ajaxResponse = new Element("response")
 
     @Before
     void setup() {
@@ -51,19 +55,27 @@ class DeleteScriptActionTest {
         actionsController = new InitScriptsActionsController(controllerManager)
         projectManager = mock(ProjectManager)
         scriptsManager = mock(GradleScriptsManager)
+        securityContext = mock(SecurityContext)
+        AuthorityHolder authorityHolder = mock(AuthorityHolder)
+        when(authorityHolder.isPermissionGrantedForProject(anyString(), eq(Permission.EDIT_PROJECT))).thenReturn(true)
+        when(securityContext.getAuthorityHolder()).thenReturn(authorityHolder)
+    }
+
+    private DeleteScriptAction createDeleteAction() {
+        new DeleteScriptAction(actionsController, projectManager, scriptsManager, securityContext)
     }
 
     @Test
     void 'action registers with action controller'() {
         InitScriptsActionsController controller = spy(actionsController)
-        DeleteScriptAction action = new DeleteScriptAction(controller, projectManager, scriptsManager)
+        DeleteScriptAction action = new DeleteScriptAction(controller, projectManager, scriptsManager, securityContext)
 
         verify(controller).registerAction(eq(action))
     }
 
     @Test
     void 'can handle deleteScript action'() {
-        DeleteScriptAction action = new DeleteScriptAction(actionsController, projectManager, scriptsManager)
+        DeleteScriptAction action = createDeleteAction()
 
         HttpServletRequest request = mock(HttpServletRequest)
         when(request.getParameter(eq('action'))).thenReturn('deleteScript')
@@ -73,7 +85,7 @@ class DeleteScriptActionTest {
 
     @Test
     void 'deletes a script from a project'() {
-        DeleteScriptAction action = new DeleteScriptAction(actionsController, projectManager, scriptsManager)
+        DeleteScriptAction action = createDeleteAction()
 
         HttpServletRequest request = mock(HttpServletRequest)
         HttpServletResponse response = mock(HttpServletResponse)
@@ -85,14 +97,14 @@ class DeleteScriptActionTest {
         SProject project = mock(SProject)
         when(projectManager.findProjectById('project1')).thenReturn(project)
 
-        action.process(request, response, null)
+        action.process(request, response, ajaxResponse)
 
         verify(scriptsManager).deleteScript(eq(project), eq('init.gradle'))
     }
 
     @Test
     void 'does not delete a script for an invalid project id'() {
-        DeleteScriptAction action = new DeleteScriptAction(actionsController, projectManager, scriptsManager)
+        DeleteScriptAction action = createDeleteAction()
 
         HttpServletRequest request = mock(HttpServletRequest)
         HttpServletResponse response = mock(HttpServletResponse)
@@ -101,7 +113,7 @@ class DeleteScriptActionTest {
         when(request.getParameter(eq('projectId'))).thenReturn('project1')
         when(projectManager.findProjectById('project1')).thenReturn(null)
 
-        action.process(request, response, null)
+        action.process(request, response, ajaxResponse)
 
         verify(scriptsManager, never()).deleteScript(any(SProject), anyString())
     }

@@ -19,18 +19,20 @@ package com.github.rodm.teamcity.gradle.scripts.server
 import jetbrains.buildServer.controllers.ActionMessages
 import jetbrains.buildServer.controllers.MultipartFormController
 import jetbrains.buildServer.serverSide.ProjectManager
+import jetbrains.buildServer.serverSide.auth.Permission
+import jetbrains.buildServer.serverSide.auth.SecurityContext
 import jetbrains.buildServer.util.StringUtil
 import jetbrains.buildServer.web.openapi.WebControllerManager
 import org.springframework.web.servlet.ModelAndView
+import java.io.IOException
+import java.nio.file.Paths
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import java.io.IOException
-import java.lang.IllegalStateException
-import java.nio.file.Paths
 
 class UploadScriptAction(val projectManager: ProjectManager,
                          controllerManager: WebControllerManager,
-                         val scriptsManager: GradleScriptsManager) : MultipartFormController()
+                         val scriptsManager: GradleScriptsManager,
+                         val securityContext: SecurityContext) : MultipartFormController()
 {
     init {
         controllerManager.registerController("/admin/uploadInitScript.html", this)
@@ -57,6 +59,10 @@ class UploadScriptAction(val projectManager: ProjectManager,
         val project = projectManager.findProjectByExternalId(request.getParameter("project"))
         if (project == null) {
             model.put("error", "Cannot upload file. Project is missing")
+            return modelAndView
+        }
+        if (!hasPermission(project.projectId)) {
+            model.put("error", "You do not have permissions to edit project settings")
             return modelAndView
         }
 
@@ -89,5 +95,9 @@ class UploadScriptAction(val projectManager: ProjectManager,
 
     private fun validFileNameExtension(name: String): Boolean {
         return name.endsWith(".gradle") || name.endsWith(".gradle.kts")
+    }
+
+    private fun hasPermission(projectId: String): Boolean {
+        return securityContext.authorityHolder.isPermissionGrantedForProject(projectId, Permission.EDIT_PROJECT)
     }
 }

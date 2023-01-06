@@ -17,6 +17,7 @@
 package com.github.rodm.teamcity.gradle.scripts.server
 
 import jetbrains.buildServer.serverSide.ProjectManager
+import jetbrains.buildServer.serverSide.auth.SecurityContext
 import jetbrains.buildServer.web.openapi.WebControllerManager
 import org.junit.Before
 import org.junit.Test
@@ -36,13 +37,15 @@ class UploadScriptActionTest {
     private WebControllerManager controllerManager
     private GradleScriptsManager scriptsManager
     private UploadScriptAction controller
+    private SecurityContext securityContext
 
     @Before
     void setup() {
         projectManager = mock(ProjectManager)
         controllerManager = mock(WebControllerManager)
         scriptsManager = mock(GradleScriptsManager)
-        controller = new UploadScriptAction(projectManager, controllerManager, scriptsManager)
+        securityContext = mock(SecurityContext)
+        controller = new UploadScriptAction(projectManager, controllerManager, scriptsManager, securityContext)
     }
 
     @Test
