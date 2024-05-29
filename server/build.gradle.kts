@@ -59,12 +59,8 @@ teamcity {
             agentOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006")
         }
 
-        register("teamcity2020.2") {
-            version = "2020.2.4"
-        }
-
-        register("teamcity2022.10") {
-            version = "2022.10.1"
+        register("teamcity2024.03") {
+            version = "2024.03.1"
             javaHome = extra["java11Home"] as String
         }
     }
