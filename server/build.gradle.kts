@@ -10,19 +10,19 @@ extra["serversDir"] = project.findProperty("servers.dir") ?: "${rootDir}/servers
 extra["java11Home"] = project.findProperty("java11.home") ?: "/opt/jdk-11.0.2"
 
 dependencies {
-    implementation (project(":common"))
+    implementation (project(":gradle-init-scripts-common"))
     implementation (kotlin("stdlib"))
 
     provided (group = "org.jetbrains.teamcity.internal", name = "server", version = rootProject.extra["teamcityVersion"] as String?)
 
-    agent (project(path = ":agent", configuration = "plugin"))
+    agent (project(path = ":gradle-init-scripts-agent", configuration = "plugin"))
 
     testImplementation (localGroovy())
 }
 
 teamcity {
     server {
-        archiveName = "gradle-init-scripts-${rootProject.version}.zip"
+        archiveName = "${rootProject.name}-${rootProject.version}.zip"
 
         descriptor {
             name = "gradleInitScripts"

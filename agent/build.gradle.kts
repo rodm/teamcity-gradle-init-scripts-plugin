@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation (project(":common"))
+    implementation (project(":gradle-init-scripts-common"))
     implementation (kotlin("stdlib"))
 
     testImplementation (kotlin("reflect"))
@@ -12,7 +12,6 @@ dependencies {
 
 teamcity {
     agent {
-        archiveName = "gradle-init-scripts-agent.zip"
         descriptor {
             pluginDeployment {
                 useSeparateClassloader = true
