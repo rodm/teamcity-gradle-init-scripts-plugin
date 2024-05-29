@@ -1,7 +1,7 @@
 
 plugins {
     id ("teamcity.base")
-    id ("org.sonarqube") version "3.4.0.2513"
+    id ("org.sonarqube") version "4.0.0.2929"
 }
 
 extra["teamcityVersion"] = project.findProperty("teamcity.api.version") as String? ?: "2018.1"
