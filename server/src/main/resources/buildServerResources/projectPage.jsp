@@ -102,11 +102,7 @@
                 BS.GradleAddInitScripts.prepareFileUpload();
             </script>
 
-            <c:if test="${empty scripts[currentProject]}">
-                <p>There are no Gradle initialization scripts defined in the current project.</p>
-            </c:if>
             <c:if test="${not empty scripts[currentProject]}">
-                <p style="margin-top: 2em">Gradle initialization scripts defined in the current project</p>
                 <table class="highlightable parametersTable" style="width: 100%">
                     <tr>
                         <th style="width: 45%">Script Name</th>
@@ -139,34 +135,6 @@
                     </c:forEach>
                 </table>
             </c:if>
-
-            <c:forEach items="${scripts}" var="projects">
-                <%--@elvariable id="project" type="jetbrains.buildServer.serverSide.SProject"--%>
-                <c:set var="project" value="${projects.key}"/>
-                <c:if test="${project ne currentProject}">
-                    <p style="margin-top: 2em">Scripts inherited from
-                        <admin:editProjectLink projectId="${project.externalId}" addToUrl="&tab=gradleInitScripts">
-                            <c:out value="${project.fullName}"/>
-                        </admin:editProjectLink>
-                    </p>
-                    <table class="parametersTable" style="width: 100%">
-                        <tr>
-                            <th style="width: 45%">Script Name</th>
-                            <th colspan="1">Usage</th>
-                        </tr>
-                        <c:forEach var="script" items="${scripts[project]}">
-                            <tr>
-                                <td>
-                                    <c:out value="${script}"/>
-                                </td>
-                                <td>
-                                    <%@ include file="scriptUsage.jspf" %>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                    </table>
-                </c:if>
-            </c:forEach>
         </c:otherwise>
     </c:choose>
 </div>
