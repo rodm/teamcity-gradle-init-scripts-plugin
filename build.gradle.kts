@@ -12,3 +12,10 @@ version = "1.1-SNAPSHOT"
 teamcity {
     version = extra["teamcityVersion"] as String
 }
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "${project.group}:teamcity-gradle-init-scripts")
+        property("sonar.projectName", "teamcity-gradle-init-scripts")
+    }
+}
