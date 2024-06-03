@@ -6,6 +6,10 @@ plugins {
     id("org.gradle.jacoco")
 }
 
+configurations.all {
+    exclude(group = "com.ibm.icu", module = "icu4j")
+}
+
 dependencies {
     testImplementation (group = "junit", name = "junit", version = "4.13.1")
     testImplementation (group = "org.hamcrest", name = "hamcrest-library", version = "2.2")
