@@ -13,8 +13,6 @@ dependencies {
     implementation (project(":gradle-init-scripts-common"))
     implementation (kotlin("stdlib"))
 
-    provided (group = "org.jetbrains.teamcity.internal", name = "server", version = rootProject.extra["teamcityVersion"] as String?)
-
     agent (project(path = ":gradle-init-scripts-agent", configuration = "plugin"))
 
     testImplementation (localGroovy())
