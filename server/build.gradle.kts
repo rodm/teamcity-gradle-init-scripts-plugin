@@ -1,8 +1,8 @@
 
 plugins {
     id ("teamcity.server-plugin")
+    id ("teamcity.environments")
     id ("groovy")
-    id ("io.github.rodm.teamcity-environments")
 }
 
 extra["downloadsDir"] = project.findProperty("downloads.dir") ?: "${rootDir}/downloads"
