@@ -21,7 +21,7 @@
 
 <jsp:useBean id="currentProject" type="jetbrains.buildServer.serverSide.SProject" scope="request"/>
 
-<%--@elvariable id="scripts" type="java.util.Map"--%>
+<%--@elvariable id="scripts" type="java.util.List"--%>
 <div class="section noMargin">
     <h2 class="noBorder">Gradle Init Scripts</h2>
     <bs:smallNote>In this section you can manage the Gradle initialization scripts to reuse them within the project</bs:smallNote>
@@ -98,35 +98,38 @@
             </authz:authorize>
 
             <script type="text/javascript">
-                BS.GradleAddInitScripts.setFiles([<c:forEach var="script" items="${scripts[currentProject]}">'${script}', </c:forEach>]);
+                BS.GradleAddInitScripts.setFiles([<c:forEach var="script" items="${scripts}">'${script}', </c:forEach>]);
                 BS.GradleAddInitScripts.prepareFileUpload();
             </script>
 
-            <c:if test="${not empty scripts[currentProject]}">
+            <c:if test="${not empty scripts}">
                 <table class="highlightable parametersTable" style="width: 100%">
                     <tr>
-                        <th style="width: 45%">Script Name</th>
-                        <th colspan="3">Usage</th>
+                        <th colspan="3">Script Name</th>
                     </tr>
                     <%--@elvariable id="usage" type="java.util.Map<String, List<SBuildType>>"--%>
-                    <c:forEach var="script" items="${scripts[currentProject]}">
-                        <c:url var="fileUrl" value="/admin/editProject.html?projectId=${currentProject.externalId}&tab=gradleInitScripts&file=${script}"/>
+                    <c:forEach var="script" items="${scripts}">
+                        <c:url var="fileUrl" value="/admin/editProject.html?tab=gradleInitScripts&projectId=${currentProject.externalId}&file=${script}"/>
                         <c:set var="onclick" value="document.location.href = '${fileUrl}';"/>
+                        <c:url var="usagesReportUrl" value="/admin/editProject.html?tab=usagesReport&projectId=${currentProject.externalId}&scriptName=${script}"/>
+                        <c:set var="usages" value='<a href="${usagesReportUrl}">View usages</a>'/>
                         <tr>
                             <authz:authorize projectId="${currentProject.projectId}" allPermissions="EDIT_PROJECT">
                                 <jsp:attribute name="ifAccessGranted">
-                                    <td class="highlight" onclick="${onclick}"><c:out value="${script}"/></td>
-                                    <td class="highlight" onclick="${onclick}" style="white-space: nowrap">
-                                        <%@ include file="scriptUsage.jspf" %>
+                                    <td class="highlight beforeActions" onclick="${onclick}">
+                                        <span style="float:right; padding-right: 2em">${usages}</span>
+                                        <c:out value="${script}"/>
                                     </td>
                                     <td class="edit highlight"><a href="#" onclick="${onclick}">View</a></td>
-                                    <td class="edit">
+                                    <td class="edit highlight">
                                         <a href="#" onclick="BS.GradleInitScripts.deleteScript('${currentProject.projectId}', '${script}')">Delete</a>
                                     </td>
                                 </jsp:attribute>
                                 <jsp:attribute name="ifAccessDenied">
-                                    <td><c:out value="${script}"/></td>
-                                    <td style="white-space: nowrap"><%@ include file="scriptUsage.jspf" %></td>
+                                    <td class="beforeActions">
+                                        <span style="float:right; padding-right: 2em">${usages}</span>
+                                        <c:out value="${script}"/>
+                                    </td>
                                     <td class="edit"><div class="clearfix" style="color: #737577"><i>View</i></div></td>
                                     <td class="edit"><div class="clearfix" style="color: #737577"><i>Delete</i></div></td>
                                 </jsp:attribute>

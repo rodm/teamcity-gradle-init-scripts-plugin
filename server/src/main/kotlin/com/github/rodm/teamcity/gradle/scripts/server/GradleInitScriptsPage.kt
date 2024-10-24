@@ -24,16 +24,15 @@ import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import javax.servlet.http.HttpServletRequest
 
+private const val TITLE = "Gradle Init Scripts"
+
 class GradleInitScriptsPage(pagePlaces: PagePlaces,
                             descriptor: PluginDescriptor,
                             val scriptsManager: GradleScriptsManager,
-                            val analyzer: InitScriptsUsageAnalyzer,
-                            val inspector: ProjectInspector,
-                            val securityContext: SecurityContext) :
+                            private val inspector: ProjectInspector,
+                            private val securityContext: SecurityContext) :
         EditProjectTab(pagePlaces, descriptor.pluginName, descriptor.getPluginResourcesPath("projectPage.jsp"), "")
 {
-    private val TITLE = "Gradle Init Scripts"
-
     init {
         tabTitle = TITLE
         addCssFile("/css/admin/buildTypeForm.css")
@@ -48,16 +47,14 @@ class GradleInitScriptsPage(pagePlaces: PagePlaces,
             if (fileName != null && hasPermission(project.projectId)) {
                 val fileContent = scriptsManager.findScript(project, fileName)
                 if (fileContent != null) {
-                    model.put("fileName", fileName)
-                    model.put("fileContent", fileContent)
+                    model["fileName"] = fileName
+                    model["fileContent"] = fileContent
                 }
             }
             val scripts = scriptsManager.getScriptNames(project)
-            model.put("scripts", scripts)
-            val usage = analyzer.getScriptsUsage(scripts)
-            model.put("usage", usage)
+            model["scripts"] = scripts[project]
             val inspections = inspector.report(project)
-            model.put("inspections", inspections)
+            model["inspections"] = inspections
         }
     }
 
