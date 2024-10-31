@@ -23,8 +23,8 @@ import jetbrains.buildServer.serverSide.auth.Permission
 import jetbrains.buildServer.serverSide.auth.SecurityContext
 import jetbrains.buildServer.web.openapi.WebControllerManager
 import org.jdom.Element
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -49,7 +49,7 @@ class DeleteScriptActionTest {
     private SecurityContext securityContext
     private Element ajaxResponse = new Element("response")
 
-    @Before
+    @BeforeEach
     void setup() {
         WebControllerManager controllerManager = mock(WebControllerManager)
         actionsController = new InitScriptsActionsController(controllerManager)

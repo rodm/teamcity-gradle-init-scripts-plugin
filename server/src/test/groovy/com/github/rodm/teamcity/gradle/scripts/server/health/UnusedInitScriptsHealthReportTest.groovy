@@ -27,8 +27,8 @@ import jetbrains.buildServer.serverSide.healthStatus.HealthStatusScope
 import jetbrains.buildServer.serverSide.healthStatus.ItemCategory
 import jetbrains.buildServer.web.openapi.*
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 
@@ -45,7 +45,7 @@ class UnusedInitScriptsHealthReportTest {
     private PagePlace pagePlace
     private UnusedInitScriptsHealthReport report
 
-    @Before
+    @BeforeEach
     void setup() {
         analyzer = mock(InitScriptsUsageAnalyzer)
         pagePlace = mock(PagePlace)

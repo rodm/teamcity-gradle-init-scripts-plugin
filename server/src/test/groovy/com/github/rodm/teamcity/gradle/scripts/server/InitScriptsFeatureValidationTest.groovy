@@ -17,8 +17,8 @@
 package com.github.rodm.teamcity.gradle.scripts.server
 
 import jetbrains.buildServer.web.openapi.PluginDescriptor
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
 import static org.hamcrest.MatcherAssert.assertThat
@@ -33,7 +33,7 @@ class InitScriptsFeatureValidationTest {
 
     private PluginDescriptor descriptor
 
-    @Before
+    @BeforeEach
     void setup() {
         descriptor = mock(PluginDescriptor)
     }

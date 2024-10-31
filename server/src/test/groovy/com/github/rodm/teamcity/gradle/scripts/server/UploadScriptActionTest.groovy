@@ -19,8 +19,8 @@ package com.github.rodm.teamcity.gradle.scripts.server
 import jetbrains.buildServer.serverSide.ProjectManager
 import jetbrains.buildServer.serverSide.auth.SecurityContext
 import jetbrains.buildServer.web.openapi.WebControllerManager
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.web.servlet.ModelAndView
 
 import javax.servlet.http.HttpServletRequest
@@ -39,7 +39,7 @@ class UploadScriptActionTest {
     private UploadScriptAction controller
     private SecurityContext securityContext
 
-    @Before
+    @BeforeEach
     void setup() {
         projectManager = mock(ProjectManager)
         controllerManager = mock(WebControllerManager)

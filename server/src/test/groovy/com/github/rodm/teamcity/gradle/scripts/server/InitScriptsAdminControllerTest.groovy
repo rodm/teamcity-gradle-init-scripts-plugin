@@ -21,8 +21,8 @@ import jetbrains.buildServer.serverSide.SBuildServer
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.WebControllerManager
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.springframework.web.servlet.ModelAndView
 
 import javax.servlet.http.HttpServletRequest
@@ -45,7 +45,7 @@ class InitScriptsAdminControllerTest {
 
     private InitScriptsAdminController controller
 
-    @Before
+    @BeforeEach
     void setup() {
         SBuildServer server = mock(SBuildServer)
         projectManager = mock(ProjectManager)

@@ -19,10 +19,12 @@ package com.github.rodm.teamcity.gradle.scripts.server
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
 import jetbrains.buildServer.web.openapi.PluginDescriptor
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+
+import java.nio.file.Files
+import java.nio.file.Path
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
@@ -45,34 +47,33 @@ class GradleScriptManagerTest {
 
     private VersionedSettingsRegistry settingsRegistry
 
-    @Rule
-    public TemporaryFolder projectDir = new TemporaryFolder()
+    @TempDir
+    Path configDir
 
     private File pluginDir
-
-    @Rule
-    public TemporaryFolder parentProjectDir = new TemporaryFolder()
-
     private File parentPluginDir
 
-    @Before
+    @BeforeEach
     void setup() {
         PluginDescriptor descriptor = mock(PluginDescriptor)
         when(descriptor.getPluginName()).thenReturn(PLUGIN_NAME)
         settingsRegistry = mock(VersionedSettingsRegistry)
         scriptsManager = new DefaultGradleScriptsManager(descriptor, settingsRegistry)
-        pluginDir = projectDir.newFolder(PLUGIN_NAME)
+        pluginDir = configDir.resolve('project').resolve(PLUGIN_NAME).toFile()
+        Files.createDirectories(pluginDir.toPath())
         new File(pluginDir, 'init1.gradle') << 'contents of script1'
         new File(pluginDir, 'init2.gradle') << 'contents of script2'
-        parentPluginDir = parentProjectDir.newFolder(PLUGIN_NAME)
+        parentPluginDir = configDir.resolve('parent-project').resolve(PLUGIN_NAME).toFile()
+        Files.createDirectories(parentPluginDir.toPath())
         new File(parentPluginDir, 'parent.gradle') << 'contents of parent script'
     }
 
     @Test
     void 'project with no scripts returns an empty map'() {
-        File emptyPluginDir = projectDir.newFolder('emptyPluginDir')
+        Path emptyPluginDir = configDir.resolve('emptyPluginDir')
+        Files.createDirectories(emptyPluginDir)
         SProject project = mock(SProject)
-        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(emptyPluginDir)
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(emptyPluginDir.toFile())
 
         Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
         assertThat(scripts.keySet(), hasSize(0))

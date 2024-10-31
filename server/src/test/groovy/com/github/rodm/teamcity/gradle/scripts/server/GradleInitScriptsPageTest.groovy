@@ -26,8 +26,8 @@ import jetbrains.buildServer.web.openapi.PagePlace
 import jetbrains.buildServer.web.openapi.PagePlaces
 import jetbrains.buildServer.web.openapi.PlaceId
 import jetbrains.buildServer.web.openapi.PluginDescriptor
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import javax.servlet.http.HttpServletRequest
 
@@ -53,7 +53,7 @@ class GradleInitScriptsPageTest {
     private SProject project
     private GradleInitScriptsPage page
 
-    @Before
+    @BeforeEach
     void setup() {
         places = mock(PagePlaces)
         descriptor = mock(PluginDescriptor)

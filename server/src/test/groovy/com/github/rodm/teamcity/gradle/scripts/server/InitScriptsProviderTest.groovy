@@ -23,8 +23,8 @@ import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.SRunnerContext
 import jetbrains.buildServer.serverSide.SRunningBuild
 import jetbrains.buildServer.serverSide.UnknownRunType
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.is
@@ -48,7 +48,7 @@ class InitScriptsProviderTest {
 
     private boolean isGradleRunner = true
 
-    @Before
+    @BeforeEach
     void setup() {
         scriptsManager = mock(GradleScriptsManager)
         provider = new InitScriptsProvider(scriptsManager) {

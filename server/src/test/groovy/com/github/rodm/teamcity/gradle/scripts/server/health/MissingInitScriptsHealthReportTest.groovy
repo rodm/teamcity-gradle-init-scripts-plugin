@@ -32,8 +32,8 @@ import jetbrains.buildServer.web.openapi.PlaceId
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import jetbrains.buildServer.web.openapi.PositionConstraint
 import jetbrains.buildServer.web.openapi.healthStatus.HealthStatusItemPageExtension
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 
@@ -59,7 +59,7 @@ class MissingInitScriptsHealthReportTest {
     private PagePlace pagePlace
     private MissingInitScriptsHealthReport report
 
-    @Before
+    @BeforeEach
     void setup() {
         scriptsManager = mock(GradleScriptsManager)
         pagePlace = mock(PagePlace)

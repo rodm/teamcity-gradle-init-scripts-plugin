@@ -21,8 +21,8 @@ import jetbrains.buildServer.serverSide.BuildTypeTemplate
 import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor
 import jetbrains.buildServer.serverSide.SBuildType
 import jetbrains.buildServer.serverSide.SProject
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import static com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
@@ -37,7 +37,7 @@ class ProjectInspectorTest {
 
     private ProjectInspector inspector
 
-    @Before
+    @BeforeEach
     void setup() {
         scriptsManager = mock(GradleScriptsManager)
         inspector = new ProjectInspector(scriptsManager)
