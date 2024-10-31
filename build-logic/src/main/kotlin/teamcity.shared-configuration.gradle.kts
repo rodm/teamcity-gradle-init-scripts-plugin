@@ -11,9 +11,14 @@ configurations.all {
 }
 
 dependencies {
+    testImplementation (platform("org.junit:junit-bom:5.11.3"))
+    testImplementation (group = "org.junit.jupiter", name = "junit-jupiter-api")
     testImplementation (group = "junit", name = "junit", version = "4.13.1")
     testImplementation (group = "org.hamcrest", name = "hamcrest-library", version = "2.2")
     testImplementation (group = "org.mockito", name = "mockito-core", version = "3.5.15")
+
+    testRuntimeOnly (group = "org.junit.jupiter", name = "junit-jupiter-engine")
+    testRuntimeOnly (group = "org.junit.vintage", name = "junit-vintage-engine")
 }
 
 tasks.withType<KotlinCompile> {
@@ -22,7 +27,8 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-tasks.named("test") {
+tasks.named<Test>("test") {
+    useJUnitPlatform()
     finalizedBy (tasks.named("jacocoTestReport"))
 }
 
