@@ -28,10 +28,9 @@ import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.startsWith
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import org.mockito.ArgumentMatchers.matches
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.eq
@@ -45,9 +44,8 @@ class GradleInitScriptsBuildFeatureTest {
 
     val FEATURE_PARAMETERS = hashMapOf(INIT_SCRIPT_NAME to "init.gradle", INIT_SCRIPT_CONTENT to "content")
 
-    @Rule
-    @JvmField
-    var tempDir = TemporaryFolder()
+    @TempDir
+    lateinit var tempDir: File
 
     val runner = mock(BuildRunnerContext::class.java)
 
@@ -59,11 +57,11 @@ class GradleInitScriptsBuildFeatureTest {
         }
 
         override fun getBuildTempDirectory(context: BuildRunnerContext): File {
-            return tempDir.root
+            return tempDir
         }
     }
 
-    @Before
+    @BeforeEach
     fun setup() {
         `when`(runner.runnerParameters).thenReturn(FEATURE_PARAMETERS)
     }
@@ -79,7 +77,7 @@ class GradleInitScriptsBuildFeatureTest {
     fun `when feature is enabled it writes an init script to the temporary build directory`() {
         feature.beforeRunnerStart(runner)
 
-        val files = tempDir.root.list().toList()
+        val files = tempDir.list()?.toList()
         assertThat(files, hasItem(startsWith("init_")))
         assertThat(files, hasItem(endsWith(".gradle")))
     }
@@ -88,18 +86,18 @@ class GradleInitScriptsBuildFeatureTest {
     fun `when feature is enabled it writes the init script content to a file`() {
         feature.beforeRunnerStart(runner)
 
-        val files = tempDir.root.listFiles()
-        assertThat(files[0].readText(), equalTo("content"))
+        val files = tempDir.listFiles()
+        assertThat(files?.get(0)?.readText(), equalTo("content"))
     }
 
     @Test
     fun `when feature is enabled it removes the init script file after the build finishes`() {
         feature.beforeRunnerStart(runner)
 
-        val filesBeforeBuild = tempDir.root.list().toList()
+        val filesBeforeBuild = tempDir.list()?.toList()
         feature.runnerFinished(runner, BuildFinishedStatus.FINISHED_SUCCESS)
 
-        val filesAfterBuild = tempDir.root.list().toList()
+        val filesAfterBuild = tempDir.list()?.toList()
         assertThat(filesBeforeBuild, hasSize(1))
         assertThat(filesAfterBuild, hasSize(0))
     }
