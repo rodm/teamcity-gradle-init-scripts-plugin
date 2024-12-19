@@ -17,6 +17,10 @@
 package com.github.rodm.teamcity.gradle.scripts.server
 
 import jetbrains.buildServer.log.Loggers.SERVER_CATEGORY
+import jetbrains.buildServer.serverSide.ConfigActionFactory
+import jetbrains.buildServer.serverSide.ConfigFileChangesListener
+import jetbrains.buildServer.serverSide.CopiedObjects
+import jetbrains.buildServer.serverSide.CustomSettingsMapper
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
 import jetbrains.buildServer.util.ExceptionUtil
@@ -29,8 +33,10 @@ import java.lang.Exception
 import kotlin.reflect.KFunction1
 
 class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
-                                  registry: VersionedSettingsRegistry)
-    : GradleScriptsManager
+                                  registry: VersionedSettingsRegistry,
+                                  private val configChangesListener: ConfigFileChangesListener,
+                                  private val configActionFactory: ConfigActionFactory)
+    : GradleScriptsManager, CustomSettingsMapper
 {
     private val log = Logger.getLogger("$SERVER_CATEGORY.GradleInitScripts")
 
@@ -38,6 +44,30 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
 
     init {
         registry.registerDir("pluginData/" + descriptor.pluginName)
+    }
+
+    override fun mapData(copiedObjects: CopiedObjects) {
+        for ((source, target) in copiedObjects.copiedProjectsMap) {
+            val sourceDir = source.getPluginDataDirectory(pluginName)
+            val files = sourceDir.listFiles()
+            if (files != null && files.isNotEmpty()) {
+                var targetDir: File?
+                try {
+                    targetDir = FileUtil.createDir(target.getPluginDataDirectory(pluginName))
+                } catch (e: IOException) {
+                    log.warn("Could not create directory for project Gradle init scripts", e)
+                    continue
+                }
+                for (sourceFile in files) {
+                    val targetFile = File(targetDir, sourceFile.name)
+                    try {
+                        FileUtil.copy(sourceFile, targetFile)
+                    } catch (e: IOException) {
+                        log.warn("Could not copy script file: " + sourceFile.absolutePath + " to: " + targetFile.absolutePath, e)
+                    }
+                }
+            }
+        }
     }
 
     override fun getScriptNames(project: SProject): Map<SProject, List<String>> {
@@ -103,7 +133,10 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
 
     override fun saveScript(project: SProject, name: String, content: String) {
         val file = File(getPluginDataDirectory(project), name)
+        val exists = file.exists()
         file.writeText(content)
+        val message = "Gradle init script $name was ${if (exists) "updated" else "uploaded"}"
+        configChangesListener.onPersist(project, file, configActionFactory.createAction(project, message))
     }
 
     override fun deleteScript(project: SProject, name: String): Boolean {
@@ -111,6 +144,10 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
         try {
             val file = File(getPluginDataDirectory(project), name)
             result = FileUtil.delete(file)
+            if (result) {
+                val message = "Gradle init script $name was deleted"
+                configChangesListener.onDelete(project, file, configActionFactory.createAction(project, message))
+            }
         }
         catch (e: IOException) {
             log.error(e.message)

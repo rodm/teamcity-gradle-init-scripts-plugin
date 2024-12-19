@@ -16,12 +16,16 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server
 
+import jetbrains.buildServer.serverSide.ConfigAction
+import jetbrains.buildServer.serverSide.ConfigActionFactory
+import jetbrains.buildServer.serverSide.ConfigFileChangesListener
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.mockito.ArgumentCaptor
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -34,6 +38,7 @@ import static org.hamcrest.Matchers.hasSize
 import static org.hamcrest.Matchers.is
 import static org.hamcrest.Matchers.not
 import static org.hamcrest.Matchers.nullValue
+import static org.mockito.ArgumentMatchers.any
 import static org.mockito.Mockito.eq
 import static org.mockito.Mockito.mock
 import static org.mockito.Mockito.verify
@@ -47,6 +52,10 @@ class GradleScriptManagerTest {
 
     private VersionedSettingsRegistry settingsRegistry
 
+    private ConfigFileChangesListener changesListener
+
+    private ConfigActionFactory actionFactory
+
     @TempDir
     Path configDir
 
@@ -58,7 +67,9 @@ class GradleScriptManagerTest {
         PluginDescriptor descriptor = mock(PluginDescriptor)
         when(descriptor.getPluginName()).thenReturn(PLUGIN_NAME)
         settingsRegistry = mock(VersionedSettingsRegistry)
-        scriptsManager = new DefaultGradleScriptsManager(descriptor, settingsRegistry)
+        changesListener = mock(ConfigFileChangesListener)
+        actionFactory = mock(ConfigActionFactory)
+        scriptsManager = new DefaultGradleScriptsManager(descriptor, settingsRegistry, changesListener, actionFactory)
         pluginDir = configDir.resolve('project').resolve(PLUGIN_NAME).toFile()
         Files.createDirectories(pluginDir.toPath())
         new File(pluginDir, 'init1.gradle') << 'contents of script1'
@@ -210,5 +221,71 @@ class GradleScriptManagerTest {
     @Test
     void 'manager registers plugin directory with versioned settings registry'() {
         verify(settingsRegistry).registerDir(eq('pluginData/' + PLUGIN_NAME))
+    }
+
+    @Test
+    void 'saving a script notifies the config file changes listener'() {
+        SProject project = mock(SProject)
+        when(project.getProjectPath()).thenReturn([project])
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+
+        scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
+
+        ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File)
+        verify(changesListener).onPersist(eq(project), fileCaptor.capture(), any(ConfigAction))
+        File file = fileCaptor.value
+        assertThat(file.name, equalTo('test.gradle'))
+    }
+
+    @Test
+    void 'deleting a script notifies the config file changes listener'() {
+        new File(pluginDir, 'test.gradle') << 'contents of test.gradle'
+        SProject project = mock(SProject)
+        when(project.getProjectPath()).thenReturn([project])
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+
+        scriptsManager.deleteScript(project, 'test.gradle')
+
+        ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File)
+        verify(changesListener).onDelete(eq(project), fileCaptor.capture(), any(ConfigAction))
+        File file = fileCaptor.value
+        assertThat(file.name, equalTo('test.gradle'))
+    }
+
+    @Test
+    void 'uploading a new script creates a config action with script uploaded message'() {
+        SProject project = mock(SProject)
+        when(project.getProjectPath()).thenReturn([project])
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+
+        scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
+
+        verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was uploaded'))
+    }
+
+    @Test
+    void 'updating a script creates a config action with script updated message'() {
+        SProject project = mock(SProject)
+        when(project.getProjectPath()).thenReturn([project])
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        new File(pluginDir, 'test.gradle') << 'initial contents of test.gradle'
+
+        scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
+
+        verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was updated'))
+    }
+
+    @Test
+    void 'deleting a script creates a config action with script deleted message'() {
+        new File(pluginDir, 'test.gradle') << 'contents of test.gradle'
+        SProject project = mock(SProject)
+        when(project.getProjectPath()).thenReturn([project])
+        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+
+        scriptsManager.deleteScript(project, 'test.gradle')
+
+        verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was deleted'))
     }
 }

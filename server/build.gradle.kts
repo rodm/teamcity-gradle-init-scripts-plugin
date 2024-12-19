@@ -9,9 +9,13 @@ extra["downloadsDir"] = project.findProperty("downloads.dir") ?: "${rootDir}/dow
 extra["serversDir"] = project.findProperty("servers.dir") ?: "${rootDir}/servers"
 extra["java11Home"] = project.findProperty("java11.home") ?: "/opt/jdk-11.0.2"
 
+val teamcityVersion = project.findProperty("teamcity.api.version") as String? ?: "2018.1"
+
 dependencies {
     implementation (project(":gradle-init-scripts-common"))
     implementation (kotlin("stdlib"))
+
+    provided (group = "org.jetbrains.teamcity.internal", name = "server", version = teamcityVersion)
 
     agent (project(path = ":gradle-init-scripts-agent", configuration = "plugin"))
 
