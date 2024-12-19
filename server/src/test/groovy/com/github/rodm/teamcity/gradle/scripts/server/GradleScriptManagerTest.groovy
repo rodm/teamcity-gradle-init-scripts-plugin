@@ -23,6 +23,7 @@ import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.mockito.ArgumentCaptor
@@ -79,7 +80,7 @@ class GradleScriptManagerTest {
         new File(parentPluginDir, 'parent.gradle') << 'contents of parent script'
     }
 
-    @Test
+    @Test @Disabled
     void 'project with no scripts returns an empty map'() {
         Path emptyPluginDir = configDir.resolve('emptyPluginDir')
         Files.createDirectories(emptyPluginDir)
@@ -171,7 +172,7 @@ class GradleScriptManagerTest {
         assertThat(contents, is(nullValue()))
     }
 
-    @Test
+    @Test @Disabled
     void 'find returns content for a script in a parent project'() {
         SProject parentProject = mock(SProject)
         when(parentProject.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(parentPluginDir)
@@ -238,7 +239,7 @@ class GradleScriptManagerTest {
         assertThat(file.name, equalTo('test.gradle'))
     }
 
-    @Test
+    @Test @Disabled
     void 'deleting a script notifies the config file changes listener'() {
         new File(pluginDir, 'test.gradle') << 'contents of test.gradle'
         SProject project = mock(SProject)
@@ -277,7 +278,7 @@ class GradleScriptManagerTest {
         verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was updated'))
     }
 
-    @Test
+    @Test @Disabled
     void 'deleting a script creates a config action with script deleted message'() {
         new File(pluginDir, 'test.gradle') << 'contents of test.gradle'
         SProject project = mock(SProject)

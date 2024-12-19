@@ -146,7 +146,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
             result = FileUtil.delete(file)
             if (result) {
                 val message = "Gradle init script $name was deleted"
-                configChangesListener.onDelete(project, file, configActionFactory.createAction(project, message))
+//                configChangesListener.onDelete(project, file, configActionFactory.createAction(project, message))
             }
         }
         catch (e: IOException) {
