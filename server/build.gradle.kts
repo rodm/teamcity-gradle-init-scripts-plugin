@@ -9,7 +9,7 @@ extra["downloadsDir"] = project.findProperty("downloads.dir") ?: "${rootDir}/dow
 extra["serversDir"] = project.findProperty("servers.dir") ?: "${rootDir}/servers"
 extra["java11Home"] = project.findProperty("java11.home") ?: "/opt/jdk-11.0.2"
 
-val teamcityVersion = project.findProperty("teamcity.api.version") as String? ?: "2018.1"
+val teamcityVersion = project.findProperty("teamcity.api.version") as String? ?: "2024.12"
 
 dependencies {
     implementation (project(":gradle-init-scripts-common"))
@@ -36,7 +36,7 @@ teamcity {
             downloadUrl = "https://github.com/rodm/teamcity-gradle-init-scripts-plugin"
             email = "rod.n.mackenzie@gmail.com"
             useSeparateClassloader = true
-            minimumBuild = "58245"
+            minimumBuild = "174331"
         }
 
         files {
@@ -55,15 +55,11 @@ teamcity {
         baseHomeDir = extra["serversDir"] as String
         baseDataDir = "${rootDir}/data"
 
-        register("teamcity2018.1") {
-            version = "2018.1.5"
+        register("teamcity2024.12") {
+            version = "2024.12"
+            javaHome = extra["java11Home"] as String
             serverOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
             agentOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006")
-        }
-
-        register("teamcity2024.03") {
-            version = "2024.03.1"
-            javaHome = extra["java11Home"] as String
         }
     }
 }
