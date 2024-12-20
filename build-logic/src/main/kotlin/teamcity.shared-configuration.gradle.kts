@@ -1,6 +1,4 @@
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm")
     id("org.gradle.jacoco")
@@ -19,10 +17,8 @@ dependencies {
     testRuntimeOnly (group = "org.junit.jupiter", name = "junit-jupiter-engine")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+kotlin {
+    jvmToolchain(8)
 }
 
 tasks.named<Test>("test") {
