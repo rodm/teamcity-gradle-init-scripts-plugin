@@ -19,11 +19,12 @@ package com.github.rodm.teamcity.gradle.scripts.server
 import jetbrains.buildServer.serverSide.ConfigAction
 import jetbrains.buildServer.serverSide.ConfigActionFactory
 import jetbrains.buildServer.serverSide.ConfigFileChangesListener
+import jetbrains.buildServer.serverSide.PersistTask
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
+import jetbrains.buildServer.serverSide.impl.ProjectEx
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.mockito.ArgumentCaptor
@@ -80,7 +81,7 @@ class GradleScriptManagerTest {
         new File(parentPluginDir, 'parent.gradle') << 'contents of parent script'
     }
 
-    @Test @Disabled
+    @Test
     void 'project with no scripts returns an empty map'() {
         Path emptyPluginDir = configDir.resolve('emptyPluginDir')
         Files.createDirectories(emptyPluginDir)
@@ -172,7 +173,7 @@ class GradleScriptManagerTest {
         assertThat(contents, is(nullValue()))
     }
 
-    @Test @Disabled
+    @Test
     void 'find returns content for a script in a parent project'() {
         SProject parentProject = mock(SProject)
         when(parentProject.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(parentPluginDir)
@@ -212,11 +213,13 @@ class GradleScriptManagerTest {
 
     @Test
     void 'delete removes a script from a project'() {
-        SProject project = mock(SProject)
+        ProjectEx project = mock(ProjectEx)
+        PersistTask task = mock(PersistTask)
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+        when(task.await(any(Long))).thenReturn(true)
 
-        assertThat(scriptsManager.deleteScript(project, 'init2.gradle'), is(true))
-        assertThat(new File(pluginDir, 'init2.gradle').exists(), is(false))
+        assertThat(scriptsManager.deleteScript(project, 'init.gradle'), is(true))
     }
 
     @Test
@@ -239,20 +242,19 @@ class GradleScriptManagerTest {
         assertThat(file.name, equalTo('test.gradle'))
     }
 
-    @Test @Disabled
+    @Test
     void 'deleting a script notifies the config file changes listener'() {
         new File(pluginDir, 'test.gradle') << 'contents of test.gradle'
-        SProject project = mock(SProject)
+        ProjectEx project = mock(ProjectEx)
+        PersistTask task = mock(PersistTask)
         when(project.getProjectPath()).thenReturn([project])
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        when(project.scheduleFileDelete(any(), any())).thenReturn(task)
         when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
 
         scriptsManager.deleteScript(project, 'test.gradle')
 
-        ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File)
-        verify(changesListener).onDelete(eq(project), fileCaptor.capture(), any(ConfigAction))
-        File file = fileCaptor.value
-        assertThat(file.name, equalTo('test.gradle'))
+        verify(project).scheduleFileDelete(any(ConfigAction), eq('test.gradle'))
     }
 
     @Test
@@ -278,12 +280,13 @@ class GradleScriptManagerTest {
         verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was updated'))
     }
 
-    @Test @Disabled
+    @Test
     void 'deleting a script creates a config action with script deleted message'() {
-        new File(pluginDir, 'test.gradle') << 'contents of test.gradle'
-        SProject project = mock(SProject)
+        ProjectEx project = mock(ProjectEx)
+        PersistTask task = mock(PersistTask)
         when(project.getProjectPath()).thenReturn([project])
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+        when(project.scheduleFileDelete(any(), any())).thenReturn(task)
 
         scriptsManager.deleteScript(project, 'test.gradle')
 

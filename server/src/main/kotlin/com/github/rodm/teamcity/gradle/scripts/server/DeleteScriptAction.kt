@@ -58,9 +58,15 @@ class DeleteScriptAction(controller: InitScriptsActionsController,
                 if (ajaxResponse != null) actionErrors.serialize(ajaxResponse)
                 return
             }
-            val deleted = scriptsManager.deleteScript(project, name)
-            val message = "Gradle init script $name ${if (deleted) "was deleted" else "cannot be deleted"}"
-            ActionMessages.getOrCreateMessages(request).addMessage("initScriptsMessage", message)
+            try {
+                val deleted = scriptsManager.deleteScript(project, name)
+                val message = "Gradle init script $name ${if (deleted) "was deleted" else "has been scheduled for deletion"}"
+                ActionMessages.getOrCreateMessages(request).addMessage("initScriptsMessage", message)
+            }
+            catch (e: Throwable) {
+                actionErrors.addError("initScriptsError", "Gradle init script $name cannot be deleted.")
+                if (ajaxResponse != null) actionErrors.serialize(ajaxResponse)
+            }
         }
     }
 

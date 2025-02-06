@@ -23,6 +23,7 @@ import jetbrains.buildServer.serverSide.CopiedObjects
 import jetbrains.buildServer.serverSide.CustomSettingsMapper
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
+import jetbrains.buildServer.serverSide.impl.ProjectEx
 import jetbrains.buildServer.util.ExceptionUtil
 import jetbrains.buildServer.util.FileUtil
 import jetbrains.buildServer.web.openapi.PluginDescriptor
@@ -31,6 +32,8 @@ import java.io.File
 import java.io.IOException
 import java.lang.Exception
 import kotlin.reflect.KFunction1
+
+private const val DEFAULT_TIMEOUT = 10000L
 
 class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
                                   registry: VersionedSettingsRegistry,
@@ -140,19 +143,21 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
     }
 
     override fun deleteScript(project: SProject, name: String): Boolean {
-        var result = false
         try {
-            val file = File(getPluginDataDirectory(project), name)
-            result = FileUtil.delete(file)
-            if (result) {
-                val message = "Gradle init script $name was deleted"
-//                configChangesListener.onDelete(project, file, configActionFactory.createAction(project, message))
+            val message = "Gradle init script $name was deleted"
+            val projectEx = project as ProjectEx
+            val task = projectEx.scheduleFileDelete(configActionFactory.createAction(project, message), name)
+            return try {
+                task.await(DEFAULT_TIMEOUT)
+            }
+            catch (e: InterruptedException) {
+                false
             }
         }
         catch (e: IOException) {
             log.error(e.message)
+            throw GradleScriptsException("Failed to delete file $name", e)
         }
-        return result
     }
 
     private fun getPluginDataDirectory(project: SProject): File {

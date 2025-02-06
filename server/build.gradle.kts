@@ -15,6 +15,7 @@ dependencies {
     agent (project(path = ":gradle-init-scripts-agent", configuration = "plugin"))
 
     testImplementation (localGroovy())
+    testImplementation (group = "org.jetbrains.teamcity.internal", name = "server", version = teamcityVersion)
 }
 
 teamcity {
