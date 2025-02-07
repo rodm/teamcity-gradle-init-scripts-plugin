@@ -62,8 +62,7 @@ class GradleScriptManagerTest {
     @TempDir
     Path configDir
 
-    private SProject project
-    private File pluginDir
+    private ProjectEx project
 
     @BeforeEach
     void setup() {
@@ -75,8 +74,8 @@ class GradleScriptManagerTest {
         scriptsManager = new DefaultGradleScriptsManager(descriptor, settingsRegistry, changesListener, actionFactory)
     }
 
-    private SProject createMockProject(String name, Map<String, String> scripts = [:]) {
-        def project = mock(SProject)
+    private ProjectEx createMockProject(String name, Map<String, String> scripts = [:]) {
+        def project = mock(ProjectEx)
         def pluginDir = createPluginDir(configDir, name)
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
         scripts.each { entry ->
@@ -160,9 +159,7 @@ class GradleScriptManagerTest {
 
         @Test
         void 'delete removes a script from a project'() {
-            ProjectEx project = mock(ProjectEx)
             PersistTask task = mock(PersistTask)
-            when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
             when(project.scheduleFileDelete(any(), any())).thenReturn(task)
             when(task.await(any(Long))).thenReturn(true)
 
@@ -183,10 +180,7 @@ class GradleScriptManagerTest {
 
         @Test
         void 'deleting a script notifies the config file changes listener'() {
-            ProjectEx project = mock(ProjectEx)
             PersistTask task = mock(PersistTask)
-            when(project.getProjectPath()).thenReturn([project])
-            when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
             when(project.scheduleFileDelete(any(), any())).thenReturn(task)
             when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
 
@@ -212,10 +206,7 @@ class GradleScriptManagerTest {
         }
         @Test
         void 'deleting a script creates a config action with script deleted message'() {
-            ProjectEx project = mock(ProjectEx)
             PersistTask task = mock(PersistTask)
-            when(project.getProjectPath()).thenReturn([project])
-            when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
             when(project.scheduleFileDelete(any(), any())).thenReturn(task)
 
             scriptsManager.deleteScript(project, 'test.gradle')
