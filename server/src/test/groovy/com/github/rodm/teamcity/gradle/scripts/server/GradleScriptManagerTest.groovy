@@ -25,6 +25,7 @@ import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
 import jetbrains.buildServer.serverSide.impl.ProjectEx
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.mockito.ArgumentCaptor
@@ -62,8 +63,6 @@ class GradleScriptManagerTest {
     Path configDir
 
     private SProject project
-    private SProject parentProject
-    private SProject emptyProject
     private File pluginDir
 
     @BeforeEach
@@ -74,14 +73,6 @@ class GradleScriptManagerTest {
         changesListener = mock(ConfigFileChangesListener)
         actionFactory = mock(ConfigActionFactory)
         scriptsManager = new DefaultGradleScriptsManager(descriptor, settingsRegistry, changesListener, actionFactory)
-
-        project = createMockProject('project',
-            ['init1.gradle' : 'contents of script1', 'init2.gradle' : 'contents of script2']
-        )
-        parentProject = createMockProject('parent-project',
-            ['parent.gradle' : 'contents of parent script']
-        )
-        emptyProject = createMockProject('empty-project')
     }
 
     private SProject createMockProject(String name, Map<String, String> scripts = [:]) {
@@ -101,176 +92,191 @@ class GradleScriptManagerTest {
     }
 
     @Test
-    void 'project with no scripts returns an empty map'() {
-        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(emptyProject)
-        assertThat(scripts.keySet(), hasSize(0))
-    }
-
-    @Test
-    void 'project with scripts returns list of names'() {
-        when(project.getProjectPath()).thenReturn([project])
-
-        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
-        assertThat(scripts.get(project), hasSize(2))
-        assertThat(scripts.get(project), hasItem('init1.gradle'))
-        assertThat(scripts.get(project), hasItem('init2.gradle'))
-    }
-
-    @Test
-    void 'project with parent returns a map of projects and scripts'() {
-        when(project.getProjectPath()).thenReturn([parentProject, project])
-
-        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
-        assertThat(scripts.keySet(), hasSize(2))
-        assertThat(scripts, hasKey(project))
-        assertThat(scripts, hasKey(parentProject))
-        assertThat(scripts.get(project), hasSize(2))
-        assertThat(scripts.get(project), hasItem('init1.gradle'))
-        assertThat(scripts.get(project), hasItem('init2.gradle'))
-        assertThat(scripts.get(parentProject), hasSize(1))
-        assertThat(scripts.get(parentProject), hasItem('parent.gradle'))
-    }
-
-    @Test
-    void 'parent project should not be returned if subproject overrides all the parent scripts'() {
-        when(project.getProjectPath()).thenReturn([parentProject, project])
-        new File(project.getPluginDataDirectory(PLUGIN_NAME), 'parent.gradle') << 'contents of override script'
-
-        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
-        assertThat(scripts.keySet(), hasSize(1))
-        assertThat(scripts, hasKey(project))
-        assertThat(scripts.get(project), hasItem('parent.gradle'))
-    }
-
-    @Test
-    void 'project with parent returns list of scripts with no duplicates'() {
-        when(project.getProjectPath()).thenReturn([parentProject, project])
-        new File(parentProject.getPluginDataDirectory(PLUGIN_NAME), 'init1.gradle') << 'contents of parent script1'
-
-        Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
-        assertThat(scripts.get(parentProject), hasSize(1))
-        assertThat(scripts.get(parentProject), hasItem('parent.gradle'))
-        assertThat(scripts.get(parentProject), not(hasItem('init1.gradle')))
-    }
-
-    @Test
-    void 'find returns content for a script that exists'() {
-        when(project.getProjectPath()).thenReturn([project])
-
-        String contents = scriptsManager.findScript(project, 'init1.gradle')
-        assertThat(contents.trim(), equalTo('contents of script1'))
-    }
-
-    @Test
-    void 'find returns null for a script that doesn\'t exist'() {
-        when(project.getProjectPath()).thenReturn([project])
-
-        String contents = scriptsManager.findScript(project, 'dummy.gradle')
-        assertThat(contents, is(nullValue()))
-    }
-
-    @Test
-    void 'find returns content for a script in a parent project'() {
-        when(project.getProjectPath()).thenReturn([parentProject, project])
-
-        String contents = scriptsManager.findScript(project, 'parent.gradle')
-        assertThat(contents.trim(), equalTo('contents of parent script'))
-    }
-
-    @Test
-    void 'save writes a script to a project '() {
-        when(project.getProjectPath()).thenReturn([project])
-
-        scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
-
-        assertThat(new File(project.getPluginDataDirectory(PLUGIN_NAME), 'test.gradle').exists(), is(true))
-        String contents = scriptsManager.findScript(project, 'test.gradle')
-        assertThat(contents, equalTo('contents of test.gradle'))
-    }
-
-    @Test
-    void 'save overwrites contents of an existing script'() {
-        when(project.getProjectPath()).thenReturn([project])
-
-        scriptsManager.saveScript(project, 'test.gradle', 'initial contents of test.gradle')
-        scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
-
-        String contents = scriptsManager.findScript(project, 'test.gradle')
-        assertThat(contents, equalTo('updated contents of test.gradle'))
-    }
-
-    @Test
-    void 'delete removes a script from a project'() {
-        ProjectEx project = mock(ProjectEx)
-        PersistTask task = mock(PersistTask)
-        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
-        when(project.scheduleFileDelete(any(), any())).thenReturn(task)
-        when(task.await(any(Long))).thenReturn(true)
-
-        assertThat(scriptsManager.deleteScript(project, 'init.gradle'), is(true))
-    }
-
-    @Test
     void 'manager registers plugin directory with versioned settings registry'() {
         verify(settingsRegistry).registerDir(eq('pluginData/' + PLUGIN_NAME))
     }
 
-    @Test
-    void 'saving a script notifies the config file changes listener'() {
-        when(project.getProjectPath()).thenReturn([project])
-        when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+    @Nested
+    class WithEmptyProject {
+        @BeforeEach
+        void setup() {
+            project = createMockProject('empty-project')
+        }
 
-        scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
-
-        ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File)
-        verify(changesListener).onPersist(eq(project), fileCaptor.capture(), any(ConfigAction))
-        File file = fileCaptor.value
-        assertThat(file.name, equalTo('test.gradle'))
+        @Test
+        void 'project with no scripts returns an empty map'() {
+            Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+            assertThat(scripts.keySet(), hasSize(0))
+        }
     }
 
-    @Test
-    void 'deleting a script notifies the config file changes listener'() {
-        ProjectEx project = mock(ProjectEx)
-        PersistTask task = mock(PersistTask)
-        when(project.getProjectPath()).thenReturn([project])
-        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
-        when(project.scheduleFileDelete(any(), any())).thenReturn(task)
-        when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+    @Nested
+    class WithSingleProject {
+        @BeforeEach
+        void setup() {
+            project = createMockProject('project',
+                ['init1.gradle': 'contents of script1', 'init2.gradle': 'contents of script2']
+            )
+            when(project.getProjectPath()).thenReturn([project])
+        }
 
-        scriptsManager.deleteScript(project, 'test.gradle')
+        @Test
+        void 'project with scripts returns list of names'() {
+            Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+            assertThat(scripts.get(project), hasSize(2))
+            assertThat(scripts.get(project), hasItem('init1.gradle'))
+            assertThat(scripts.get(project), hasItem('init2.gradle'))
+        }
 
-        verify(project).scheduleFileDelete(any(ConfigAction), eq('test.gradle'))
+        @Test
+        void 'find returns content for a script that exists'() {
+            String contents = scriptsManager.findScript(project, 'init1.gradle')
+            assertThat(contents.trim(), equalTo('contents of script1'))
+        }
+
+        @Test
+        void 'find returns null for a script that doesn\'t exist'() {
+            String contents = scriptsManager.findScript(project, 'dummy.gradle')
+            assertThat(contents, is(nullValue()))
+        }
+
+        @Test
+        void 'save writes a script to a project '() {
+            scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
+
+            assertThat(new File(project.getPluginDataDirectory(PLUGIN_NAME), 'test.gradle').exists(), is(true))
+            String contents = scriptsManager.findScript(project, 'test.gradle')
+            assertThat(contents, equalTo('contents of test.gradle'))
+        }
+
+        @Test
+        void 'save overwrites contents of an existing script'() {
+            scriptsManager.saveScript(project, 'test.gradle', 'initial contents of test.gradle')
+            scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
+
+            String contents = scriptsManager.findScript(project, 'test.gradle')
+            assertThat(contents, equalTo('updated contents of test.gradle'))
+        }
+
+        @Test
+        void 'delete removes a script from a project'() {
+            ProjectEx project = mock(ProjectEx)
+            PersistTask task = mock(PersistTask)
+            when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+            when(task.await(any(Long))).thenReturn(true)
+
+            assertThat(scriptsManager.deleteScript(project, 'init.gradle'), is(true))
+        }
+
+        @Test
+        void 'saving a script notifies the config file changes listener'() {
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+
+            scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
+
+            ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File)
+            verify(changesListener).onPersist(eq(project), fileCaptor.capture(), any(ConfigAction))
+            File file = fileCaptor.value
+            assertThat(file.name, equalTo('test.gradle'))
+        }
+
+        @Test
+        void 'deleting a script notifies the config file changes listener'() {
+            ProjectEx project = mock(ProjectEx)
+            PersistTask task = mock(PersistTask)
+            when(project.getProjectPath()).thenReturn([project])
+            when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+
+            scriptsManager.deleteScript(project, 'test.gradle')
+
+            verify(project).scheduleFileDelete(any(ConfigAction), eq('test.gradle'))
+        }
+
+        @Test
+        void 'uploading a new script creates a config action with script uploaded message'() {
+            scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
+
+            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was uploaded'))
+        }
+
+        @Test
+        void 'updating a script creates a config action with script updated message'() {
+            new File(project.getPluginDataDirectory(PLUGIN_NAME), 'test.gradle') << 'initial contents of test.gradle'
+
+            scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
+
+            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was updated'))
+        }
+        @Test
+        void 'deleting a script creates a config action with script deleted message'() {
+            ProjectEx project = mock(ProjectEx)
+            PersistTask task = mock(PersistTask)
+            when(project.getProjectPath()).thenReturn([project])
+            when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
+            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+
+            scriptsManager.deleteScript(project, 'test.gradle')
+
+            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was deleted'))
+        }
     }
 
-    @Test
-    void 'uploading a new script creates a config action with script uploaded message'() {
-        when(project.getProjectPath()).thenReturn([project])
+    @Nested
+    class WithParentProject {
 
-        scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
+        private SProject parentProject
 
-        verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was uploaded'))
-    }
+        @BeforeEach
+        void setup() {
+            project = createMockProject('project',
+                ['init1.gradle': 'contents of script1', 'init2.gradle': 'contents of script2']
+            )
+            parentProject = createMockProject('parent-project',
+                ['parent.gradle': 'contents of parent script']
+            )
+            when(project.getProjectPath()).thenReturn([parentProject, project])
+        }
 
-    @Test
-    void 'updating a script creates a config action with script updated message'() {
-        when(project.getProjectPath()).thenReturn([project])
-        new File(project.getPluginDataDirectory(PLUGIN_NAME), 'test.gradle') << 'initial contents of test.gradle'
+        @Test
+        void 'project with parent returns a map of projects and scripts'() {
+            Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+            assertThat(scripts.keySet(), hasSize(2))
+            assertThat(scripts, hasKey(project))
+            assertThat(scripts, hasKey(parentProject))
+            assertThat(scripts.get(project), hasSize(2))
+            assertThat(scripts.get(project), hasItem('init1.gradle'))
+            assertThat(scripts.get(project), hasItem('init2.gradle'))
+            assertThat(scripts.get(parentProject), hasSize(1))
+            assertThat(scripts.get(parentProject), hasItem('parent.gradle'))
+        }
 
-        scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
+        @Test
+        void 'parent project should not be returned if subproject overrides all the parent scripts'() {
+            new File(project.getPluginDataDirectory(PLUGIN_NAME), 'parent.gradle') << 'contents of override script'
 
-        verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was updated'))
-    }
+            Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+            assertThat(scripts.keySet(), hasSize(1))
+            assertThat(scripts, hasKey(project))
+            assertThat(scripts.get(project), hasItem('parent.gradle'))
+        }
 
-    @Test
-    void 'deleting a script creates a config action with script deleted message'() {
-        ProjectEx project = mock(ProjectEx)
-        PersistTask task = mock(PersistTask)
-        when(project.getProjectPath()).thenReturn([project])
-        when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
-        when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+        @Test
+        void 'project with parent returns list of scripts with no duplicates'() {
+            new File(parentProject.getPluginDataDirectory(PLUGIN_NAME), 'init1.gradle') << 'contents of parent script1'
 
-        scriptsManager.deleteScript(project, 'test.gradle')
+            Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+            assertThat(scripts.get(parentProject), hasSize(1))
+            assertThat(scripts.get(parentProject), hasItem('parent.gradle'))
+            assertThat(scripts.get(parentProject), not(hasItem('init1.gradle')))
+        }
 
-        verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was deleted'))
+        @Test
+        void 'find returns content for a script in a parent project'() {
+            String contents = scriptsManager.findScript(project, 'parent.gradle')
+            assertThat(contents.trim(), equalTo('contents of parent script'))
+        }
     }
 }
