@@ -18,7 +18,6 @@ package com.github.rodm.teamcity.gradle.scripts.server
 
 import jetbrains.buildServer.serverSide.ConfigAction
 import jetbrains.buildServer.serverSide.ConfigActionFactory
-import jetbrains.buildServer.serverSide.ConfigFileChangesListener
 import jetbrains.buildServer.serverSide.PersistTask
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
@@ -28,7 +27,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import org.mockito.ArgumentCaptor
+import org.mockito.invocation.InvocationOnMock
+import org.mockito.stubbing.Answer
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -55,8 +55,6 @@ class GradleScriptManagerTest {
 
     private VersionedSettingsRegistry settingsRegistry
 
-    private ConfigFileChangesListener changesListener
-
     private ConfigActionFactory actionFactory
 
     @TempDir
@@ -69,9 +67,8 @@ class GradleScriptManagerTest {
         PluginDescriptor descriptor = mock(PluginDescriptor)
         when(descriptor.getPluginName()).thenReturn(PLUGIN_NAME)
         settingsRegistry = mock(VersionedSettingsRegistry)
-        changesListener = mock(ConfigFileChangesListener)
         actionFactory = mock(ConfigActionFactory)
-        scriptsManager = new DefaultGradleScriptsManager(descriptor, settingsRegistry, changesListener, actionFactory)
+        scriptsManager = new DefaultGradleScriptsManager(descriptor, settingsRegistry, actionFactory)
     }
 
     private ProjectEx createMockProject(String name, Map<String, String> scripts = [:]) {
@@ -88,6 +85,17 @@ class GradleScriptManagerTest {
         def pluginDir = configDir.resolve(name).resolve(PLUGIN_NAME)
         Files.createDirectories(pluginDir)
         return pluginDir.toFile()
+    }
+
+    private static Answer createAnswer(ProjectEx project) {
+        return new Answer() {
+            Object answer(InvocationOnMock invocation) {
+                def args = invocation.arguments
+                def path = project.getPluginDataDirectory(PLUGIN_NAME).toPath().resolve(args[1].toString())
+                Files.write(path, args[2] as byte[])
+                return mock(PersistTask)
+            }
+        }
     }
 
     @Test
@@ -141,15 +149,23 @@ class GradleScriptManagerTest {
 
         @Test
         void 'save writes a script to a project '() {
+            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+
             scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
 
             assertThat(new File(project.getPluginDataDirectory(PLUGIN_NAME), 'test.gradle').exists(), is(true))
             String contents = scriptsManager.findScript(project, 'test.gradle')
             assertThat(contents, equalTo('contents of test.gradle'))
+
+            verify(project).scheduleFileSave(any(ConfigAction), eq('test.gradle'), eq('contents of test.gradle'.bytes))
         }
 
         @Test
         void 'save overwrites contents of an existing script'() {
+            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+
             scriptsManager.saveScript(project, 'test.gradle', 'initial contents of test.gradle')
             scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
 
@@ -167,18 +183,6 @@ class GradleScriptManagerTest {
         }
 
         @Test
-        void 'saving a script notifies the config file changes listener'() {
-            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
-
-            scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
-
-            ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File)
-            verify(changesListener).onPersist(eq(project), fileCaptor.capture(), any(ConfigAction))
-            File file = fileCaptor.value
-            assertThat(file.name, equalTo('test.gradle'))
-        }
-
-        @Test
         void 'deleting a script notifies the config file changes listener'() {
             PersistTask task = mock(PersistTask)
             when(project.scheduleFileDelete(any(), any())).thenReturn(task)
@@ -191,6 +195,9 @@ class GradleScriptManagerTest {
 
         @Test
         void 'uploading a new script creates a config action with script uploaded message'() {
+            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+
             scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
 
             verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was uploaded'))
@@ -198,6 +205,9 @@ class GradleScriptManagerTest {
 
         @Test
         void 'updating a script creates a config action with script updated message'() {
+            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+
             new File(project.getPluginDataDirectory(PLUGIN_NAME), 'test.gradle') << 'initial contents of test.gradle'
 
             scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')

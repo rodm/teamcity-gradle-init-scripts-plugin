@@ -18,7 +18,6 @@ package com.github.rodm.teamcity.gradle.scripts.server
 
 import jetbrains.buildServer.log.Loggers.SERVER_CATEGORY
 import jetbrains.buildServer.serverSide.ConfigActionFactory
-import jetbrains.buildServer.serverSide.ConfigFileChangesListener
 import jetbrains.buildServer.serverSide.CopiedObjects
 import jetbrains.buildServer.serverSide.CustomSettingsMapper
 import jetbrains.buildServer.serverSide.SProject
@@ -37,7 +36,6 @@ private const val DEFAULT_TIMEOUT = 10000L
 
 class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
                                   registry: VersionedSettingsRegistry,
-                                  private val configChangesListener: ConfigFileChangesListener,
                                   private val configActionFactory: ConfigActionFactory)
     : GradleScriptsManager, CustomSettingsMapper
 {
@@ -134,12 +132,25 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
         return null
     }
 
-    override fun saveScript(project: SProject, name: String, content: String) {
-        val file = File(getPluginDataDirectory(project), name)
-        val exists = file.exists()
-        file.writeText(content)
-        val message = "Gradle init script $name was ${if (exists) "updated" else "uploaded"}"
-        configChangesListener.onPersist(project, file, configActionFactory.createAction(project, message))
+    override fun saveScript(project: SProject, name: String, content: String): Boolean {
+        try {
+            val file = File(getPluginDataDirectory(project), name)
+            val exists = file.exists()
+            val message = "Gradle init script $name was ${if (exists) "updated" else "uploaded"}"
+            val action = configActionFactory.createAction(project, message)
+            val projectEx = project as ProjectEx
+            val task = projectEx.scheduleFileSave(action, name, content.toByteArray())
+            return try {
+                task.await(DEFAULT_TIMEOUT)
+            }
+            catch (e: InterruptedException) {
+                false
+            }
+        }
+        catch (e: IOException) {
+            log.error(e.message)
+            throw GradleScriptsException("Failed to save file $name", e)
+        }
     }
 
     override fun deleteScript(project: SProject, name: String): Boolean {
