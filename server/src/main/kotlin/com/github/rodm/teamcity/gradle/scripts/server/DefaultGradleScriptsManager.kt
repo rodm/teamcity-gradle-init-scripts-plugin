@@ -85,7 +85,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
                 val scripts = getScriptNamesForProject(currentProject)
                 scripts.removeAll(foundNames)
                 foundNames.addAll(scripts)
-                if (scripts.size > 0) {
+                if (scripts.isNotEmpty()) {
                     result[currentProject] = scripts
                 }
             } catch (e: IOException) {
@@ -143,7 +143,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
             return try {
                 task.await(DEFAULT_TIMEOUT)
             }
-            catch (e: InterruptedException) {
+            catch (_: InterruptedException) {
                 false
             }
         }
@@ -161,7 +161,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
             return try {
                 task.await(DEFAULT_TIMEOUT)
             }
-            catch (e: InterruptedException) {
+            catch (_: InterruptedException) {
                 false
             }
         }
