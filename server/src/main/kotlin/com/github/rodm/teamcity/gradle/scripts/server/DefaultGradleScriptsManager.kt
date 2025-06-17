@@ -133,41 +133,29 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
     }
 
     override fun saveScript(project: SProject, name: String, content: String): Boolean {
-        try {
-            val file = File(getPluginDataDirectory(project), name)
-            val exists = file.exists()
-            val message = "Gradle init script $name was ${if (exists) "updated" else "uploaded"}"
-            val action = configActionFactory.createAction(project, message)
-            val projectEx = project as ProjectEx
-            val task = projectEx.scheduleFileSave(action, name, content.toByteArray())
-            return try {
-                task.await(DEFAULT_TIMEOUT)
-            }
-            catch (_: InterruptedException) {
-                false
-            }
+        val file = File(getPluginDataDirectory(project), name)
+        val exists = file.exists()
+        val message = "Gradle init script $name was ${if (exists) "updated" else "uploaded"}"
+        val action = configActionFactory.createAction(project, message)
+        val projectEx = project as ProjectEx
+        val task = projectEx.scheduleFileSave(action, name, content.toByteArray())
+        return try {
+            task.await(DEFAULT_TIMEOUT)
         }
-        catch (e: IOException) {
-            log.error(e.message)
-            throw GradleScriptsException("Failed to save file $name", e)
+        catch (_: InterruptedException) {
+            false
         }
     }
 
     override fun deleteScript(project: SProject, name: String): Boolean {
-        try {
-            val message = "Gradle init script $name was deleted"
-            val projectEx = project as ProjectEx
-            val task = projectEx.scheduleFileDelete(configActionFactory.createAction(project, message), name)
-            return try {
-                task.await(DEFAULT_TIMEOUT)
-            }
-            catch (_: InterruptedException) {
-                false
-            }
+        val message = "Gradle init script $name was deleted"
+        val projectEx = project as ProjectEx
+        val task = projectEx.scheduleFileDelete(configActionFactory.createAction(project, message), name)
+        return try {
+            task.await(DEFAULT_TIMEOUT)
         }
-        catch (e: IOException) {
-            log.error(e.message)
-            throw GradleScriptsException("Failed to delete file $name", e)
+        catch (_: InterruptedException) {
+            false
         }
     }
 
