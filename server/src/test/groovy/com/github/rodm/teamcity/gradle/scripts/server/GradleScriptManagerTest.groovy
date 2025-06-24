@@ -18,9 +18,11 @@ package com.github.rodm.teamcity.gradle.scripts.server
 
 import jetbrains.buildServer.serverSide.ConfigAction
 import jetbrains.buildServer.serverSide.ConfigActionFactory
+import jetbrains.buildServer.serverSide.CopiedObjects
 import jetbrains.buildServer.serverSide.PersistTask
 import jetbrains.buildServer.serverSide.SProject
 import jetbrains.buildServer.serverSide.VersionedSettingsRegistry
+import jetbrains.buildServer.serverSide.auth.AccessDeniedException
 import jetbrains.buildServer.serverSide.impl.ProjectEx
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.junit.jupiter.api.BeforeEach
@@ -34,6 +36,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.Matchers.containsString
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.hasItem
 import static org.hamcrest.Matchers.hasKey
@@ -41,6 +44,7 @@ import static org.hamcrest.Matchers.hasSize
 import static org.hamcrest.Matchers.is
 import static org.hamcrest.Matchers.not
 import static org.hamcrest.Matchers.nullValue
+import static org.junit.jupiter.api.Assertions.assertThrows
 import static org.mockito.ArgumentMatchers.any
 import static org.mockito.Mockito.eq
 import static org.mockito.Mockito.mock
@@ -82,7 +86,7 @@ class GradleScriptManagerTest {
     }
 
     private static File createPluginDir(Path configDir, String name) {
-        def pluginDir = configDir.resolve(name).resolve(PLUGIN_NAME)
+        def pluginDir = configDir.resolve(name).resolve('pluginData').resolve(PLUGIN_NAME)
         Files.createDirectories(pluginDir)
         return pluginDir.toFile()
     }
@@ -214,6 +218,7 @@ class GradleScriptManagerTest {
 
             verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was updated'))
         }
+
         @Test
         void 'deleting a script creates a config action with script deleted message'() {
             PersistTask task = mock(PersistTask)
@@ -222,6 +227,41 @@ class GradleScriptManagerTest {
             scriptsManager.deleteScript(project, 'test.gradle')
 
             verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was deleted'))
+        }
+
+        @Test
+        void 'copying a project copies plugin data'() {
+            ProjectEx targetProject = createMockProject('target')
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
+            when(targetProject.getProjectPath()).thenReturn([targetProject])
+            when(actionFactory.createAction(any(String))).thenReturn(mock(ConfigAction))
+            CopiedObjects copiedObjects = mock(CopiedObjects)
+            when(copiedObjects.getCopiedProjectsMap()).thenReturn([(project): targetProject])
+
+            (scriptsManager as DefaultGradleScriptsManager).mapData(copiedObjects)
+
+            verify(targetProject).scheduleFileSave(any(ConfigAction), eq('pluginData/gradleInitScripts/init1.gradle'), any())
+            verify(targetProject).scheduleFileSave(any(ConfigAction), eq('pluginData/gradleInitScripts/init2.gradle'), any())
+        }
+
+        @Test
+        void 'valid path for a script is within the plugin data directory'() {
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
+
+            def relPath = (scriptsManager as DefaultGradleScriptsManager).getValidRelativePath(project, 'init.gradle')
+
+            assertThat(relPath, equalTo("pluginData/${PLUGIN_NAME}/init.gradle".toString()))
+        }
+
+        @Test
+        void 'invalid path for a script is outside the plugin data directory'() {
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
+
+            def e = assertThrows(AccessDeniedException, {
+                (scriptsManager as DefaultGradleScriptsManager).getValidRelativePath(project, '../init.gradle')
+            })
+
+            assertThat(e.message, containsString(' is outside of the allowed directory '))
         }
     }
 

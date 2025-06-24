@@ -16,6 +16,7 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server
 
+import jetbrains.buildServer.controllers.FileSecurityUtil
 import jetbrains.buildServer.log.Loggers.SERVER_CATEGORY
 import jetbrains.buildServer.serverSide.ConfigActionFactory
 import jetbrains.buildServer.serverSide.CopiedObjects
@@ -29,7 +30,6 @@ import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.apache.log4j.Logger
 import java.io.File
 import java.io.IOException
-import java.lang.Exception
 import kotlin.reflect.KFunction1
 
 private const val DEFAULT_TIMEOUT = 10000L
@@ -45,30 +45,6 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
 
     init {
         registry.registerDir("pluginData/" + descriptor.pluginName)
-    }
-
-    override fun mapData(copiedObjects: CopiedObjects) {
-        for ((source, target) in copiedObjects.copiedProjectsMap) {
-            val sourceDir = source.getPluginDataDirectory(pluginName)
-            val files = sourceDir.listFiles()
-            if (files != null && files.isNotEmpty()) {
-                var targetDir: File?
-                try {
-                    targetDir = FileUtil.createDir(target.getPluginDataDirectory(pluginName))
-                } catch (e: IOException) {
-                    log.warn("Could not create directory for project Gradle init scripts", e)
-                    continue
-                }
-                for (sourceFile in files) {
-                    val targetFile = File(targetDir, sourceFile.name)
-                    try {
-                        FileUtil.copy(sourceFile, targetFile)
-                    } catch (e: IOException) {
-                        log.warn("Could not copy script file: " + sourceFile.absolutePath + " to: " + targetFile.absolutePath, e)
-                    }
-                }
-            }
-        }
     }
 
     override fun getScriptNames(project: SProject): Map<SProject, List<String>> {
@@ -157,6 +133,32 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
         catch (_: InterruptedException) {
             false
         }
+    }
+
+    override fun mapData(copiedObjects: CopiedObjects) {
+        for ((source, target) in copiedObjects.copiedProjectsMap) {
+            val sourceDir = source.getPluginDataDirectory(pluginName)
+            val files = sourceDir.listFiles()
+            if (files != null && files.isNotEmpty()) {
+                for (sourceFile in files) {
+                    val relPath = getValidRelativePath(source, sourceFile.name)
+                    try {
+                        val action = configActionFactory.createAction("Copy Gradle init script")
+                        (target as ProjectEx).scheduleFileSave(action, relPath, FileUtil.loadFileBytes(sourceFile))
+                    } catch (e: IOException) {
+                        log.warn("Could not load contents of init script file: " + sourceFile.absolutePath, e)
+                    }
+                }
+            }
+        }
+    }
+
+    fun getValidRelativePath(project: SProject, name: String): String {
+        val pluginDataDir = getPluginDataDirectory(project)
+        val scriptPath = pluginDataDir.toPath().resolve(name)
+        val configDir = project.configDirectory.toPath()
+        FileSecurityUtil.checkInsideDirectory(scriptPath.toFile(), pluginDataDir)
+        return configDir.relativize(scriptPath).toString()
     }
 
     private fun getPluginDataDirectory(project: SProject): File {
