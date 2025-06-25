@@ -1,24 +1,24 @@
+:plugin-id: 9665-gradle-init-scripts
+:plugin-name: teamcity-gradle-init-scripts-plugin
+:uri-github: https://github.com
+:uri-github-project: {uri-github}/rodm/{plugin-name}
+:uri-github-actions: {uri-github-project}/actions
+:uri-github-status: {uri-github-actions}/workflows/build.yml/badge.svg
+:uri-download: https://plugins.jetbrains.com/plugin/{plugin-id}
+:uri-shields: https://img.shields.io
+:uri-version: {uri-shields}/jetbrains/plugin/v/{plugin-id}?label=TeamCity%20plugin
+:uri-downloads: {uri-shields}/jetbrains/plugin/d/{plugin-id}?label=Downloads
 :uri-teamcity: https://www.jetbrains.com/teamcity/[TeamCity]
 :uri-gradle-docs: https://docs.gradle.org/current/userguide
 :uri-gradle-init-scripts: {uri-gradle-docs}/init_scripts.html[Gradle init scripts]
-:uri-github: https://github.com
-:uri-shields: https://img.shields.io
 :uri-apache-license: https://www.apache.org/licenses/LICENSE-2.0.html[Apache License, Version 2.0]
-:plugin-id: 9665-gradle-init-scripts
-:plugin-name: teamcity-gradle-init-scripts-plugin
-:uri-project: {uri-github}/rodm/{plugin-name}
-:uri-download: https://plugins.jetbrains.com/plugin/{plugin-id}
-:uri-version: {uri-shields}/jetbrains/plugin/v/{plugin-id}?label=TeamCity%20plugin
-:uri-downloads: {uri-shields}/jetbrains/plugin/d/{plugin-id}?label=Downloads
-:uri-build-history: {uri-project}/actions
-:uri-build-status: {uri-project}/workflows/Build/badge.svg
 
 = Gradle Init Scripts plugin
 
 A {uri-teamcity} plugin that provides support for reusing {uri-gradle-init-scripts}
 between build configurations.
 
-image:{uri-build-status}?branch=master["Build Status", link="{uri-build-history}"]
+image:{uri-github-status}?branch=master["Build Status", link="{uri-github-actions}"]
 image:{uri-version}["Version", link={uri-download}]
 image:{uri-downloads}["Downloads", link="{uri-download}"]
 
@@ -42,7 +42,7 @@ Example scripts can be found in the link:scripts[scripts] directory.
 
 == Installation
 
-* Download the plugin from {uri-jetbrains-plugin}[JetBrains TeamCity Plugin Repository].
+* Download the plugin from {uri-download}[JetBrains TeamCity Plugin Repository].
 
 * Go to the plugin list of your TeamCity installation at `&lt;TeamCity URL&gt;/admin/admin.html?item=plugins` and
 click on the link _Upload plugin zip_ to install the downloaded plugin file.
@@ -92,7 +92,7 @@ The example below shows applying an init script as a build feature.
 
 == Compatibility
 
-The plugin is compatible with TeamCity 2018.1 and later and requires the build agent to be running with Java 8.
+The plugin is compatible with TeamCity 20124.12 and later and requires the build agent to be running with Java 17.
 
 == License
 
