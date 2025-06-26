@@ -62,14 +62,12 @@ open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCy
 
             try {
                 val initScriptFile = FileUtil.createTempFile(getBuildTempDirectory(runner), "init_", ".gradle", true)
-                if (initScriptFile != null) {
-                    FileUtil.writeFile(initScriptFile, content, "UTF-8")
-                    initScriptFiles.add(initScriptFile)
+                FileUtil.writeFile(initScriptFile, content, "UTF-8")
+                initScriptFiles.add(initScriptFile)
 
-                    val params = runner.runnerParameters.getOrDefault(GRADLE_CMD_PARAMS, "")
-                    val initScriptParams = "--init-script " + initScriptFile.absolutePath
-                    runner.addRunnerParameter(GRADLE_CMD_PARAMS, initScriptParams + " " + params)
-                }
+                val params = runner.runnerParameters.getOrDefault(GRADLE_CMD_PARAMS, "")
+                val initScriptParams = "--init-script " + initScriptFile.absolutePath
+                runner.addRunnerParameter(GRADLE_CMD_PARAMS, initScriptParams + " " + params)
             } catch (e: IOException) {
                 LOG.info("Failed to write init script: " + e.message)
             }
