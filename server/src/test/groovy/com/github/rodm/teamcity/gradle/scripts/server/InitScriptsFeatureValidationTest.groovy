@@ -16,6 +16,7 @@
 
 package com.github.rodm.teamcity.gradle.scripts.server
 
+import jetbrains.buildServer.serverSide.BuildTypeIdentity
 import jetbrains.buildServer.web.openapi.PluginDescriptor
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,9 +41,10 @@ class InitScriptsFeatureValidationTest {
 
     @Test
     void 'build feature should return a parameters processor'() {
+        def buildTypeIdentity = mock(BuildTypeIdentity)
         def buildFeature = new InitScriptsBuildFeature(descriptor)
 
-        assertThat(buildFeature.getParametersProcessor(), not(nullValue()))
+        assertThat(buildFeature.getParametersProcessor(buildTypeIdentity), not(nullValue()))
     }
 
     @Test

@@ -19,6 +19,7 @@ package com.github.rodm.teamcity.gradle.scripts.server
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.FEATURE_TYPE
 import com.github.rodm.teamcity.gradle.scripts.GradleInitScriptsPlugin.INIT_SCRIPT_NAME
 import jetbrains.buildServer.serverSide.BuildFeature
+import jetbrains.buildServer.serverSide.BuildTypeIdentity
 import jetbrains.buildServer.serverSide.InvalidProperty
 import jetbrains.buildServer.serverSide.PropertiesProcessor
 import jetbrains.buildServer.web.openapi.PluginDescriptor
@@ -38,7 +39,7 @@ class InitScriptsBuildFeature(private val descriptor: PluginDescriptor) : BuildF
         return "Runs Gradle build steps with the '$initScriptName' initialization script"
     }
 
-    override fun getParametersProcessor(): PropertiesProcessor? {
+    override fun getParametersProcessor(buildTypeOrTemplate: BuildTypeIdentity): PropertiesProcessor? {
         return InitScriptsParametersProcessor()
     }
 }
