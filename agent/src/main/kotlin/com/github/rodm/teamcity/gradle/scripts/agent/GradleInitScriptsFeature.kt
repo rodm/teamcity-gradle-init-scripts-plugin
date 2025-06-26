@@ -67,7 +67,7 @@ open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCy
 
                 val params = runner.runnerParameters.getOrDefault(GRADLE_CMD_PARAMS, "")
                 val initScriptParams = "--init-script " + initScriptFile.absolutePath
-                runner.addRunnerParameter(GRADLE_CMD_PARAMS, initScriptParams + " " + params)
+                runner.addRunnerParameter(GRADLE_CMD_PARAMS, "$initScriptParams $params")
             } catch (e: IOException) {
                 LOG.info("Failed to write init script: " + e.message)
             }
@@ -86,6 +86,6 @@ open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCy
     }
 
     open fun getBuildTempDirectory(context: BuildRunnerContext) : File {
-        return context.build.getBuildTempDirectory()
+        return context.build.buildTempDirectory
     }
 }
