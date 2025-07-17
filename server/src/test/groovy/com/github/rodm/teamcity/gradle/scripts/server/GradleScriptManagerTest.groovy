@@ -95,7 +95,7 @@ class GradleScriptManagerTest {
         return new Answer() {
             Object answer(InvocationOnMock invocation) {
                 def args = invocation.arguments
-                def path = project.getPluginDataDirectory(PLUGIN_NAME).toPath().resolve(args[1].toString())
+                def path = project.configDirectory.toPath().resolve(args[1].toString())
                 Files.write(path, args[2] as byte[])
                 return mock(PersistTask)
             }
@@ -153,52 +153,20 @@ class GradleScriptManagerTest {
 
         @Test
         void 'save writes a script to a project '() {
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
             when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
             when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
 
             scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
 
-            assertThat(new File(project.getPluginDataDirectory(PLUGIN_NAME), 'test.gradle').exists(), is(true))
-            String contents = scriptsManager.findScript(project, 'test.gradle')
-            assertThat(contents, equalTo('contents of test.gradle'))
-
-            verify(project).scheduleFileSave(any(ConfigAction), eq('test.gradle'), eq('contents of test.gradle'.bytes))
-        }
-
-        @Test
-        void 'save overwrites contents of an existing script'() {
-            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
-            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
-
-            scriptsManager.saveScript(project, 'test.gradle', 'initial contents of test.gradle')
-            scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
-
-            String contents = scriptsManager.findScript(project, 'test.gradle')
-            assertThat(contents, equalTo('updated contents of test.gradle'))
-        }
-
-        @Test
-        void 'delete removes a script from a project'() {
-            PersistTask task = mock(PersistTask)
-            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
-            when(task.await(any(Long))).thenReturn(true)
-
-            assertThat(scriptsManager.deleteScript(project, 'init.gradle'), is(true))
-        }
-
-        @Test
-        void 'deleting a script notifies the config file changes listener'() {
-            PersistTask task = mock(PersistTask)
-            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
-            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
-
-            scriptsManager.deleteScript(project, 'test.gradle')
-
-            verify(project).scheduleFileDelete(any(ConfigAction), eq('test.gradle'))
+            def expectedPath = 'pluginData/gradleInitScripts/test.gradle'
+            def expectedBytes = 'contents of test.gradle'.bytes
+            verify(project).scheduleFileSave(any(ConfigAction), eq(expectedPath), eq(expectedBytes))
         }
 
         @Test
         void 'uploading a new script creates a config action with script uploaded message'() {
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
             when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
             when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
 
@@ -209,10 +177,10 @@ class GradleScriptManagerTest {
 
         @Test
         void 'updating a script creates a config action with script updated message'() {
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
             when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
             when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
-
-            new File(project.getPluginDataDirectory(PLUGIN_NAME), 'test.gradle') << 'initial contents of test.gradle'
+            scriptsManager.saveScript(project, 'test.gradle', 'initial contents of test.gradle')
 
             scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
 
@@ -220,9 +188,35 @@ class GradleScriptManagerTest {
         }
 
         @Test
-        void 'deleting a script creates a config action with script deleted message'() {
+        void 'delete removes a script from a project'() {
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
+            PersistTask task = mock(PersistTask)
+            when(task.await(any(Long))).thenReturn(true)
+            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+
+            assertThat(scriptsManager.deleteScript(project, 'init.gradle'), is(true))
+        }
+
+        @Test
+        void 'deleting a script notifies the config file changes listener'() {
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
             PersistTask task = mock(PersistTask)
             when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+
+            scriptsManager.deleteScript(project, 'test.gradle')
+
+            def expectedPath = 'pluginData/gradleInitScripts/test.gradle'
+            verify(project).scheduleFileDelete(any(ConfigAction), eq(expectedPath))
+        }
+
+        @Test
+        void 'deleting a script creates a config action with script deleted message'() {
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
+            PersistTask task = mock(PersistTask)
+            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
 
             scriptsManager.deleteScript(project, 'test.gradle')
 

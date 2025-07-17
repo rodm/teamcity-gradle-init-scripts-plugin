@@ -113,8 +113,8 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
         val exists = file.exists()
         val message = "Gradle init script $name was ${if (exists) "updated" else "uploaded"}"
         val action = configActionFactory.createAction(project, message)
-        val projectEx = project as ProjectEx
-        val task = projectEx.scheduleFileSave(action, name, content.toByteArray())
+        val relPath = getValidRelativePath(project, name)
+        val task = (project as ProjectEx).scheduleFileSave(action, relPath, content.toByteArray())
         return try {
             task.await(DEFAULT_TIMEOUT)
         }
@@ -125,8 +125,9 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
 
     override fun deleteScript(project: SProject, name: String): Boolean {
         val message = "Gradle init script $name was deleted"
-        val projectEx = project as ProjectEx
-        val task = projectEx.scheduleFileDelete(configActionFactory.createAction(project, message), name)
+        val action = configActionFactory.createAction(project, message)
+        val relPath = getValidRelativePath(project, name)
+        val task = (project as ProjectEx).scheduleFileDelete(action, relPath)
         return try {
             task.await(DEFAULT_TIMEOUT)
         }
