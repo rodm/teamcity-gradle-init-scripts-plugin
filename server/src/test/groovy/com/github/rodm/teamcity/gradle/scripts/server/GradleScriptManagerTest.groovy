@@ -108,7 +108,7 @@ class GradleScriptManagerTest {
     }
 
     @Nested
-    class WithEmptyProject {
+    class QueryWithEmptyProject {
         @BeforeEach
         void setup() {
             project = createMockProject('empty-project')
@@ -122,7 +122,7 @@ class GradleScriptManagerTest {
     }
 
     @Nested
-    class WithSingleProject {
+    class QueryWithSingleProject {
         @BeforeEach
         void setup() {
             project = createMockProject('project',
@@ -151,116 +151,10 @@ class GradleScriptManagerTest {
             assertThat(contents, is(nullValue()))
         }
 
-        @Test
-        void 'save writes a script to a project '() {
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
-            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
-            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
-
-            scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
-
-            def expectedPath = 'pluginData/gradleInitScripts/test.gradle'
-            def expectedBytes = 'contents of test.gradle'.bytes
-            verify(project).scheduleFileSave(any(ConfigAction), eq(expectedPath), eq(expectedBytes))
-        }
-
-        @Test
-        void 'uploading a new script creates a config action with script uploaded message'() {
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
-            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
-            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
-
-            scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
-
-            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was uploaded'))
-        }
-
-        @Test
-        void 'updating a script creates a config action with script updated message'() {
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
-            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
-            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
-            scriptsManager.saveScript(project, 'test.gradle', 'initial contents of test.gradle')
-
-            scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
-
-            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was updated'))
-        }
-
-        @Test
-        void 'delete removes a script from a project'() {
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
-            PersistTask task = mock(PersistTask)
-            when(task.await(any(Long))).thenReturn(true)
-            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
-            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
-
-            assertThat(scriptsManager.deleteScript(project, 'init.gradle'), is(true))
-        }
-
-        @Test
-        void 'deleting a script notifies the config file changes listener'() {
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
-            PersistTask task = mock(PersistTask)
-            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
-            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
-
-            scriptsManager.deleteScript(project, 'test.gradle')
-
-            def expectedPath = 'pluginData/gradleInitScripts/test.gradle'
-            verify(project).scheduleFileDelete(any(ConfigAction), eq(expectedPath))
-        }
-
-        @Test
-        void 'deleting a script creates a config action with script deleted message'() {
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
-            PersistTask task = mock(PersistTask)
-            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
-            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
-
-            scriptsManager.deleteScript(project, 'test.gradle')
-
-            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was deleted'))
-        }
-
-        @Test
-        void 'copying a project copies plugin data'() {
-            ProjectEx targetProject = createMockProject('target')
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
-            when(targetProject.getProjectPath()).thenReturn([targetProject])
-            when(actionFactory.createAction(any(String))).thenReturn(mock(ConfigAction))
-            CopiedObjects copiedObjects = mock(CopiedObjects)
-            when(copiedObjects.getCopiedProjectsMap()).thenReturn([(project): targetProject])
-
-            (scriptsManager as DefaultGradleScriptsManager).mapData(copiedObjects)
-
-            verify(targetProject).scheduleFileSave(any(ConfigAction), eq('pluginData/gradleInitScripts/init1.gradle'), any())
-            verify(targetProject).scheduleFileSave(any(ConfigAction), eq('pluginData/gradleInitScripts/init2.gradle'), any())
-        }
-
-        @Test
-        void 'valid path for a script is within the plugin data directory'() {
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
-
-            def relPath = (scriptsManager as DefaultGradleScriptsManager).getValidRelativePath(project, 'init.gradle')
-
-            assertThat(relPath, equalTo("pluginData/${PLUGIN_NAME}/init.gradle".toString()))
-        }
-
-        @Test
-        void 'invalid path for a script is outside the plugin data directory'() {
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
-
-            def e = assertThrows(AccessDeniedException, {
-                (scriptsManager as DefaultGradleScriptsManager).getValidRelativePath(project, '../init.gradle')
-            })
-
-            assertThat(e.message, containsString(' is outside of the allowed directory '))
-        }
     }
 
     @Nested
-    class WithParentProject {
+    class QueryWithParentProject {
 
         private SProject parentProject
 
@@ -312,6 +206,106 @@ class GradleScriptManagerTest {
         void 'find returns content for a script in a parent project'() {
             String contents = scriptsManager.findScript(project, 'parent.gradle')
             assertThat(contents.trim(), equalTo('contents of parent script'))
+        }
+    }
+
+    @Nested
+    class ManageScripts {
+
+        @BeforeEach
+        void setup() {
+            def name = 'project'
+            project = createMockProject(name,
+                ['init1.gradle': 'contents of script1', 'init2.gradle': 'contents of script2']
+            )
+            when(project.getProjectPath()).thenReturn([project])
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve(name).toFile())
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+        }
+
+        @Test
+        void 'save writes a script to a project '() {
+            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
+
+            scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
+
+            def expectedPath = 'pluginData/gradleInitScripts/test.gradle'
+            def expectedBytes = 'contents of test.gradle'.bytes
+            verify(project).scheduleFileSave(any(ConfigAction), eq(expectedPath), eq(expectedBytes))
+        }
+
+        @Test
+        void 'uploading a new script creates a config action with script uploaded message'() {
+            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
+
+            scriptsManager.saveScript(project, 'test.gradle', 'contents of test.gradle')
+
+            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was uploaded'))
+        }
+
+        @Test
+        void 'updating a script creates a config action with script updated message'() {
+            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
+            scriptsManager.saveScript(project, 'test.gradle', 'initial contents of test.gradle')
+
+            scriptsManager.saveScript(project, 'test.gradle', 'updated contents of test.gradle')
+
+            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was updated'))
+        }
+
+        @Test
+        void 'deleting a script notifies the config file changes listener'() {
+            PersistTask task = mock(PersistTask)
+            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+
+            scriptsManager.deleteScript(project, 'test.gradle')
+
+            def expectedPath = 'pluginData/gradleInitScripts/test.gradle'
+            verify(project).scheduleFileDelete(any(ConfigAction), eq(expectedPath))
+        }
+
+        @Test
+        void 'deleting a script creates a config action with script deleted message'() {
+            PersistTask task = mock(PersistTask)
+            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+
+            scriptsManager.deleteScript(project, 'test.gradle')
+
+            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle was deleted'))
+        }
+
+        @Test
+        void 'copying a project copies plugin data'() {
+            ProjectEx targetProject = createMockProject('target')
+            when(targetProject.getProjectPath()).thenReturn([targetProject])
+            when(actionFactory.createAction(any(String))).thenReturn(mock(ConfigAction))
+            CopiedObjects copiedObjects = mock(CopiedObjects)
+            when(copiedObjects.getCopiedProjectsMap()).thenReturn([(project): targetProject])
+
+            (scriptsManager as DefaultGradleScriptsManager).mapData(copiedObjects)
+
+            def expectedPath1 = 'pluginData/gradleInitScripts/init1.gradle'
+            def expectedPath2 = 'pluginData/gradleInitScripts/init2.gradle'
+            verify(targetProject).scheduleFileSave(any(ConfigAction), eq(expectedPath1), any())
+            verify(targetProject).scheduleFileSave(any(ConfigAction), eq(expectedPath2), any())
+        }
+
+        @Test
+        void 'valid path for a script is within the plugin data directory'() {
+            def relPath = (scriptsManager as DefaultGradleScriptsManager).getValidRelativePath(project, 'init.gradle')
+
+            assertThat(relPath, equalTo("pluginData/${PLUGIN_NAME}/init.gradle".toString()))
+        }
+
+        @Test
+        void 'invalid path for a script is outside the plugin data directory'() {
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
+
+            def e = assertThrows(AccessDeniedException, {
+                (scriptsManager as DefaultGradleScriptsManager).getValidRelativePath(project, '../init.gradle')
+            })
+
+            assertThat(e.message, containsString(' is outside of the allowed directory '))
         }
     }
 }
