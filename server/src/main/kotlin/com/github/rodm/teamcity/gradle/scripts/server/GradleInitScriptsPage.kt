@@ -69,6 +69,10 @@ class GradleInitScriptsPage(pagePlaces: PagePlaces,
         return TITLE
     }
 
+    override fun getEditProjectTabGroup(): String {
+        return INTEGRATIONS_GROUP
+    }
+
     private fun hasPermission(projectId: String): Boolean {
         return securityContext.authorityHolder.isPermissionGrantedForProject(projectId, Permission.EDIT_PROJECT)
     }
