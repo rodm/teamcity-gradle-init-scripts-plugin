@@ -4,5 +4,5 @@ plugins {
 }
 
 teamcity {
-    version = project.findProperty("teamcity.api.version") as String? ?: "2024.12"
+    version = project.findProperty("teamcity.api.version") as String? ?: "2025.03"
 }

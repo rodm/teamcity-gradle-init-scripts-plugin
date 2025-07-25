@@ -4,7 +4,7 @@ plugins {
     id ("groovy")
 }
 
-val teamcityVersion = project.findProperty("teamcity.api.version") as String? ?: "2024.12"
+val teamcityVersion = project.findProperty("teamcity.api.version") as String? ?: "2025.03"
 
 dependencies {
     implementation (project(":gradle-init-scripts-common"))
@@ -32,7 +32,7 @@ teamcity {
             downloadUrl = "https://github.com/rodm/teamcity-gradle-init-scripts-plugin"
             email = "rod.n.mackenzie@gmail.com"
             useSeparateClassloader = true
-            minimumBuild = "174331"
+            minimumBuild = "186049"
         }
 
         files {
