@@ -11,8 +11,8 @@ configurations.all {
 dependencies {
     testImplementation (platform("org.junit:junit-bom:5.11.3"))
     testImplementation (group = "org.junit.jupiter", name = "junit-jupiter-api")
-    testImplementation (group = "org.hamcrest", name = "hamcrest-library", version = "2.2")
-    testImplementation (group = "org.mockito", name = "mockito-core", version = "4.11.0")
+    testImplementation (group = "org.hamcrest", name = "hamcrest-library", version = "3.0")
+    testImplementation (group = "org.mockito", name = "mockito-core", version = "5.18.0")
 
     testRuntimeOnly (group = "org.junit.platform", name = "junit-platform-launcher")
     testRuntimeOnly (group = "org.junit.jupiter", name = "junit-jupiter-engine")
