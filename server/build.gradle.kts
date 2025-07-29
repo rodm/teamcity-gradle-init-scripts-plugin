@@ -4,6 +4,8 @@ plugins {
     id ("groovy")
 }
 
+configurations["testImplementation"].extendsFrom(configurations["provided"])
+
 dependencies {
     implementation (project(":gradle-init-scripts-common"))
     implementation (kotlin("stdlib"))
@@ -13,7 +15,6 @@ dependencies {
     agent (project(path = ":gradle-init-scripts-agent", configuration = "plugin"))
 
     testImplementation (localGroovy())
-    testImplementation ("org.jetbrains.teamcity.internal:server:${teamcity.version}")
 }
 
 teamcity {
