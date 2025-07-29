@@ -4,18 +4,16 @@ plugins {
     id ("groovy")
 }
 
-val teamcityVersion = project.findProperty("teamcity.api.version") as String? ?: "2025.03"
-
 dependencies {
     implementation (project(":gradle-init-scripts-common"))
     implementation (kotlin("stdlib"))
 
-    provided (group = "org.jetbrains.teamcity.internal", name = "server", version = teamcityVersion)
+    provided (group = "org.jetbrains.teamcity.internal", name = "server", version = teamcity.version)
 
     agent (project(path = ":gradle-init-scripts-agent", configuration = "plugin"))
 
     testImplementation (localGroovy())
-    testImplementation (group = "org.jetbrains.teamcity.internal", name = "server", version = teamcityVersion)
+    testImplementation (group = "org.jetbrains.teamcity.internal", name = "server", version = teamcity.version)
 }
 
 teamcity {
