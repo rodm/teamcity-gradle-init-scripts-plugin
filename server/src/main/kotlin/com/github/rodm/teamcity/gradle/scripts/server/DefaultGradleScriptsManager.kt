@@ -34,6 +34,9 @@ import kotlin.reflect.KFunction1
 
 private const val DEFAULT_TIMEOUT = 10000L
 
+private const val KTS_EXTENSION = ".kts"
+private const val ENCODED_EXTENSION = "._kts_"
+
 class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
                                   registry: VersionedSettingsRegistry,
                                   private val configActionFactory: ConfigActionFactory)
@@ -79,7 +82,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
         val files = getPluginDataDirectory(project).listFiles(filter)
         if (files != null && files.isNotEmpty()) {
             for (file in files) {
-                scripts.add(file.name)
+                scripts.add(decodeFileName(file.name))
             }
         }
         return scripts
@@ -97,7 +100,8 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
             val currentProject = iter.previous()
 
             try {
-                val file = File(getPluginDataDirectory(currentProject), name)
+                val fileName = encodeFileName(name)
+                val file = File(getPluginDataDirectory(currentProject), fileName)
                 if (file.exists()) {
                     return FileUtil.readText(file, "UTF-8")
                 }
@@ -109,11 +113,12 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
     }
 
     override fun saveScript(project: SProject, name: String, content: String): Boolean {
-        val file = File(getPluginDataDirectory(project), name)
+        val fileName = encodeFileName(name)
+        val file = File(getPluginDataDirectory(project), fileName)
         val exists = file.exists()
         val message = "Gradle init script $name was ${if (exists) "updated" else "uploaded"}"
         val action = configActionFactory.createAction(project, message)
-        val relPath = getValidRelativePath(project, name)
+        val relPath = getValidRelativePath(project, fileName)
         val task = (project as ProjectEx).scheduleFileSave(action, relPath, content.toByteArray())
         return try {
             task.await(DEFAULT_TIMEOUT)
@@ -126,7 +131,8 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
     override fun deleteScript(project: SProject, name: String): Boolean {
         val message = "Gradle init script $name was deleted"
         val action = configActionFactory.createAction(project, message)
-        val relPath = getValidRelativePath(project, name)
+        val fileName = encodeFileName(name)
+        val relPath = getValidRelativePath(project, fileName)
         val task = (project as ProjectEx).scheduleFileDelete(action, relPath)
         return try {
             task.await(DEFAULT_TIMEOUT)
@@ -164,5 +170,15 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
 
     private fun getPluginDataDirectory(project: SProject): File {
         return FileUtil.createDir(project.getPluginDataDirectory(pluginName))
+    }
+
+    private fun encodeFileName(name: String): String {
+        return if (name.endsWith(KTS_EXTENSION))
+            name.replace(KTS_EXTENSION, ENCODED_EXTENSION) else name
+    }
+
+    private fun decodeFileName(name: String): String {
+        return if (name.endsWith(ENCODED_EXTENSION))
+            name.replace(ENCODED_EXTENSION, KTS_EXTENSION) else name
     }
 }

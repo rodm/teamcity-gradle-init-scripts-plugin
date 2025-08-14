@@ -150,7 +150,6 @@ class GradleScriptManagerTest {
             String contents = scriptsManager.findScript(project, 'dummy.gradle')
             assertThat(contents, is(nullValue()))
         }
-
     }
 
     @Nested
@@ -306,6 +305,109 @@ class GradleScriptManagerTest {
             })
 
             assertThat(e.message, containsString(' is outside of the allowed directory '))
+        }
+    }
+
+    @Nested
+    class ManageKotlinScripts {
+
+        @BeforeEach
+        void setup() {
+            def name = 'project'
+            project = createMockProject(name, [
+                'init1.gradle._kts_'      : 'contents of script1',
+                'init2.gradle._kts_'      : 'contents of script2'
+            ])
+            when(project.getProjectPath()).thenReturn([project])
+            when(project.getConfigDirectory()).thenReturn(configDir.resolve(name).toFile())
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
+        }
+
+        @Test
+        void 'project with scripts returns list of names'() {
+            Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+            assertThat(scripts.get(project), hasSize(2))
+            assertThat(scripts.get(project), hasItem('init1.gradle.kts'))
+            assertThat(scripts.get(project), hasItem('init2.gradle.kts'))
+        }
+
+        @Test
+        void 'find returns content for a script that exists'() {
+            String contents = scriptsManager.findScript(project, 'init1.gradle.kts')
+            assertThat(contents.trim(), equalTo('contents of script1'))
+        }
+
+        @Test
+        void 'find returns null for a script that doesn\'t exist'() {
+            String contents = scriptsManager.findScript(project, 'dummy.gradle.kts')
+            assertThat(contents, is(nullValue()))
+        }
+
+        @Test
+        void 'save writes a script to a project '() {
+            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
+
+            scriptsManager.saveScript(project, 'test.gradle.kts', 'contents of test.gradle.kts')
+
+            def expectedPath = 'pluginData/gradleInitScripts/test.gradle._kts_'
+            def expectedBytes = 'contents of test.gradle.kts'.bytes
+            verify(project).scheduleFileSave(any(ConfigAction), eq(expectedPath), eq(expectedBytes))
+        }
+
+        @Test
+        void 'uploading a new script creates a config action with script uploaded message'() {
+            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
+
+            scriptsManager.saveScript(project, 'test.gradle.kts', 'contents of test.gradle.kts')
+
+            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle.kts was uploaded'))
+        }
+
+        @Test
+        void 'updating a script creates a config action with script updated message'() {
+            when(project.scheduleFileSave(any(), any(), any())).then(createAnswer(project))
+            scriptsManager.saveScript(project, 'test.gradle.kts', 'initial contents of test.gradle.kts')
+
+            scriptsManager.saveScript(project, 'test.gradle.kts', 'updated contents of test.gradle.kts')
+
+            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle.kts was updated'))
+        }
+
+        @Test
+        void 'deleting a script notifies the config file changes listener'() {
+            PersistTask task = mock(PersistTask)
+            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+
+            scriptsManager.deleteScript(project, 'test.gradle.kts')
+
+            def expectedPath = 'pluginData/gradleInitScripts/test.gradle._kts_'
+            verify(project).scheduleFileDelete(any(ConfigAction), eq(expectedPath))
+        }
+
+        @Test
+        void 'deleting a script creates a config action with script deleted message'() {
+            PersistTask task = mock(PersistTask)
+            when(project.scheduleFileDelete(any(), any())).thenReturn(task)
+
+            scriptsManager.deleteScript(project, 'test.gradle.kts')
+
+            verify(actionFactory).createAction(eq(project), eq('Gradle init script test.gradle.kts was deleted'))
+        }
+
+        @Test
+        void 'copying a project copies plugin data'() {
+            ProjectEx targetProject = createMockProject('target')
+            when(targetProject.getProjectPath()).thenReturn([targetProject])
+            when(actionFactory.createAction(any(String))).thenReturn(mock(ConfigAction))
+            CopiedObjects copiedObjects = mock(CopiedObjects)
+            when(copiedObjects.getCopiedProjectsMap()).thenReturn([(project): targetProject])
+
+            (scriptsManager as DefaultGradleScriptsManager).mapData(copiedObjects)
+
+            def expectedPath1 = 'pluginData/gradleInitScripts/init1.gradle._kts_'
+            def expectedPath2 = 'pluginData/gradleInitScripts/init2.gradle._kts_'
+            verify(targetProject).scheduleFileSave(any(ConfigAction), eq(expectedPath1), any())
+            verify(targetProject).scheduleFileSave(any(ConfigAction), eq(expectedPath2), any())
         }
     }
 }
