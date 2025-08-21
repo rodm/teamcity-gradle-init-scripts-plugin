@@ -78,6 +78,7 @@ class GradleScriptManagerTest {
     private ProjectEx createMockProject(String name, Map<String, String> scripts = [:]) {
         def project = mock(ProjectEx)
         def pluginDir = createPluginDir(configDir, name)
+        when(project.getConfigDirectory()).thenReturn(configDir.resolve(name).toFile())
         when(project.getPluginDataDirectory(PLUGIN_NAME)).thenReturn(pluginDir)
         scripts.each { entry ->
             Files.write(pluginDir.toPath().resolve(entry.key), [entry.value])
@@ -107,8 +108,28 @@ class GradleScriptManagerTest {
         verify(settingsRegistry).registerDir(eq('pluginData/' + PLUGIN_NAME))
     }
 
+    @Test
+    void 'valid path for a script is within the plugin data directory'() {
+        project = createMockProject('project')
+
+        def relPath = (scriptsManager as DefaultGradleScriptsManager).getValidRelativePath(project, 'init.gradle')
+
+        assertThat(relPath, equalTo("pluginData/${PLUGIN_NAME}/init.gradle".toString()))
+    }
+
+    @Test
+    void 'invalid path for a script is outside the plugin data directory'() {
+        project = createMockProject('project')
+
+        def e = assertThrows(AccessDeniedException, {
+            (scriptsManager as DefaultGradleScriptsManager).getValidRelativePath(project, '../init.gradle')
+        })
+
+        assertThat(e.message, containsString(' is outside of the allowed directory '))
+    }
+
     @Nested
-    class QueryWithEmptyProject {
+    class WithEmptyProject {
         @BeforeEach
         void setup() {
             project = createMockProject('empty-project')
@@ -122,13 +143,15 @@ class GradleScriptManagerTest {
     }
 
     @Nested
-    class QueryWithSingleProject {
+    class WithProjectContainingGroovyScripts {
         @BeforeEach
         void setup() {
-            project = createMockProject('project',
-                ['init1.gradle': 'contents of script1', 'init2.gradle': 'contents of script2']
-            )
+            project = createMockProject('project', [
+                'init1.gradle': 'contents of script 1',
+                'init2.gradle': 'contents of script 2'
+            ])
             when(project.getProjectPath()).thenReturn([project])
+            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
         }
 
         @Test
@@ -142,84 +165,13 @@ class GradleScriptManagerTest {
         @Test
         void 'find returns content for a script that exists'() {
             String contents = scriptsManager.findScript(project, 'init1.gradle')
-            assertThat(contents.trim(), equalTo('contents of script1'))
+            assertThat(contents.trim(), equalTo('contents of script 1'))
         }
 
         @Test
         void 'find returns null for a script that doesn\'t exist'() {
             String contents = scriptsManager.findScript(project, 'dummy.gradle')
             assertThat(contents, is(nullValue()))
-        }
-    }
-
-    @Nested
-    class QueryWithParentProject {
-
-        private SProject parentProject
-
-        @BeforeEach
-        void setup() {
-            project = createMockProject('project',
-                ['init1.gradle': 'contents of script1', 'init2.gradle': 'contents of script2']
-            )
-            parentProject = createMockProject('parent-project',
-                ['parent.gradle': 'contents of parent script']
-            )
-            when(project.getProjectPath()).thenReturn([parentProject, project])
-        }
-
-        @Test
-        void 'project with parent returns a map of projects and scripts'() {
-            Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
-            assertThat(scripts.keySet(), hasSize(2))
-            assertThat(scripts, hasKey(project))
-            assertThat(scripts, hasKey(parentProject))
-            assertThat(scripts.get(project), hasSize(2))
-            assertThat(scripts.get(project), hasItem('init1.gradle'))
-            assertThat(scripts.get(project), hasItem('init2.gradle'))
-            assertThat(scripts.get(parentProject), hasSize(1))
-            assertThat(scripts.get(parentProject), hasItem('parent.gradle'))
-        }
-
-        @Test
-        void 'parent project should not be returned if subproject overrides all the parent scripts'() {
-            new File(project.getPluginDataDirectory(PLUGIN_NAME), 'parent.gradle') << 'contents of override script'
-
-            Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
-            assertThat(scripts.keySet(), hasSize(1))
-            assertThat(scripts, hasKey(project))
-            assertThat(scripts.get(project), hasItem('parent.gradle'))
-        }
-
-        @Test
-        void 'project with parent returns list of scripts with no duplicates'() {
-            new File(parentProject.getPluginDataDirectory(PLUGIN_NAME), 'init1.gradle') << 'contents of parent script1'
-
-            Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
-            assertThat(scripts.get(parentProject), hasSize(1))
-            assertThat(scripts.get(parentProject), hasItem('parent.gradle'))
-            assertThat(scripts.get(parentProject), not(hasItem('init1.gradle')))
-        }
-
-        @Test
-        void 'find returns content for a script in a parent project'() {
-            String contents = scriptsManager.findScript(project, 'parent.gradle')
-            assertThat(contents.trim(), equalTo('contents of parent script'))
-        }
-    }
-
-    @Nested
-    class ManageScripts {
-
-        @BeforeEach
-        void setup() {
-            def name = 'project'
-            project = createMockProject(name,
-                ['init1.gradle': 'contents of script1', 'init2.gradle': 'contents of script2']
-            )
-            when(project.getProjectPath()).thenReturn([project])
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve(name).toFile())
-            when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
         }
 
         @Test
@@ -289,37 +241,69 @@ class GradleScriptManagerTest {
             verify(targetProject).scheduleFileSave(any(ConfigAction), eq(expectedPath2), any())
         }
 
-        @Test
-        void 'valid path for a script is within the plugin data directory'() {
-            def relPath = (scriptsManager as DefaultGradleScriptsManager).getValidRelativePath(project, 'init.gradle')
+        @Nested
+        class WithParentProject {
 
-            assertThat(relPath, equalTo("pluginData/${PLUGIN_NAME}/init.gradle".toString()))
-        }
+            private SProject parentProject
 
-        @Test
-        void 'invalid path for a script is outside the plugin data directory'() {
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve('project').toFile())
+            @BeforeEach
+            void setup() {
+                parentProject = createMockProject('parent-project', [
+                    'parent.gradle': 'contents of parent script'
+                ])
+                when(project.getProjectPath()).thenReturn([parentProject, project])
+            }
 
-            def e = assertThrows(AccessDeniedException, {
-                (scriptsManager as DefaultGradleScriptsManager).getValidRelativePath(project, '../init.gradle')
-            })
+            @Test
+            void 'project with parent returns a map of projects and scripts'() {
+                Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+                assertThat(scripts.keySet(), hasSize(2))
+                assertThat(scripts, hasKey(project))
+                assertThat(scripts, hasKey(parentProject))
+                assertThat(scripts.get(project), hasSize(2))
+                assertThat(scripts.get(project), hasItem('init1.gradle'))
+                assertThat(scripts.get(project), hasItem('init2.gradle'))
+                assertThat(scripts.get(parentProject), hasSize(1))
+                assertThat(scripts.get(parentProject), hasItem('parent.gradle'))
+            }
 
-            assertThat(e.message, containsString(' is outside of the allowed directory '))
+            @Test
+            void 'parent project should not be returned if subproject overrides all the parent scripts'() {
+                new File(project.getPluginDataDirectory(PLUGIN_NAME), 'parent.gradle') << 'contents of override script'
+
+                Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+                assertThat(scripts.keySet(), hasSize(1))
+                assertThat(scripts, hasKey(project))
+                assertThat(scripts.get(project), hasItem('parent.gradle'))
+            }
+
+            @Test
+            void 'project with parent returns list of scripts with no duplicates'() {
+                new File(parentProject.getPluginDataDirectory(PLUGIN_NAME), 'init1.gradle') << 'contents of parent script1'
+
+                Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+                assertThat(scripts.get(parentProject), hasSize(1))
+                assertThat(scripts.get(parentProject), hasItem('parent.gradle'))
+                assertThat(scripts.get(parentProject), not(hasItem('init1.gradle')))
+            }
+
+            @Test
+            void 'find returns content for a script in a parent project'() {
+                String contents = scriptsManager.findScript(project, 'parent.gradle')
+                assertThat(contents.trim(), equalTo('contents of parent script'))
+            }
         }
     }
 
     @Nested
-    class ManageKotlinScripts {
-
+    class WithProjectContainingKotlinScripts {
         @BeforeEach
         void setup() {
-            def name = 'project'
-            project = createMockProject(name, [
-                'init1.gradle._kts_'      : 'contents of script1',
-                'init2.gradle._kts_'      : 'contents of script2'
+            project = createMockProject('project', [
+                'init1.gradle._kts_'      : 'contents of script 1',
+                'init2.gradle._kts_'      : 'contents of script 2'
             ])
             when(project.getProjectPath()).thenReturn([project])
-            when(project.getConfigDirectory()).thenReturn(configDir.resolve(name).toFile())
             when(actionFactory.createAction(any(SProject), any(String))).thenReturn(mock(ConfigAction))
         }
 
@@ -334,7 +318,7 @@ class GradleScriptManagerTest {
         @Test
         void 'find returns content for a script that exists'() {
             String contents = scriptsManager.findScript(project, 'init1.gradle.kts')
-            assertThat(contents.trim(), equalTo('contents of script1'))
+            assertThat(contents.trim(), equalTo('contents of script 1'))
         }
 
         @Test
@@ -408,6 +392,59 @@ class GradleScriptManagerTest {
             def expectedPath2 = 'pluginData/gradleInitScripts/init2.gradle._kts_'
             verify(targetProject).scheduleFileSave(any(ConfigAction), eq(expectedPath1), any())
             verify(targetProject).scheduleFileSave(any(ConfigAction), eq(expectedPath2), any())
+        }
+
+        @Nested
+        class WithParentProject {
+
+            private SProject parentProject
+
+            @BeforeEach
+            void setup() {
+                parentProject = createMockProject('parent-project', [
+                    'parent.gradle._kts_': 'contents of parent script'
+                ])
+                when(project.getProjectPath()).thenReturn([parentProject, project])
+            }
+
+            @Test
+            void 'project with parent returns a map of projects and scripts'() {
+                Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+                assertThat(scripts.keySet(), hasSize(2))
+                assertThat(scripts, hasKey(project))
+                assertThat(scripts, hasKey(parentProject))
+                assertThat(scripts.get(project), hasSize(2))
+                assertThat(scripts.get(project), hasItem('init1.gradle.kts'))
+                assertThat(scripts.get(project), hasItem('init2.gradle.kts'))
+                assertThat(scripts.get(parentProject), hasSize(1))
+                assertThat(scripts.get(parentProject), hasItem('parent.gradle.kts'))
+            }
+
+            @Test
+            void 'parent project should not be returned if subproject overrides all the parent scripts'() {
+                new File(project.getPluginDataDirectory(PLUGIN_NAME), 'parent.gradle._kts_') << 'contents of override script'
+
+                Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+                assertThat(scripts.keySet(), hasSize(1))
+                assertThat(scripts, hasKey(project))
+                assertThat(scripts.get(project), hasItem('parent.gradle.kts'))
+            }
+
+            @Test
+            void 'project with parent returns list of scripts with no duplicates'() {
+                new File(parentProject.getPluginDataDirectory(PLUGIN_NAME), 'init1.gradle._kts_') << 'contents of parent script1'
+
+                Map<SProject, List<String>> scripts = scriptsManager.getScriptNames(project)
+                assertThat(scripts.get(parentProject), hasSize(1))
+                assertThat(scripts.get(parentProject), hasItem('parent.gradle.kts'))
+                assertThat(scripts.get(parentProject), not(hasItem('init1.gradle.kts')))
+            }
+
+            @Test
+            void 'find returns content for a script in a parent project'() {
+                String contents = scriptsManager.findScript(project, 'parent.gradle.kts')
+                assertThat(contents.trim(), equalTo('contents of parent script'))
+            }
         }
     }
 }
