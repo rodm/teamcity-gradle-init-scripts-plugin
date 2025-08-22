@@ -41,35 +41,35 @@ class UploadScriptAction(val projectManager: ProjectManager,
     override fun doPost(request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
         val modelAndView = ModelAndView("/_fileUploadResponse.jsp")
         val model = modelAndView.model
-        model.put("jsBase", "BS.GradleAddInitScripts")
+        model["jsBase"] = "BS.GradleAddInitScripts"
         val fileName = request.getParameter("fileName")
         if (StringUtil.isEmpty(fileName)) {
-            model.put("error", "File name must be provided")
+            model["error"] = "File name must be provided"
             return modelAndView
         }
         if (!validFileName(fileName)) {
-            model.put("error", "Invalid file name provided for init script")
+            model["error"] = "Invalid file name provided for init script"
             return modelAndView
         }
         if (!validFileNameExtension(fileName)) {
-            model.put("error", "Invalid extension provided for init script")
+            model["error"] = "Invalid extension provided for init script"
             return modelAndView
         }
 
         val project = projectManager.findProjectByExternalId(request.getParameter("project"))
         if (project == null) {
-            model.put("error", "Cannot upload file. Project is missing")
+            model["error"] = "Cannot upload file. Project is missing"
             return modelAndView
         }
         if (!hasPermission(project.projectId)) {
-            model.put("error", "You do not have permissions to edit project settings")
+            model["error"] = "You do not have permissions to edit project settings"
             return modelAndView
         }
 
         try {
             val file = getMultipartFileOrFail(request, "file:fileToUpload")
             if (file == null) {
-                model.put("error", "No file set")
+                model["error"] = "No file set"
                 return modelAndView
             }
 
@@ -84,10 +84,10 @@ class UploadScriptAction(val projectManager: ProjectManager,
             ActionMessages.getOrCreateMessages(request).addMessage("initScriptsMessage", message)
         }
         catch (e: IOException) {
-             model.put("error", e.message)
+            model["error"] = e.message
         }
         catch (e: IllegalStateException) {
-             model.put("error", e.message)
+            model["error"] = e.message
         }
         return modelAndView
     }
