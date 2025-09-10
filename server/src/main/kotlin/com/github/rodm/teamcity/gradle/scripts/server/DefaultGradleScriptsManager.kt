@@ -89,7 +89,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
     }
 
     override fun getScriptsCount(project: SProject): Int {
-        return getScriptNames(project).values.stream().mapToInt { it.size }.sum()
+        return getScriptNamesForProject(project).count()
     }
 
     override fun findScript(project: SProject, name: String): String? {
