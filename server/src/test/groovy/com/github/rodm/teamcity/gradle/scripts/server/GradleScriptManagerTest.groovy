@@ -128,6 +128,18 @@ class GradleScriptManagerTest {
         assertThat(e.message, containsString(' is outside of the allowed directory '))
     }
 
+    @Test
+    void 'invalid path for an existing file outside the plugin data directory'() {
+        project = createMockProject('project')
+        when(project.getProjectPath()).thenReturn([project])
+        def projectConfig = project.getConfigDirectory().toPath().resolve('project-config.xml')
+        Files.write(projectConfig, 'dummy project configuration file'.bytes)
+
+        String contents = scriptsManager.findScript(project, '../../project-config.xml')
+
+        assertThat(contents, nullValue())
+    }
+
     @Nested
     class WithEmptyProject {
         @BeforeEach

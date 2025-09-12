@@ -93,6 +93,7 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
     }
 
     override fun findScript(project: SProject, name: String): String? {
+        if (!validFileName(project, name)) return null
         val projectPath = project.projectPath
         val iter = projectPath.listIterator(projectPath.size)
 
@@ -166,6 +167,12 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
         val configDir = project.configDirectory.toPath()
         FileSecurityUtil.checkInsideDirectory(scriptPath.toFile(), pluginDataDir)
         return configDir.relativize(scriptPath).toString()
+    }
+
+    private fun validFileName(project: SProject, name: String): Boolean {
+        val pluginDataDir = getPluginDataDirectory(project)
+        val path = pluginDataDir.resolve(name)
+        return path.normalize().startsWith(pluginDataDir)
     }
 
     private fun getPluginDataDirectory(project: SProject): File {
