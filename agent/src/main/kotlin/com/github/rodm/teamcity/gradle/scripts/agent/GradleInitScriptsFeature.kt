@@ -61,7 +61,10 @@ open class GradleInitScriptsFeature(eventDispatcher: EventDispatcher<AgentLifeCy
             }
 
             try {
-                val initScriptFile = FileUtil.createTempFile(getBuildTempDirectory(runner), "init_", ".gradle", true)
+                val prefix = "init_"
+                val suffix = if (name.endsWith(".gradle.kts")) ".gradle.kts" else ".gradle"
+                val dir = getBuildTempDirectory(runner)
+                val initScriptFile = FileUtil.createTempFile(dir, prefix, suffix, true)
                 FileUtil.writeFile(initScriptFile, content, "UTF-8")
                 initScriptFiles.add(initScriptFile)
 

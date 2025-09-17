@@ -72,12 +72,22 @@ class GradleInitScriptsBuildRunnerTest {
     }
 
     @Test
-    fun `writes an init script to the temporary build directory`() {
+    fun `writes a Groovy init script to the temporary build directory`() {
         feature.beforeRunnerStart(runner)
 
         val files = tempDir.list()?.toList()
         assertThat(files, hasItem(startsWith("init_")))
         assertThat(files, hasItem(endsWith(".gradle")))
+    }
+
+    @Test
+    fun `writes a Kotlin init script to the temporary build directory`() {
+        SETTINGS_PARAMETERS[INIT_SCRIPT_NAME_PARAMETER] = "init.gradle.kts"
+        feature.beforeRunnerStart(runner)
+
+        val files = tempDir.list()?.toList()
+        assertThat(files, hasItem(startsWith("init_")))
+        assertThat(files, hasItem(endsWith(".gradle.kts")))
     }
 
     @Test
