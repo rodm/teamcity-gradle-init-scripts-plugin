@@ -11,7 +11,7 @@ class TaskExecutionStatisticsPublisher extends BuildAdapter implements TaskExecu
     TaskExecutionStatisticsPublisher(Logger logger) {
         this.logger = logger
         TaskExecutionOutcome.values().each { outcome ->
-            taskCounts.put(outcome, new Integer(0))
+            taskCounts.put(outcome, Integer.valueOf(0))
         }
         statisticsKey.put(TaskExecutionOutcome.EXECUTED, 'GradleTasksExecuted')
         statisticsKey.put(TaskExecutionOutcome.FROM_CACHE, 'GradleTasksFromCache')

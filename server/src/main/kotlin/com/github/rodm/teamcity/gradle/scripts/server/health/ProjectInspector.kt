@@ -45,7 +45,7 @@ class ProjectInspector(val scriptsManager: GradleScriptsManager) {
                 val scriptName = feature.parameters[INIT_SCRIPT_NAME]
                 val scriptContent = scriptsManager.findScript(project, scriptName!!)
                 if (scriptContent == null) {
-                    buildTypes.put(buildType, scriptName)
+                    buildTypes[buildType] = scriptName
                 }
             }
         }
@@ -54,7 +54,7 @@ class ProjectInspector(val scriptsManager: GradleScriptsManager) {
                 val scriptName = feature.parameters[INIT_SCRIPT_NAME]
                 val scriptContent = scriptsManager.findScript(project, scriptName!!)
                 if (scriptContent == null) {
-                    buildTemplates.put(buildTemplate, scriptName)
+                    buildTemplates[buildTemplate] = scriptName
                 }
             }
         }

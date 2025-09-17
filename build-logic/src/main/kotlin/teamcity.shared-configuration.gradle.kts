@@ -18,13 +18,15 @@ kotlin {
     jvmToolchain(17)
 }
 
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-    finalizedBy (tasks.named("jacocoTestReport"))
-}
+tasks {
+    test {
+        useJUnitPlatform()
+        finalizedBy (jacocoTestReport)
+    }
 
-tasks.named<JacocoReport>("jacocoTestReport") {
-    reports {
-        xml.required.set(true)
+    jacocoTestReport {
+        reports {
+            xml.required = true
+        }
     }
 }

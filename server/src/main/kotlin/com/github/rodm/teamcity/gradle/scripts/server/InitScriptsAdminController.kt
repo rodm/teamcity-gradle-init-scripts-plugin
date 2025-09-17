@@ -58,7 +58,7 @@ class InitScriptsAdminController(server: SBuildServer,
         }
         val project = projectManager.findProjectById(projectId)
         if (project == null) {
-            log.error("Project not found: projectId: " + projectId)
+            log.error("Project not found: projectId: $projectId")
             return emptyMap()
         }
         return scriptsManager.getScriptNames(project)
@@ -66,7 +66,7 @@ class InitScriptsAdminController(server: SBuildServer,
 
     private fun getChooserName(request: HttpServletRequest): String {
         val name = request.getParameter("chooserName")
-        return if (name == null) INIT_SCRIPT_NAME else name
+        return name ?: INIT_SCRIPT_NAME
     }
 
     private fun getMissingName(request: HttpServletRequest): String? {

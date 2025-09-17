@@ -31,7 +31,7 @@ class InitScriptsUsageAnalyzer(private val scriptsManager: GradleScriptsManager)
     fun getProjectScriptsUsage(project: SProject): Map<String, ScriptUsage> {
         val scripts = scriptsManager.getScriptNames(project)
         val scriptsForCurrentProject = mutableMapOf<SProject, List<String>>()
-        scriptsForCurrentProject.put(project, scripts.get(project).orEmpty())
+        scriptsForCurrentProject[project] = scripts[project].orEmpty()
         return getScriptsUsage(scriptsForCurrentProject)
     }
 
@@ -39,7 +39,7 @@ class InitScriptsUsageAnalyzer(private val scriptsManager: GradleScriptsManager)
         val usage = LinkedHashMap<String, ScriptUsage>()
         for ((project, value) in scripts) {
             for (script in value) {
-                usage.put(script, ScriptUsage())
+                usage[script] = ScriptUsage()
                 addScriptUsageForSubProjects(script, project, usage)
             }
         }
