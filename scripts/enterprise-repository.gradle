@@ -24,6 +24,7 @@ class EnterpriseRepositoryPlugin implements Plugin<Gradle> {
                 maven {
                     name "STANDARD_ENTERPRISE_REPO"
                     url ENTERPRISE_REPOSITORY_URL
+                    allowInsecureProtocol = ENTERPRISE_REPOSITORY_URL.startsWith("http://")
                 }
                 project.logger.lifecycle "Repository ${ENTERPRISE_REPOSITORY_URL} added to project ${project.name}."
             }
