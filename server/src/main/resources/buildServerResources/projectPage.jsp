@@ -116,7 +116,7 @@
                         <tr>
                             <authz:authorize projectId="${currentProject.projectId}" allPermissions="EDIT_PROJECT">
                                 <jsp:attribute name="ifAccessGranted">
-                                    <td class="highlight beforeActions" onclick="${onclick}">
+                                    <td class="beforeActions">
                                         <span style="float:right; padding-right: 2em">${usages}</span>
                                         <c:out value="${script}"/>
                                     </td>
