@@ -8,13 +8,14 @@ To use the scripts select a project to edit then select the 'Gradle Init Scripts
 script using the 'Upload init script' button, then select a build configuration and add the Build Feature
 'Gradle Init Script' selecting the script to use.
 
-* `enterprise-repository.gradle` - replaces Maven repositories with a single enterprise repository URL.
-This script is based on the example in the Gradle {uri-gradle-init-script-plugins} documentation. The script
-requires the environment variable `REPO_URL` to be set with the URL of the enterprise repository to be used.
+* `enterprise-repository.gradle` and `enterprise-repository.gradle.kts` - replaces Maven repositories with a
+single enterprise repository URL. This script is based on the example in the Gradle
+{uri-gradle-init-script-plugins} documentation. The script  requires the environment variable `REPO_URL` to
+be set with the URL of the enterprise repository to be used.
 
-* `task-outcomes.gradle` - collects the execution outcomes of all the Gradle tasks in a build configuration and
-outputs the counts as TeamCity statistics values. The statistics values can be used to add a new graph to the
-build configurations statistics page.
+* `task-outcomes.gradle` and `task-outcomes.gradle.kts` - collects the execution outcomes of all the Gradle
+tasks in a build configuration and outputs the counts as TeamCity statistics values. The statistics values
+can be used to add a new graph to the build configurations statistics page.
 
 * `build-cache.gradle.kts` - configures the build cache to use a remote HTTP build cache, .e.g {uri-gradle-build-cache}.
 The script requires the system property `build.cache.url` to be set with the URL of the build cache to be used.
