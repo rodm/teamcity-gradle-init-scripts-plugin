@@ -40,8 +40,17 @@ teamcity {
             }
         }
 
+        val changeNotes = "<ul>\n" +
+            "<li>Supports Gradle Init Scripts written in Kotlin</li>\n" +
+            "<li>View usages rewritten to use newer API</li>\n" +
+            "<li>Improved validation when adding as a build feature</li>\n" +
+            "<li>Improved filename and permission checks</li>\n" +
+            "<li>Updated to use newer versioned settings API</li>\n"
+            "</ul>\n"
+
         publish {
             token = findProperty("jetbrains.token") as String?
+            notes = changeNotes
         }
     }
 }
