@@ -3,7 +3,7 @@ name: Build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ v2.0.x ]
     paths-ignore:
       - '.teamcity/**'
       - 'README.adoc'
