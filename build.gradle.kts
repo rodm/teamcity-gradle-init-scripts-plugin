@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.github.rodm"
-version = "2.0"
+version = "2.0.1-SNAPSHOT"
 
 sonarqube {
     properties {
