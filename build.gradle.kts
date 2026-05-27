@@ -1,6 +1,6 @@
 
 plugins {
-    id ("org.sonarqube") version "7.2.0.6526"
+    id ("org.sonarqube") version "7.3.0.8198"
 }
 
 group = "com.github.rodm"
