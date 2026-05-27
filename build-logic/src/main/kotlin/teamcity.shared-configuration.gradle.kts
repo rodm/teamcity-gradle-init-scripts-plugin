@@ -5,10 +5,10 @@ plugins {
 }
 
 dependencies {
-    testImplementation (platform("org.junit:junit-bom:6.0.1"))
+    testImplementation (platform("org.junit:junit-bom:6.1.0"))
     testImplementation ("org.junit.jupiter:junit-jupiter-api")
     testImplementation ("org.hamcrest:hamcrest-library:3.0")
-    testImplementation ("org.mockito:mockito-core:5.20.0")
+    testImplementation ("org.mockito:mockito-core:5.23.0")
 
     testRuntimeOnly ("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine")
