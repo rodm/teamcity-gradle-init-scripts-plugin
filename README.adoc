@@ -92,7 +92,7 @@ The example below shows applying an init script as a build feature.
 
 == Compatibility
 
-The plugin is compatible with TeamCity 20124.12 and later and requires the build agent to be running with Java 17.
+The plugin is compatible with TeamCity 2025.03 and later and requires the build agent to be running with Java 21.
 
 == License
 
