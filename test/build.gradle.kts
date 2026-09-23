@@ -12,7 +12,7 @@ dependencies {
 teamcity {
     environments {
         register("teamcity") {
-            version = "2026.1"
+            version = "2026.2"
             plugins = configurations["plugins"]
             serverOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
             agentOptions ("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5006")
