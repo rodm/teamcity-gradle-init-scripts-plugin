@@ -3,7 +3,7 @@ plugins {
     id ("teamcity.environments")
 }
 
-val plugins by configurations.creating
+val plugins = configurations.create("plugins")
 
 dependencies {
     plugins (project(path = ":gradle-init-scripts-server", configuration = "plugin"))
