@@ -171,8 +171,8 @@ class DefaultGradleScriptsManager(descriptor: PluginDescriptor,
 
     private fun validFileName(project: SProject, name: String): Boolean {
         val pluginDataDir = getPluginDataDirectory(project)
-        val path = pluginDataDir.resolve(name)
-        return path.normalize().startsWith(pluginDataDir)
+        val normalizedPath = pluginDataDir.resolve(name).normalize()
+        return normalizedPath.startsWith(pluginDataDir)
     }
 
     private fun getPluginDataDirectory(project: SProject): File {
