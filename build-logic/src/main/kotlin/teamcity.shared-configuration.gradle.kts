@@ -4,6 +4,8 @@ plugins {
     id("org.gradle.jacoco")
 }
 
+val mockito = configurations.create("mockito")
+
 dependencies {
     testImplementation (platform("org.junit:junit-bom:6.1.3"))
     testImplementation ("org.junit.jupiter:junit-jupiter-api")
@@ -12,6 +14,8 @@ dependencies {
 
     testRuntimeOnly ("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly ("org.junit.jupiter:junit-jupiter-engine")
+
+    mockito ("org.mockito:mockito-core:5.24.0") { isTransitive = false }
 }
 
 kotlin {
@@ -22,6 +26,7 @@ tasks {
     test {
         useJUnitPlatform()
         finalizedBy (jacocoTestReport)
+        jvmArgs ("-javaagent:${mockito.asPath}")
     }
 
     jacocoTestReport {
